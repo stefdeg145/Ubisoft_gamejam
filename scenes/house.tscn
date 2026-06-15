@@ -26,14 +26,10 @@
 [ext_resource type="Texture2D" uid="uid://djdnrpuugxcsc" path="res://assets/art/plant.png" id="24_6jrpf"]
 [ext_resource type="Texture2D" uid="uid://gth6n764d45b" path="res://assets/art/window.png" id="25_a7qna"]
 [ext_resource type="Script" uid="uid://dml61abxxrgtw" path="res://scripts/memory_object.gd" id="26_11a5k"]
-[ext_resource type="Script" uid="uid://t17do1devuji" path="res://scripts/player.gd" id="27_1erkf"]
-[ext_resource type="Texture2D" uid="uid://wq877rutceo0" path="res://assets/art/character.png" id="28_g6dbt"]
+[ext_resource type="PackedScene" uid="uid://ctl4ghc1s7hr2" path="res://player.tscn" id="27_ivbqp"]
 
 [sub_resource type="CircleShape2D" id="shape_interact"]
 radius = 70.0
-
-[sub_resource type="RectangleShape2D" id="shape_player"]
-size = Vector2(18, 16)
 
 [node name="House" type="Node2D" unique_id=1360432888]
 texture_filter = 1
@@ -425,15 +421,4 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="MemAcceptance" unique_id=196744652]
 shape = SubResource("shape_interact")
 
-[node name="Player" type="CharacterBody2D" parent="." unique_id=1845512285]
-position = Vector2(670, 650)
-script = ExtResource("27_1erkf")
-
-[node name="Sprite" type="Sprite2D" parent="Player" unique_id=318264152]
-scale = Vector2(2, 2)
-texture = ExtResource("28_g6dbt")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Player" unique_id=651570647]
-shape = SubResource("shape_player")
-
-[node name="Camera2D" type="Camera2D" parent="Player" unique_id=588953833]
+[node name="Player" parent="." unique_id=605165646 instance=ExtResource("27_ivbqp")]
