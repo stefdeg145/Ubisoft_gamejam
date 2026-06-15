@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="TheNewMorning"
-run/main_scene="uid://c8tlm0house03"
+run/main_scene="uid://c8tlm0house04"
 config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [physics]
