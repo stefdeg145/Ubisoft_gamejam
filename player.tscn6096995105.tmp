@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cagj3tmssetcs" path="res://assets/art/Weixin Image_20260615142006_6_96.png" id="4_b26j0"]
 [ext_resource type="Texture2D" uid="uid://8ks3b3j3y2rj" path="res://assets/art/Weixin Image_20260615142006_7_96.png" id="5_n7ghd"]
 [ext_resource type="Texture2D" uid="uid://bfl7mwrovdnmr" path="res://assets/art/Weixin Image_20260615142006_7_96(right.png" id="6_nvl01"]
-[ext_resource type="AudioStream" uid="uid://c0v0g2uf2ovou" path="res://assets/Sound/walksound.wav" id="7_1jxqw"]
+[ext_resource type="AudioStream" uid="uid://c0v0g2uf2ovou" path="res://assets/Sound/walk_sound.wav" id="7_1jxqw"]
 
 [sub_resource type="RectangleShape2D" id="shape_player"]
 size = Vector2(340.00024, 381.66544)
@@ -146,6 +146,80 @@ animations = [{
 "speed": 7.0
 }]
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dw050"]
+size = Vector2(340.00024, 381.66544)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_b26j0"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4jkga")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r2srw")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k27xr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8cron")
+}],
+"loop": true,
+"name": &"Down",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p4eap")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_80gfe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q425y")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_in3qe")
+}],
+"loop": true,
+"name": &"Left",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u1c27")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_op7ga")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q13i1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pylmc")
+}],
+"loop": true,
+"name": &"Right",
+"speed": 7.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ivps1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_urp6f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bwjto")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_606se")
+}],
+"loop": true,
+"name": &"Up",
+"speed": 7.0
+}]
+
 [node name="Player" type="CharacterBody2D" unique_id=605165646]
 position = Vector2(670, 650)
 scale = Vector2(0.1, 0.1)
@@ -166,8 +240,26 @@ texture_filter = 1
 position = Vector2(0, -7.6293945e-06)
 sprite_frames = SubResource("SpriteFrames_p4eap")
 animation = &"Up"
-frame_progress = 0.60167414
+frame_progress = 0.1139327
 
-[node name="walksound" type="AudioStreamPlayer2D" parent="." unique_id=2077992148]
+[node name="Walksound" type="AudioStreamPlayer2D" parent="." unique_id=2077992148]
 stream = ExtResource("7_1jxqw")
-volume_db = -8.98
+
+[node name="Player" type="CharacterBody2D" parent="Walksound" unique_id=1003816111]
+position = Vector2(670, 650)
+scale = Vector2(0.15, 0.15)
+script = ExtResource("1_2hs0m")
+
+[node name="Sprite" type="Sprite2D" parent="Walksound/Player" unique_id=2102994658]
+scale = Vector2(2, 2)
+texture = ExtResource("2_1jxqw")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walksound/Player" unique_id=602782801]
+shape = SubResource("RectangleShape2D_dw050")
+
+[node name="Camera2D" type="Camera2D" parent="Walksound/Player" unique_id=406235437]
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Walksound/Player" unique_id=1857913613]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_b26j0")
+animation = &"Down"

@@ -4,9 +4,10 @@ extends CharacterBody2D
 var nearby_object: Node = null
 
 @onready var animated_sprite: AnimatedSprite2D = $AnimatedSprite2D
+@onready var walk_sound: AudioStreamPlayer2D = $walksound
 
-# Store the last played direction animation to reuse when standing still
 var last_direction_animation: String = "Down"
+var was_moving: bool = false
 
 func _ready() -> void:
 	add_to_group("player")
@@ -17,10 +18,11 @@ func _physics_process(_delta: float) -> void:
 	move_and_slide()
 	
 	update_animation(direction)
+	update_walk_sound(direction != Vector2.ZERO)
 
 func update_animation(direction: Vector2) -> void:
 	if direction == Vector2.ZERO:
-		# Stop animation - this freezes on the current frame (usually the first frame of the last animation)
+		# No movement: freeze animation on current frame (usually the first frame of the last animation)
 		animated_sprite.stop()
 		return
 	
@@ -39,6 +41,14 @@ func update_animation(direction: Vector2) -> void:
 		else:
 			animated_sprite.play("Up")
 			last_direction_animation = "Up"
+
+func update_walk_sound(is_moving: bool) -> void:
+	if is_moving and not was_moving:
+		walk_sound.play()
+	elif not is_moving and was_moving:
+		walk_sound.stop()
+	
+	was_moving = is_moving
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_accept") and nearby_object != null:
