@@ -1,3 +1,17 @@
-# Godot 4+ specific ignores
+# Godot 4+ — the import cache & editor state are regenerated locally
 .godot/
 /android/
+
+# Exported builds
+/build/
+/export/
+*.exe
+*.pck
+*.zip
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*~
+.idea/
+.vscode/

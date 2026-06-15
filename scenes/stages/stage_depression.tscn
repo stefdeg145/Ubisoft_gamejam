@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bynftkempbvkh"]
+
+[ext_resource type="Script" path="res://scenes/stages/stage_depression.gd" id="1_depr"]
+
+[node name="StageDepression" type="Node2D"]
+script = ExtResource("1_depr")

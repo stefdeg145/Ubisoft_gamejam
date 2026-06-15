@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cpj3rn5y3f3yj"]
+
+[ext_resource type="Script" path="res://scenes/stages/stage_acceptance.gd" id="1_acc"]
+
+[node name="StageAcceptance" type="Node2D"]
+script = ExtResource("1_acc")

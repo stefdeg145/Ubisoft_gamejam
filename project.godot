@@ -10,9 +10,22 @@ config_version=5
 
 [application]
 
-config/name="TheNewMorning"
-run/main_scene="uid://c8tlm0house04"
+config/name="The Last Morning"
+config/description="A short narrative game about moving through grief, one morning at a time."
+run/main_scene="res://scenes/intro/cold_open.tscn"
 config/features=PackedStringArray("4.6", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+GameState="*res://scripts/autoload/game_state.gd"
+Game="*res://scripts/autoload/game.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
 
 [physics]
 
@@ -20,6 +33,7 @@ config/features=PackedStringArray("4.6", "GL Compatibility")
 
 [rendering]
 
+textures/canvas_textures/default_texture_filter=0
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
