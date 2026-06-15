@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dudi87oomxjd7"
-path="res://.godot/imported/wardrobe.png-e7e51352f6d3f9510507221419004a57.ctex"
+uid="uid://inxv0557t7or"
+path="res://.godot/imported/counter_right.png-32545bbe12d8647fb0ebe04a3438b7b5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/wardrobe.png"
-dest_files=["res://.godot/imported/wardrobe.png-e7e51352f6d3f9510507221419004a57.ctex"]
+source_file="res://assets/art/counter_right.png"
+dest_files=["res://.godot/imported/counter_right.png-32545bbe12d8647fb0ebe04a3438b7b5.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://inxv0557t7or"
-path="res://.godot/imported/counter_right.png-a54bc06f029cff1cf55112ce44120c96.ctex"
+uid="uid://bodx4m47hgijl"
+path="res://.godot/imported/floor_livingA.png-9338d7895603558b0682eea3e2a6dc08.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/counter_right.png"
-dest_files=["res://.godot/imported/counter_right.png-a54bc06f029cff1cf55112ce44120c96.ctex"]
+source_file="res://assets/art/floor_livingA.png"
+dest_files=["res://.godot/imported/floor_livingA.png-9338d7895603558b0682eea3e2a6dc08.ctex"]
 
 [params]
 

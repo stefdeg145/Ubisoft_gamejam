@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gth6n764d45b"
-path="res://.godot/imported/window.png-cb6f4ccb9f9435776ebbbd88cf973773.ctex"
+uid="uid://dnvu1gcdenw7h"
+path="res://.godot/imported/couch.png-2106fd5a309cf9a13f45ff938a00ad20.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/window.png"
-dest_files=["res://.godot/imported/window.png-cb6f4ccb9f9435776ebbbd88cf973773.ctex"]
+source_file="res://assets/art/couch.png"
+dest_files=["res://.godot/imported/couch.png-2106fd5a309cf9a13f45ff938a00ad20.ctex"]
 
 [params]
 

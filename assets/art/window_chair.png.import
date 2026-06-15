@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bftpwu64fn4mp"
-path="res://.godot/imported/coffee_table.png-90f191b6845faecab0fc6e01db5fc8cd.ctex"
+uid="uid://clkdnuqny50ie"
+path="res://.godot/imported/window_chair.png-9f90b0170e9ed4d6177b6bfefb536bf8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/coffee_table.png"
-dest_files=["res://.godot/imported/coffee_table.png-90f191b6845faecab0fc6e01db5fc8cd.ctex"]
+source_file="res://assets/art/window_chair.png"
+dest_files=["res://.godot/imported/window_chair.png-9f90b0170e9ed4d6177b6bfefb536bf8.ctex"]
 
 [params]
 

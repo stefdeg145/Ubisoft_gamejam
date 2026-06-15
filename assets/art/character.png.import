@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ct8nwsulii5u4"
-path="res://.godot/imported/rug.png-405155428c62d7a5c6db964aad9d3cff.ctex"
+uid="uid://wq877rutceo0"
+path="res://.godot/imported/character.png-b798e28e0b53d86cd1f923be6fcf4663.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://art/rug.png"
-dest_files=["res://.godot/imported/rug.png-405155428c62d7a5c6db964aad9d3cff.ctex"]
+source_file="res://assets/art/character.png"
+dest_files=["res://.godot/imported/character.png-b798e28e0b53d86cd1f923be6fcf4663.ctex"]
 
 [params]
 
