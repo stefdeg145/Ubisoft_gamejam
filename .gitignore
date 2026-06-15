@@ -1,3 +1,15 @@
+<<<<<<< HEAD
 # Godot 4+ specific ignores
 .godot/
 /android/
+=======
+# Godot 4+
+.godot/
+/android/
+*.translation
+
+# Exports
+export.cfg
+export_presets.cfg
+build/
+>>>>>>> af73b282254aa18799eb9bccacdd44c90be77cf7
