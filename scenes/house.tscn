@@ -99,7 +99,8 @@ texture = ExtResource("10_in3qe")
 centered = false
 
 [node name="Bed2" type="Sprite2D" parent="Furniture" unique_id=1984352738]
-position = Vector2(96, 560)
+position = Vector2(236, 680)
+rotation = 3.1415927
 scale = Vector2(4, 4)
 texture = ExtResource("11_m31jp")
 centered = false
