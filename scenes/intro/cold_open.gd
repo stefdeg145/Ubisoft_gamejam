@@ -9,12 +9,12 @@ func _ready() -> void:
 	Game.set_black(true)
 	Game.hide_prompt()
 	await get_tree().create_timer(1.0).timeout
-	Game.show_prompt("press any key")
+	Game.show_prompt("press E")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _started:
 		return
-	if (event is InputEventKey or event is InputEventMouseButton) and event.pressed:
+	if event.is_action_pressed("ui_accept"):
 		_started = true
 		_begin()
 
