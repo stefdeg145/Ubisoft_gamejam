@@ -1,27 +1,51 @@
 [gd_scene format=3 uid="uid://cpj3rn525q7jb"]
 
 [ext_resource type="Script" uid="uid://qvgl83sme8ou" path="res://scenes/stages/stage_denial.gd" id="1_den"]
-[ext_resource type="Texture2D" uid="uid://cawwvob022wpx" path="res://assets/art/denial_stage/background.jpg" id="2_kxse8"]
-[ext_resource type="Texture2D" uid="uid://w1uxo74y5rr6" path="res://assets/art/denial_stage/mug1.png" id="3_kqoer"]
-[ext_resource type="Texture2D" uid="uid://dau63d8glfxav" path="res://assets/art/denial_stage/painting.png" id="5_dd44h"]
-[ext_resource type="Texture2D" uid="uid://b653ybnog7f7n" path="res://assets/art/denial_stage/chair1.png" id="6_i5x8y"]
+[ext_resource type="Texture2D" uid="uid://cawwvob022wpx" path="res://assets/art/denial_stage/background.jpg" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://bbjno1ej8xqgu" path="res://assets/art/denial_stage/Mug Spilled for Denial.png" id="3_mug"]
+[ext_resource type="Texture2D" uid="uid://dau63d8glfxav" path="res://assets/art/denial_stage/painting.png" id="4_paint"]
+[ext_resource type="Texture2D" uid="uid://b653ybnog7f7n" path="res://assets/art/denial_stage/chair1.png" id="5_chair"]
+[ext_resource type="PackedScene" uid="uid://cpj3rn6gdeonh" path="res://scenes/actors/player.tscn" id="6_player"]
 
-[node name="StageDenial" type="Node2D" unique_id=1434950221]
+[node name="StageDenial" type="Node2D" unique_id=16967629]
 script = ExtResource("1_den")
-background_texture = ExtResource("2_kxse8")
-background_scale = 0.25
 
-[node name="mug_sprite" type="Sprite2D" parent="." unique_id=912267166]
-position = Vector2(146.99998, 129.99998)
-scale = Vector2(0.06640626, 0.06640626)
-texture = ExtResource("3_kqoer")
+[node name="Background" type="Sprite2D" parent="." unique_id=224800853]
+z_index = -100
+texture_filter = 1
+scale = Vector2(0.94, 0.94)
+texture = ExtResource("2_bg")
+centered = false
 
-[node name="painting_sprite" type="Sprite2D" parent="." unique_id=1437028439]
-position = Vector2(122, 66.00001)
-scale = Vector2(0.08246528, 0.08246528)
-texture = ExtResource("5_dd44h")
+[node name="ChairSeat" type="Sprite2D" parent="." unique_id=417718956]
+texture_filter = 1
+position = Vector2(922, 564.99994)
+scale = Vector2(-0.655, 0.694)
+texture = ExtResource("5_chair")
 
-[node name="chair_sprite" type="Sprite2D" parent="." unique_id=1383103197]
-position = Vector2(105, 149)
-scale = Vector2(0.17895442, 0.17895442)
-texture = ExtResource("6_i5x8y")
+[node name="ChairKnocked" type="Sprite2D" parent="." unique_id=1394703736]
+texture_filter = 1
+position = Vector2(412, 576)
+rotation = 0.7
+scale = Vector2(0.62542444, 0.6582346)
+texture = ExtResource("5_chair")
+
+[node name="Painting" type="Sprite2D" parent="." unique_id=1619867590]
+texture_filter = 1
+position = Vector2(807.99994, 406)
+rotation = 0.3
+scale = Vector2(0.26292077, 0.22706078)
+texture = ExtResource("4_paint")
+
+[node name="Mug" type="Sprite2D" parent="." unique_id=622421462]
+texture_filter = 1
+position = Vector2(575.99994, 496.00003)
+rotation = -0.35
+scale = Vector2(0.12556784, 0.12714162)
+texture = ExtResource("3_mug")
+
+[node name="Player" parent="." unique_id=1439162931 instance=ExtResource("6_player")]
+position = Vector2(222.00002, 678)
+scale = Vector2(3, 3)
+can_move = false
+lock_vertical = true

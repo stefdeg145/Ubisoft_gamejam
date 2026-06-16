@@ -5,17 +5,23 @@ extends CanvasLayer
 ## game flows through here so the "fall asleep -> dream -> wake" grammar is shared.
 
 const VIGNETTE := preload("res://assets/art/fx/vignette.png")
+const FONT_PATH := "res://assets/fonts/Lora.ttf"
 
+var _font: Font
 var _fade: ColorRect
 var _vig: TextureRect
 var _caption: Label
 var _title: Label
+var _subtitle: Label
 var _prompt: Label
 var _prompt_tween: Tween
 
 func _ready() -> void:
 	layer = 100
 	process_mode = Node.PROCESS_MODE_ALWAYS
+
+	if ResourceLoader.exists(FONT_PATH):
+		_font = load(FONT_PATH)
 
 	_fade = ColorRect.new()
 	_fade.color = Color(0, 0, 0, 1)        # start black; first scene fades in
@@ -37,6 +43,10 @@ func _ready() -> void:
 	_title.modulate.a = 0.0
 	add_child(_title)
 
+	_subtitle = _make_label(26, Color(0.78, 0.76, 0.70))
+	_subtitle.modulate.a = 0.0
+	add_child(_subtitle)
+
 	_prompt = _make_label(22, Color(0.7, 0.7, 0.74))
 	_prompt.modulate.a = 0.0
 	add_child(_prompt)
@@ -49,6 +59,8 @@ func _make_label(size: int, col: Color) -> Label:
 	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	l.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	if _font:
+		l.add_theme_font_override("font", _font)
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", col)
 	l.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.7))
@@ -68,6 +80,9 @@ func _resize() -> void:
 	_title.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_title.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.42)
 	_title.size = Vector2(vs.x * 0.9, 120)
+	_subtitle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_subtitle.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.56)
+	_subtitle.size = Vector2(vs.x * 0.9, 60)
 	_prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_prompt.position = Vector2(vs.x * 0.5 - vs.x * 0.4, vs.y * 0.85)
 	_prompt.size = Vector2(vs.x * 0.8, 60)
@@ -149,4 +164,18 @@ func show_title(text: String, hold := 3.0) -> void:
 	t.tween_property(_title, "modulate:a", 1.0, 1.2)
 	t.tween_interval(hold)
 	t.tween_property(_title, "modulate:a", 0.0, 1.5)
+	await t.finished
+
+## Title card with a subtitle under it (e.g. "After" / "Ubisoft Gamejam 2026").
+## Drawn over whatever is currently on screen (typically the closed-eyes black).
+func show_title_card(title: String, subtitle: String, hold := 3.0) -> void:
+	_title.text = title
+	_subtitle.text = subtitle
+	# Title rises first; the subtitle follows a beat later, then both hold and fade.
+	var t := create_tween()
+	t.tween_property(_title, "modulate:a", 1.0, 1.4)
+	t.parallel().tween_property(_subtitle, "modulate:a", 1.0, 1.4).set_delay(0.6)
+	t.tween_interval(hold)
+	t.tween_property(_subtitle, "modulate:a", 0.0, 1.3)
+	t.parallel().tween_property(_title, "modulate:a", 0.0, 1.5)
 	await t.finished

@@ -13,6 +13,10 @@ const BedScript := preload("res://scripts/bed.gd")
 const AngerScene := preload("res://scripts/anger_sequence.gd")
 
 const DENIAL_SCENE := "res://scenes/stages/stage_denial.tscn"
+## Where the Anger bleed leads once it resolves: the Bargaining stage (being
+## pushed by another dev). Until that scene exists this path will fail to load,
+## so _on_anger_finished falls back to the house if it's missing.
+const ANGER_NEXT_SCENE := "res://scenes/stages/stage_bargaining.tscn"
 
 const A := "res://assets/art/house/"
 const ART := "res://assets/art/"
@@ -63,7 +67,10 @@ func _ready() -> void:
 	_build_music()
 	_update_grade()
 
-	if GameState.first_wake:
+	# Only play the opening intro on a truly fresh start. Once any stage has been
+	# resolved, returning to the house always goes through the wake-from-dream path
+	# (so finishing Denial leads into Anger, not back to the intro).
+	if GameState.first_wake and GameState.completed.is_empty():
 		_intro()
 	else:
 		_return_from_dream()
@@ -349,6 +356,7 @@ func _return_from_dream() -> void:
 
 # -------------------------------------------------------------- anger bleed
 func _start_anger() -> void:
+	_play_music()                         # keep the house BGM going through the bleed
 	_set_house_interactions(false)        # silence the "too tired" props mid-bleed
 	var seq := AngerScene.new()
 	var rug := get_node_or_null("Decals/RugLiving")
@@ -366,10 +374,18 @@ func _start_anger() -> void:
 
 func _on_anger_finished() -> void:
 	_update_grade()                       # house warms a notch now Anger is resolved
-	_set_house_interactions(true)
-	player.can_move = true
 	await Game.say("The mug is in pieces. The rain keeps on, softer now.", 3.0)
 	await Game.say("...But the photograph is in my pocket. I can carry that.", 3.2)
+	# Anger resolved — lead into the next stage (Bargaining).
+	if ResourceLoader.exists(ANGER_NEXT_SCENE):
+		_fade_out_music(1.4)
+		await Game.fade_out(1.6)
+		Game.change_scene(ANGER_NEXT_SCENE)
+	else:
+		# next stage not in the project yet — stay in the warmed house
+		_set_house_interactions(true)
+		player.can_move = true
+		await Game.say("(The next memory isn't ready yet.)", 2.4)
 
 func _find_world_sprite(prefix: String) -> Sprite2D:
 	for c in _world.get_children():

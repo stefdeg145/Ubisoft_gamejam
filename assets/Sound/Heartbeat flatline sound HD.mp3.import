@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://mmyui8wlmhxu"
+path="res://.godot/imported/Heartbeat flatline sound HD.mp3-358ca99d40447e48ad37fea1d947e712.mp3str"
+
+[deps]
+
+source_file="res://assets/Sound/Heartbeat flatline sound HD.mp3"
+dest_files=["res://.godot/imported/Heartbeat flatline sound HD.mp3-358ca99d40447e48ad37fea1d947e712.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
