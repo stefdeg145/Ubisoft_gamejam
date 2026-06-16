@@ -49,7 +49,7 @@ func add_prop(tex_path: String, x: float, y: float, s := 4.0, centered := true) 
 	add_child(sp)
 	return sp
 
-func add_interactable(x: float, y: float, radius := 70.0, prompt := "") -> Area2D:
+func add_interactable(x: float, y: float, radius := 70.0, prompt := "", follow: Node2D = null) -> Area2D:
 	var area := Area2D.new()
 	area.set_script(Interactable)
 	area.prompt = prompt
@@ -60,7 +60,17 @@ func add_interactable(x: float, y: float, radius := 70.0, prompt := "") -> Area2
 	cs.shape = sh
 	area.add_child(cs)
 	add_child(area)
+	# When glued to a prop, the trigger + the floating "E" follow it forever.
+	if follow != null:
+		area.bind_to(follow)
 	return area
+
+## Spawn a prop and an interactable glued to it in one call. Move the prop later
+## (in code or the editor) and the trigger + "E" come along automatically.
+func add_prop_interactable(tex_path: String, x: float, y: float, prompt := "", s := 4.0, radius := 64.0, centered := true) -> Dictionary:
+	var sp := add_prop(tex_path, x, y, s, centered)
+	var area := add_interactable(x, y, radius, prompt, sp)
+	return {"sprite": sp, "area": area}
 
 ## Resolve the stage: warm the house one notch and wake back into it.
 func finish(stage_name: String, fragment: String) -> void:

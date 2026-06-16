@@ -39,7 +39,8 @@ func _make_fix(tex: String, x: float, y: float, prompt: String, home: Vector2, t
 	var sp := add_prop(tex, x, y, 1.0)
 	sp.scale = scl
 	sp.rotation = tilt                 # the "wrong" pose
-	var area := add_interactable(x, y, 64, prompt)
+	# Glue the zone + "E" to this prop so they follow it wherever it's placed.
+	var area := add_interactable(x, y, 64, prompt, sp)
 	area.used.connect(_on_fix)
 	_fix_objects[area] = {"sprite": sp, "home_rot": tilt, "home_pos": home}
 

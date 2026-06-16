@@ -91,10 +91,35 @@ func _update_hint() -> void:
 	var target := _closest_interactable()
 	if can_move and target != null and target is Node2D:
 		var bob := sin(Time.get_ticks_msec() / 200.0) * 2.0
-		_hint.global_position = (target as Node2D).global_position + Vector2(-13, -44 + bob)
+		# Sit the "E" just above the actual object, centred on it, so it always
+		# reads as belonging to that piece of furniture regardless of its size.
+		var anchor := _hint_anchor(target)
+		var half_w: float = max(_hint.size.x, 16.0) * 0.5
+		_hint.global_position = anchor + Vector2(-half_w, bob)
 		_hint.visible = true
 	else:
 		_hint.visible = false
+
+## World-space point the "E" should hover over for a given interactable. Prefers
+## the object's real sprite (top-centre of its drawn rect), so moving or resizing
+## furniture keeps the pill correctly placed.
+func _hint_anchor(target: Node) -> Vector2:
+	var spr = target.get("follow_target")
+	if spr == null or not is_instance_valid(spr):
+		spr = target.get("source_sprite")
+	if spr != null and is_instance_valid(spr) and spr is Sprite2D and (spr as Sprite2D).texture != null:
+		return _sprite_top_center(spr) + Vector2(0, -10)
+	return (target as Node2D).global_position + Vector2(0, -44)
+
+## Top-centre of a Sprite2D's drawn rectangle in world space, handling both
+## centred and offset sprites.
+func _sprite_top_center(spr: Sprite2D) -> Vector2:
+	var ts: Vector2 = spr.texture.get_size()
+	var base_tl: Vector2 = spr.offset
+	if spr.centered:
+		base_tl -= ts * 0.5
+	var world_tl: Vector2 = spr.global_position + base_tl * spr.scale
+	return Vector2(world_tl.x + ts.x * spr.scale.x * 0.5, world_tl.y)
 
 func _physics_process(delta: float) -> void:
 	var dir := Vector2.ZERO

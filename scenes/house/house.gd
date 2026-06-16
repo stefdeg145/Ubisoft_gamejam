@@ -29,6 +29,8 @@ const TILE := 64
 var player: CharacterBody2D
 var _grade: CanvasModulate
 var _music: AudioStreamPlayer
+## [{zone, sprite}] pairs kept in sync each frame so interactions track furniture.
+var _follow_zones: Array = []
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -191,16 +193,40 @@ func _zone(sp: Sprite2D, pad: float) -> Area2D:
 func _add_tired_zone(parent: Node, sp: Sprite2D) -> void:
 	var a := _zone(sp, 28.0)
 	a.set_script(TiredScript)
+	a.source_sprite = sp
 	parent.add_child(a)
+	_follow_zones.append({"zone": a, "sprite": sp})
 
 func _add_bed_zone(parent: Node, sp: Sprite2D, mine: bool) -> void:
 	var a := _zone(sp, 48.0)
 	a.set_script(BedScript)
+	a.source_sprite = sp
 	a.is_my_bed = mine
 	a.stage_scene = DENIAL_SCENE
 	if mine:
 		a.chosen.connect(_on_memory_chosen)   # reuse drift-to-sleep -> dream flow
 	parent.add_child(a)
+	_follow_zones.append({"zone": a, "sprite": sp})
+
+## Each frame, keep every interaction zone snapped to its furniture's current
+## visual centre. Dragging furniture around in the editor (or moving it at
+## runtime) then never desyncs the trigger or the floating "E".
+func _process(_dt: float) -> void:
+	for e in _follow_zones:
+		var sp = e["sprite"]
+		var z = e["zone"]
+		if not (is_instance_valid(sp) and is_instance_valid(z)):
+			continue
+		var r := _visual_aabb_global(sp)
+		z.global_position = r.position + r.size * 0.5
+
+func _visual_aabb_global(sp: Sprite2D) -> Rect2:
+	var ts: Vector2 = sp.texture.get_size()
+	var base_tl: Vector2 = sp.offset
+	if sp.centered:
+		base_tl -= ts * 0.5
+	var tl: Vector2 = sp.global_position + base_tl * sp.scale
+	return Rect2(tl, ts * sp.scale)
 
 func _build_memories() -> void:
 	for stage in MEMORIES.keys():

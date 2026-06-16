@@ -4,6 +4,10 @@ extends Area2D
 
 signal chosen(node)
 
+## The furniture sprite this zone wraps; lets the floating "E" anchor to the
+## object's real position so it stays correct when the furniture is moved.
+var source_sprite: Node2D = null
+
 @export var is_my_bed := false
 @export_file("*.tscn") var stage_scene: String = "res://scenes/stages/stage_denial.tscn"
 @export var not_my_bed_lines: PackedStringArray = [

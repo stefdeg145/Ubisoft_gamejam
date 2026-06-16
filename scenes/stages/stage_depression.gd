@@ -14,6 +14,9 @@ var _step := 0
 var _mashing := false
 var _mash := 0
 var _reach: Sprite2D
+var _bed_sp: Sprite2D
+var _ns_sp: Sprite2D
+var _mug_sp: Sprite2D
 var _bar: ProgressBar
 var _done := false
 
@@ -22,11 +25,12 @@ func _ready() -> void:
 	spawn_player(Vector2(640, 470))
 	player.face("up")
 
-	var bed_a := add_interactable(640, 250, 90, "Try to sleep (E)")
+	# Each zone is glued to its prop, so the trigger + "E" follow the furniture.
+	var bed_a := add_interactable(640, 250, 90, "Try to sleep (E)", _bed_sp)
 	bed_a.used.connect(_on_bed)
-	var rec_a := add_interactable(900, 330, 80, "Play their voice (E)")
+	var rec_a := add_interactable(900, 330, 80, "Play their voice (E)", _ns_sp)
 	rec_a.used.connect(_on_record)
-	var water_a := add_interactable(900, 250, 80, "Reach for the water (E)")
+	var water_a := add_interactable(900, 250, 80, "Reach for the water (E)", _mug_sp)
 	water_a.used.connect(_on_water)
 
 	await Game.wake(1.8)
@@ -47,10 +51,10 @@ func setup_room() -> void:
 			sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			floors.add_child(sp)
 	# bed + nightstand
-	_dim_prop(A + "bed.png", 640, 250, 2.2)
-	_dim_prop(A + "nightstand.png", 900, 330, 2.0)
+	_bed_sp = _dim_prop(A + "bed.png", 640, 250, 2.2)
+	_ns_sp = _dim_prop(A + "nightstand.png", 900, 330, 2.0)
 	_reach = _dim_prop("res://assets/art/props/record.png", 900, 360, 2.0)  # recording on stand
-	_dim_prop("res://assets/art/props/mug.png", 900, 250, 2.0)              # the "water" cup
+	_mug_sp = _dim_prop("res://assets/art/props/mug.png", 900, 250, 2.0)    # the "water" cup
 
 	# bounds
 	_wall(300, 180, 24, 420); _wall(840, 180, 24, 420)

@@ -17,7 +17,7 @@ region = Rect2(144, 256, 64, 32)
 size = Vector2(12, 192)
 
 [sub_resource type="RectangleShape2D" id="rs_16"]
-size = Vector2(16, 105.75)
+size = Vector2(16, 80.375)
 
 [sub_resource type="RectangleShape2D" id="rs_17"]
 size = Vector2(288, 12)
@@ -35,7 +35,7 @@ size = Vector2(49, 7)
 size = Vector2(240, 12)
 
 [sub_resource type="RectangleShape2D" id="rs_0"]
-size = Vector2(83, 124)
+size = Vector2(89, 126)
 
 [sub_resource type="RectangleShape2D" id="rs_1"]
 size = Vector2(32, 86)
@@ -44,7 +44,7 @@ size = Vector2(32, 86)
 size = Vector2(71, 28)
 
 [sub_resource type="RectangleShape2D" id="rs_3"]
-size = Vector2(92, 76)
+size = Vector2(92, 41)
 
 [sub_resource type="RectangleShape2D" id="rs_4"]
 size = Vector2(90, 34)
@@ -193,14 +193,14 @@ color = Color(0.33, 0.3, 0.35, 1)
 
 [node name="WallBody1" type="ColorRect" parent="Walls" unique_id=289277857]
 offset_left = 340.0
-offset_top = 360.0
+offset_top = 395.0
 offset_right = 352.0
 offset_bottom = 470.0
 color = Color(0.2, 0.18, 0.22, 1)
 
 [node name="WallTop1" type="ColorRect" parent="Walls" unique_id=1894476877]
 offset_left = 340.0
-offset_top = 360.0
+offset_top = 364.0
 offset_right = 352.0
 offset_bottom = 364.0
 color = Color(0.33, 0.3, 0.35, 1)
@@ -314,7 +314,7 @@ shape = SubResource("rs_15")
 [node name="WC1" type="StaticBody2D" parent="Solid" unique_id=1171195626]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC1" unique_id=8785979]
-position = Vector2(346, 417.5)
+position = Vector2(346, 430.1875)
 shape = SubResource("rs_16")
 
 [node name="WC2" type="StaticBody2D" parent="Solid" unique_id=359016962]
@@ -380,7 +380,7 @@ shape = SubResource("rs_2")
 [node name="FC_Bed2" type="StaticBody2D" parent="Solid" unique_id=1953088011]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Bed2" unique_id=2133448113]
-position = Vector2(100.5, 466)
+position = Vector2(114.5, 467)
 shape = SubResource("rs_0")
 
 [node name="FC_Nightstand2" type="StaticBody2D" parent="Solid" unique_id=1000387369]
@@ -392,7 +392,7 @@ shape = SubResource("rs_1")
 [node name="FC_Bookshelf2" type="StaticBody2D" parent="Solid" unique_id=682727783]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Bookshelf2" unique_id=1108942749]
-position = Vector2(120, 598)
+position = Vector2(120, 615.5)
 shape = SubResource("rs_3")
 
 [node name="FC_Dresser2" type="StaticBody2D" parent="Solid" unique_id=1606216381]
@@ -422,13 +422,13 @@ shape = SubResource("rs_7")
 [node name="FC_Kitchen" type="StaticBody2D" parent="Solid" unique_id=1362295619]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Kitchen" unique_id=1500091097]
-position = Vector2(727, 198.5)
+position = Vector2(727, 187.5)
 shape = SubResource("rs_8")
 
 [node name="FC_Fridge" type="StaticBody2D" parent="Solid" unique_id=1905115449]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Fridge" unique_id=1361445775]
-position = Vector2(921, 187)
+position = Vector2(921, 134)
 shape = SubResource("rs_9")
 
 [node name="FC_DiningTable" type="StaticBody2D" parent="Solid" unique_id=291274189]
@@ -490,7 +490,7 @@ offset = Vector2(-24, -45)
 
 [node name="FloorLamp1" type="Sprite2D" parent="World" unique_id=1893221554]
 texture_filter = 1
-position = Vector2(312, 380)
+position = Vector2(221, 170)
 scale = Vector2(2, 2)
 texture = SubResource("at_lamp")
 centered = false
@@ -498,7 +498,7 @@ offset = Vector2(-8, -47)
 
 [node name="Bed2" type="Sprite2D" parent="World" unique_id=1061183487]
 texture_filter = 1
-position = Vector2(45.858025, 419.53198)
+position = Vector2(57, 419.99997)
 scale = Vector2(0.22820213, 0.21932246)
 texture = ExtResource("6_yj2u4")
 centered = false
@@ -506,7 +506,7 @@ offset = Vector2(-32, -86)
 
 [node name="Nightstand2" type="Sprite2D" parent="World" unique_id=1297701579]
 texture_filter = 1
-position = Vector2(307, 499)
+position = Vector2(307, 482)
 scale = Vector2(2, 2)
 texture = SubResource("at_nstand")
 centered = false
@@ -514,7 +514,7 @@ offset = Vector2(-8, -48)
 
 [node name="Bookshelf2" type="Sprite2D" parent="World" unique_id=199396959]
 texture_filter = 1
-position = Vector2(120, 636)
+position = Vector2(122, 636)
 scale = Vector2(2, 2)
 texture = SubResource("at_bshelf")
 centered = false
@@ -554,7 +554,7 @@ offset = Vector2(-16, -21)
 
 [node name="Kitchen" type="Sprite2D" parent="World" unique_id=131674458]
 texture_filter = 1
-position = Vector2(727, 249)
+position = Vector2(727, 234)
 scale = Vector2(2, 2)
 texture = SubResource("at_kit")
 centered = false
@@ -562,7 +562,7 @@ offset = Vector2(-72.5, -66)
 
 [node name="Fridge" type="Sprite2D" parent="World" unique_id=693591482]
 texture_filter = 1
-position = Vector2(921, 239)
+position = Vector2(921, 195)
 scale = Vector2(2, 2)
 texture = SubResource("at_fridge")
 centered = false
