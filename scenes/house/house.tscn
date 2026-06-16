@@ -1,6 +1,657 @@
-[gd_scene load_steps=2 format=3 uid="uid://clastmorn0house"]
+[gd_scene format=3 uid="uid://obrpjtwx5k4w"]
 
-[ext_resource type="Script" path="res://scenes/house/house.gd" id="1_house"]
+[ext_resource type="Texture2D" uid="uid://bvtcymcc1gdhu" path="res://sierrassets furniture pack/furniture/individual sprites/part-Slice 156.png" id="3_12j21"]
+[ext_resource type="Texture2D" uid="uid://dom618r3hkjc5" path="res://sierrassets furniture pack/furniture/individual sprites/part-Slice 148.png" id="6_ycl3c"]
+[ext_resource type="Texture2D" uid="uid://b8rhqwouv8k7d" path="res://pixelinterior_LRK_v1/cabinets_LRK.png" id="cab"]
+[ext_resource type="Texture2D" uid="uid://duhjca3kxgl70" path="res://pixelinterior_LRK_v1/decorations_LRK.png" id="deco"]
+[ext_resource type="Texture2D" uid="uid://w7b0ajw4yjno" path="res://pixelinterior_BA_v1/fixtures_BA.png" id="fix"]
+[ext_resource type="Script" uid="uid://dmpx5y2acayg5" path="res://scenes/house/house.gd" id="house"]
+[ext_resource type="Texture2D" uid="uid://b8f2yt1vim4sy" path="res://pixelinterior_LRK_v1/kitchen_LRK.png" id="kitchen"]
+[ext_resource type="Texture2D" uid="uid://b4r2vuf7dgkpo" path="res://pixelinterior_LRK_v1/livingroom_LRK.png" id="living"]
 
-[node name="House" type="Node2D"]
-script = ExtResource("1_house")
+[sub_resource type="AtlasTexture" id="at_rug"]
+atlas = ExtResource("living")
+region = Rect2(144, 256, 64, 32)
+
+[sub_resource type="RectangleShape2D" id="rs_15"]
+size = Vector2(12, 182)
+
+[sub_resource type="RectangleShape2D" id="rs_16"]
+size = Vector2(13, 97)
+
+[sub_resource type="RectangleShape2D" id="rs_17"]
+size = Vector2(288, 12)
+
+[sub_resource type="RectangleShape2D" id="rs_18"]
+size = Vector2(12, 259)
+
+[sub_resource type="RectangleShape2D" id="rs_19"]
+size = Vector2(62, 12)
+
+[sub_resource type="RectangleShape2D" id="rs_20"]
+size = Vector2(49, 7)
+
+[sub_resource type="RectangleShape2D" id="rs_21"]
+size = Vector2(240, 12)
+
+[sub_resource type="RectangleShape2D" id="rs_0"]
+size = Vector2(118.5, 137)
+
+[sub_resource type="RectangleShape2D" id="rs_1"]
+size = Vector2(32, 86)
+
+[sub_resource type="RectangleShape2D" id="rs_2"]
+size = Vector2(71, 28)
+
+[sub_resource type="RectangleShape2D" id="rs_3"]
+size = Vector2(92, 76)
+
+[sub_resource type="RectangleShape2D" id="rs_4"]
+size = Vector2(90, 34)
+
+[sub_resource type="RectangleShape2D" id="rs_5"]
+size = Vector2(128, 50)
+
+[sub_resource type="RectangleShape2D" id="rs_6"]
+size = Vector2(44, 40)
+
+[sub_resource type="RectangleShape2D" id="rs_7"]
+size = Vector2(62, 30)
+
+[sub_resource type="RectangleShape2D" id="rs_8"]
+size = Vector2(286, 77)
+
+[sub_resource type="RectangleShape2D" id="rs_9"]
+size = Vector2(48, 100)
+
+[sub_resource type="RectangleShape2D" id="rs_10"]
+size = Vector2(96, 50)
+
+[sub_resource type="RectangleShape2D" id="rs_11"]
+size = Vector2(92, 42)
+
+[sub_resource type="RectangleShape2D" id="rs_12"]
+size = Vector2(60, 26)
+
+[sub_resource type="RectangleShape2D" id="rs_13"]
+size = Vector2(92, 56)
+
+[sub_resource type="RectangleShape2D" id="rs_14"]
+size = Vector2(60, 56)
+
+[sub_resource type="AtlasTexture" id="at_nstand"]
+atlas = ExtResource("cab")
+region = Rect2(144, 16, 16, 48)
+
+[sub_resource type="AtlasTexture" id="at_wardr"]
+atlas = ExtResource("cab")
+region = Rect2(272, 83, 48, 45)
+
+[sub_resource type="AtlasTexture" id="at_lamp"]
+atlas = ExtResource("deco")
+region = Rect2(48, 15, 16, 47)
+
+[sub_resource type="AtlasTexture" id="at_bshelf"]
+atlas = ExtResource("cab")
+region = Rect2(16, 16, 48, 48)
+
+[sub_resource type="AtlasTexture" id="at_dresser"]
+atlas = ExtResource("cab")
+region = Rect2(624, 32, 48, 25)
+
+[sub_resource type="AtlasTexture" id="at_tub"]
+atlas = ExtResource("fix")
+region = Rect2(15, 16, 65, 32)
+
+[sub_resource type="AtlasTexture" id="at_toilet"]
+atlas = ExtResource("fix")
+region = Rect2(165, 16, 22, 44)
+
+[sub_resource type="AtlasTexture" id="at_sink"]
+atlas = ExtResource("fix")
+region = Rect2(105, 13, 32, 21)
+
+[sub_resource type="AtlasTexture" id="at_kit"]
+atlas = ExtResource("kitchen")
+region = Rect2(23, 11, 145, 66)
+
+[sub_resource type="AtlasTexture" id="at_fridge"]
+atlas = ExtResource("kitchen")
+region = Rect2(356, 24, 24, 56)
+
+[sub_resource type="AtlasTexture" id="at_dtable"]
+atlas = ExtResource("living")
+region = Rect2(16, 160, 48, 32)
+
+[sub_resource type="AtlasTexture" id="at_chair_d"]
+atlas = ExtResource("living")
+region = Rect2(128, 144, 16, 32)
+
+[sub_resource type="AtlasTexture" id="at_chair_r"]
+atlas = ExtResource("living")
+region = Rect2(544, 144, 16, 32)
+
+[sub_resource type="AtlasTexture" id="at_chair_l"]
+atlas = ExtResource("living")
+region = Rect2(512, 144, 16, 32)
+
+[sub_resource type="AtlasTexture" id="at_tvstand"]
+atlas = ExtResource("cab")
+region = Rect2(528, 32, 48, 25)
+
+[sub_resource type="AtlasTexture" id="at_tv"]
+atlas = ExtResource("living")
+region = Rect2(358, 342, 36, 20)
+
+[sub_resource type="AtlasTexture" id="at_coffee"]
+atlas = ExtResource("living")
+region = Rect2(568, 246, 32, 16)
+
+[sub_resource type="AtlasTexture" id="at_couch"]
+atlas = ExtResource("living")
+region = Rect2(80, 96, 48, 32)
+
+[sub_resource type="AtlasTexture" id="at_armch"]
+atlas = ExtResource("living")
+region = Rect2(288, 96, 32, 32)
+
+[sub_resource type="AtlasTexture" id="at_plant"]
+atlas = ExtResource("deco")
+region = Rect2(16, 81, 15, 30)
+
+[node name="House" type="Node2D" unique_id=1371279137]
+script = ExtResource("house")
+
+[node name="Floor" type="Node2D" parent="." unique_id=1010922795]
+
+[node name="NorthWall" type="Node2D" parent="." unique_id=1210059416]
+
+[node name="Decals" type="Node2D" parent="." unique_id=2129166044]
+
+[node name="RugLiving" type="Sprite2D" parent="Decals" unique_id=654717022]
+texture_filter = 1
+position = Vector2(576, 456)
+scale = Vector2(2, 2)
+texture = SubResource("at_rug")
+centered = false
+
+[node name="Walls" type="Node2D" parent="." unique_id=1753458935]
+
+[node name="WallBody0" type="ColorRect" parent="Walls" unique_id=897040324]
+offset_left = 372.0
+offset_top = 130.0
+offset_right = 384.0
+offset_bottom = 312.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop0" type="ColorRect" parent="Walls" unique_id=966170032]
+offset_left = 340.0
+offset_top = 128.0
+offset_right = 352.0
+offset_bottom = 132.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody1" type="ColorRect" parent="Walls" unique_id=289277857]
+offset_left = 340.0
+offset_top = 360.0
+offset_right = 352.0
+offset_bottom = 470.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop1" type="ColorRect" parent="Walls" unique_id=1894476877]
+offset_left = 340.0
+offset_top = 360.0
+offset_right = 352.0
+offset_bottom = 364.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody2" type="ColorRect" parent="Walls" unique_id=687646272]
+offset_left = 340.0
+offset_top = 550.0
+offset_right = 352.0
+offset_bottom = 640.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop2" type="ColorRect" parent="Walls" unique_id=798723924]
+offset_left = 340.0
+offset_top = 534.0
+offset_right = 340.0
+offset_bottom = 534.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody3" type="ColorRect" parent="Walls" unique_id=1119672858]
+offset_left = 64.0
+offset_top = 384.0
+offset_right = 352.0
+offset_bottom = 396.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop3" type="ColorRect" parent="Walls" unique_id=572745118]
+offset_left = 64.0
+offset_top = 384.0
+offset_right = 352.0
+offset_bottom = 388.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody4" type="ColorRect" parent="Walls" unique_id=1704287890]
+offset_left = 563.0
+offset_top = 131.0
+offset_right = 575.0
+offset_bottom = 381.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop4" type="ColorRect" parent="Walls" unique_id=1535757676]
+offset_left = 552.0
+offset_top = 128.0
+offset_right = 564.0
+offset_bottom = 132.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody5" type="ColorRect" parent="Walls" unique_id=1859397119]
+offset_left = 372.0
+offset_top = 309.0
+offset_right = 430.0
+offset_bottom = 321.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop5" type="ColorRect" parent="Walls" unique_id=1886712118]
+offset_left = 376.0
+offset_top = 321.0
+offset_right = 430.0
+offset_bottom = 325.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody6" type="ColorRect" parent="Walls" unique_id=1094850828]
+offset_left = 486.0
+offset_top = 309.0
+offset_right = 564.0
+offset_bottom = 321.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop6" type="ColorRect" parent="Walls" unique_id=1235288551]
+offset_left = 486.0
+offset_top = 319.0
+offset_right = 544.0
+offset_bottom = 323.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody7" type="ColorRect" parent="Walls" unique_id=1958824693]
+offset_left = 569.0
+offset_top = 372.0
+offset_right = 617.0
+offset_bottom = 384.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop7" type="ColorRect" parent="Walls" unique_id=147065787]
+offset_left = 564.0
+offset_top = 372.0
+offset_right = 600.0
+offset_bottom = 376.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="WallBody8" type="ColorRect" parent="Walls" unique_id=1388677302]
+offset_left = 720.0
+offset_top = 372.0
+offset_right = 960.0
+offset_bottom = 384.0
+color = Color(0.2, 0.18, 0.22, 1)
+
+[node name="WallTop8" type="ColorRect" parent="Walls" unique_id=182473679]
+offset_left = 720.0
+offset_top = 372.0
+offset_right = 960.0
+offset_bottom = 376.0
+color = Color(0.33, 0.3, 0.35, 1)
+
+[node name="Solid" type="Node2D" parent="." unique_id=30832037]
+
+[node name="WC0" type="StaticBody2D" parent="Solid" unique_id=2023907128]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC0" unique_id=106303239]
+position = Vector2(378, 219)
+shape = SubResource("rs_15")
+
+[node name="WC1" type="StaticBody2D" parent="Solid" unique_id=1171195626]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC1" unique_id=8785979]
+position = Vector2(346, 415)
+shape = SubResource("rs_16")
+
+[node name="WC2" type="StaticBody2D" parent="Solid" unique_id=359016962]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC2" unique_id=59120498]
+position = Vector2(345.5, 591.5)
+shape = SubResource("rs_16")
+
+[node name="WC3" type="StaticBody2D" parent="Solid" unique_id=1742342210]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC3" unique_id=2096381957]
+position = Vector2(208, 390)
+shape = SubResource("rs_17")
+
+[node name="WC4" type="StaticBody2D" parent="Solid" unique_id=1977708139]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC4" unique_id=420428037]
+position = Vector2(570, 245.5)
+shape = SubResource("rs_18")
+
+[node name="WC5" type="StaticBody2D" parent="Solid" unique_id=1178417693]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC5" unique_id=1201546955]
+position = Vector2(404, 314)
+shape = SubResource("rs_19")
+
+[node name="WC6" type="StaticBody2D" parent="Solid" unique_id=1942911874]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC6" unique_id=1539775485]
+position = Vector2(521, 314)
+shape = SubResource("rs_19")
+
+[node name="WC7" type="StaticBody2D" parent="Solid" unique_id=1521086280]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC7" unique_id=1374308641]
+position = Vector2(589, 379)
+shape = SubResource("rs_20")
+
+[node name="WC8" type="StaticBody2D" parent="Solid" unique_id=50225579]
+
+[node name="C" type="CollisionShape2D" parent="Solid/WC8" unique_id=349864714]
+position = Vector2(840, 378)
+shape = SubResource("rs_21")
+
+[node name="FC_Bed1" type="StaticBody2D" parent="Solid" unique_id=2071064589]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Bed1" unique_id=1364920301]
+position = Vector2(140.75, 201.5)
+shape = SubResource("rs_0")
+
+[node name="FC_Nightstand1" type="StaticBody2D" parent="Solid" unique_id=235210194]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Nightstand1" unique_id=1112433058]
+position = Vector2(338, 176)
+shape = SubResource("rs_1")
+
+[node name="FC_Wardrobe1" type="StaticBody2D" parent="Solid" unique_id=1334096972]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Wardrobe1" unique_id=215847499]
+position = Vector2(105.5, 366)
+shape = SubResource("rs_2")
+
+[node name="FC_Bed2" type="StaticBody2D" parent="Solid" unique_id=1953088011]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Bed2" unique_id=2133448113]
+position = Vector2(120.5, 466)
+shape = SubResource("rs_0")
+
+[node name="FC_Nightstand2" type="StaticBody2D" parent="Solid" unique_id=1000387369]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Nightstand2" unique_id=1798286600]
+position = Vector2(308, 453)
+shape = SubResource("rs_1")
+
+[node name="FC_Bookshelf2" type="StaticBody2D" parent="Solid" unique_id=682727783]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Bookshelf2" unique_id=1108942749]
+position = Vector2(120, 598)
+shape = SubResource("rs_3")
+
+[node name="FC_Dresser2" type="StaticBody2D" parent="Solid" unique_id=1606216381]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Dresser2" unique_id=1052761820]
+position = Vector2(285, 619)
+shape = SubResource("rs_4")
+
+[node name="FC_Bathtub" type="StaticBody2D" parent="Solid" unique_id=71452804]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Bathtub" unique_id=220597023]
+position = Vector2(452, 175)
+shape = SubResource("rs_5")
+
+[node name="FC_Toilet" type="StaticBody2D" parent="Solid" unique_id=118301987]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Toilet" unique_id=1725312223]
+position = Vector2(406, 264)
+shape = SubResource("rs_6")
+
+[node name="FC_BathSink" type="StaticBody2D" parent="Solid" unique_id=143077835]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_BathSink" unique_id=1042537618]
+position = Vector2(511, 275)
+shape = SubResource("rs_7")
+
+[node name="FC_Kitchen" type="StaticBody2D" parent="Solid" unique_id=1362295619]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Kitchen" unique_id=1500091097]
+position = Vector2(727, 198.5)
+shape = SubResource("rs_8")
+
+[node name="FC_Fridge" type="StaticBody2D" parent="Solid" unique_id=1905115449]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Fridge" unique_id=1361445775]
+position = Vector2(921, 187)
+shape = SubResource("rs_9")
+
+[node name="FC_DiningTable" type="StaticBody2D" parent="Solid" unique_id=291274189]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_DiningTable" unique_id=1196110022]
+position = Vector2(700, 317)
+shape = SubResource("rs_10")
+
+[node name="FC_TVStand" type="StaticBody2D" parent="Solid" unique_id=861635217]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_TVStand" unique_id=1217377468]
+position = Vector2(640, 447)
+shape = SubResource("rs_11")
+
+[node name="FC_CoffeeTable" type="StaticBody2D" parent="Solid" unique_id=2111055923]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_CoffeeTable" unique_id=478604070]
+position = Vector2(640, 530)
+shape = SubResource("rs_12")
+
+[node name="FC_Couch" type="StaticBody2D" parent="Solid" unique_id=980530088]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Couch" unique_id=994434176]
+position = Vector2(640, 590)
+shape = SubResource("rs_13")
+
+[node name="FC_Armchair" type="StaticBody2D" parent="Solid" unique_id=576576787]
+
+[node name="C" type="CollisionShape2D" parent="Solid/FC_Armchair" unique_id=1866900159]
+position = Vector2(860, 570)
+shape = SubResource("rs_14")
+
+[node name="World" type="Node2D" parent="." unique_id=1502813882]
+y_sort_enabled = true
+
+[node name="Bed1" type="Sprite2D" parent="World" unique_id=1199367596]
+texture_filter = 1
+position = Vector2(194, 513)
+scale = Vector2(3.437501, 4.4953175)
+texture = ExtResource("3_12j21")
+centered = false
+offset = Vector2(-32, -86)
+
+[node name="Nightstand1" type="Sprite2D" parent="World" unique_id=654023103]
+texture_filter = 1
+position = Vector2(341, 218)
+scale = Vector2(2.125, 2)
+texture = SubResource("at_nstand")
+centered = false
+offset = Vector2(-8, -48)
+
+[node name="Wardrobe1" type="Sprite2D" parent="World" unique_id=722293268]
+texture_filter = 1
+position = Vector2(105.5, 380)
+scale = Vector2(1.6041666, 1.9333328)
+texture = SubResource("at_wardr")
+centered = false
+offset = Vector2(-24, -45)
+
+[node name="FloorLamp1" type="Sprite2D" parent="World" unique_id=1893221554]
+texture_filter = 1
+position = Vector2(312, 380)
+scale = Vector2(2, 2)
+texture = SubResource("at_lamp")
+centered = false
+offset = Vector2(-8, -47)
+
+[node name="Bed2" type="Sprite2D" parent="World" unique_id=1061183487]
+texture_filter = 1
+position = Vector2(248, 771)
+scale = Vector2(5.375, 4.387097)
+texture = ExtResource("6_ycl3c")
+centered = false
+offset = Vector2(-32, -86)
+
+[node name="Nightstand2" type="Sprite2D" parent="World" unique_id=1297701579]
+texture_filter = 1
+position = Vector2(307, 499)
+scale = Vector2(2, 2)
+texture = SubResource("at_nstand")
+centered = false
+offset = Vector2(-8, -48)
+
+[node name="Bookshelf2" type="Sprite2D" parent="World" unique_id=199396959]
+texture_filter = 1
+position = Vector2(120, 636)
+scale = Vector2(2, 2)
+texture = SubResource("at_bshelf")
+centered = false
+offset = Vector2(-24, -48)
+
+[node name="Dresser2" type="Sprite2D" parent="World" unique_id=1226945356]
+texture_filter = 1
+position = Vector2(285, 636)
+scale = Vector2(2, 2)
+texture = SubResource("at_dresser")
+centered = false
+offset = Vector2(-24, -25)
+
+[node name="Bathtub" type="Sprite2D" parent="World" unique_id=1615601293]
+texture_filter = 1
+position = Vector2(452, 200)
+scale = Vector2(2, 2)
+texture = SubResource("at_tub")
+centered = false
+offset = Vector2(-32.5, -32)
+
+[node name="Toilet" type="Sprite2D" parent="World" unique_id=727313977]
+texture_filter = 1
+position = Vector2(407, 291)
+scale = Vector2(2, 2)
+texture = SubResource("at_toilet")
+centered = false
+offset = Vector2(-11, -44)
+
+[node name="BathSink" type="Sprite2D" parent="World" unique_id=1799189273]
+texture_filter = 1
+position = Vector2(512, 290)
+scale = Vector2(2, 2)
+texture = SubResource("at_sink")
+centered = false
+offset = Vector2(-16, -21)
+
+[node name="Kitchen" type="Sprite2D" parent="World" unique_id=131674458]
+texture_filter = 1
+position = Vector2(727, 249)
+scale = Vector2(2, 2)
+texture = SubResource("at_kit")
+centered = false
+offset = Vector2(-72.5, -66)
+
+[node name="Fridge" type="Sprite2D" parent="World" unique_id=693591482]
+texture_filter = 1
+position = Vector2(921, 239)
+scale = Vector2(2, 2)
+texture = SubResource("at_fridge")
+centered = false
+offset = Vector2(-12, -56)
+
+[node name="DiningTable" type="Sprite2D" parent="World" unique_id=172838659]
+texture_filter = 1
+position = Vector2(700, 346)
+scale = Vector2(2, 2)
+texture = SubResource("at_dtable")
+centered = false
+offset = Vector2(-24, -32)
+
+[node name="ChairN" type="Sprite2D" parent="World" unique_id=361460161]
+texture_filter = 1
+position = Vector2(700, 300)
+scale = Vector2(2, 2)
+texture = SubResource("at_chair_d")
+centered = false
+offset = Vector2(-8, -32)
+
+[node name="ChairW" type="Sprite2D" parent="World" unique_id=1449074408]
+texture_filter = 1
+position = Vector2(636, 338)
+scale = Vector2(2, 2)
+texture = SubResource("at_chair_r")
+centered = false
+offset = Vector2(-8, -32)
+
+[node name="ChairE" type="Sprite2D" parent="World" unique_id=965559863]
+texture_filter = 1
+position = Vector2(766, 338)
+scale = Vector2(2, 2)
+texture = SubResource("at_chair_l")
+centered = false
+offset = Vector2(-8, -32)
+
+[node name="TVStand" type="Sprite2D" parent="World" unique_id=2128076932]
+texture_filter = 1
+position = Vector2(640, 470)
+scale = Vector2(2, 2)
+texture = SubResource("at_tvstand")
+centered = false
+offset = Vector2(-24, -25)
+
+[node name="TV" type="Sprite2D" parent="World" unique_id=288615197]
+texture_filter = 1
+position = Vector2(640, 448)
+scale = Vector2(2, 2)
+texture = SubResource("at_tv")
+centered = false
+offset = Vector2(-18, -20)
+
+[node name="CoffeeTable" type="Sprite2D" parent="World" unique_id=178172972]
+texture_filter = 1
+position = Vector2(640, 545)
+scale = Vector2(2, 2)
+texture = SubResource("at_coffee")
+centered = false
+offset = Vector2(-16, -16)
+
+[node name="Couch" type="Sprite2D" parent="World" unique_id=1797363107]
+texture_filter = 1
+position = Vector2(640, 620)
+scale = Vector2(2, 2)
+texture = SubResource("at_couch")
+centered = false
+offset = Vector2(-24, -32)
+
+[node name="Armchair" type="Sprite2D" parent="World" unique_id=406934412]
+texture_filter = 1
+position = Vector2(860, 600)
+scale = Vector2(2, 2)
+texture = SubResource("at_armch")
+centered = false
+offset = Vector2(-16, -32)
+
+[node name="PlantLiving" type="Sprite2D" parent="World" unique_id=2049468305]
+texture_filter = 1
+position = Vector2(374, 448)
+scale = Vector2(2, 2)
+texture = SubResource("at_plant")
+centered = false
+offset = Vector2(-7.5, -30)
+
+[node name="FloorLampLiving" type="Sprite2D" parent="World" unique_id=223710771]
+texture_filter = 1
+position = Vector2(917, 486)
+scale = Vector2(2, 2)
+texture = SubResource("at_lamp")
+centered = false
+offset = Vector2(-8, -47)

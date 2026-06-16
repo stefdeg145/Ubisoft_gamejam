@@ -17,6 +17,7 @@ var _facing := "down"
 var _frame := 0
 var _timer := 0.0
 @onready var _sprite: Sprite2D = $Sprite
+@onready var _walk_sound: AudioStreamPlayer2D = $WalkSound
 
 ## The memory object currently in range (set by memory_object.gd), or null.
 var nearby_object: Node = null
@@ -39,7 +40,8 @@ func _physics_process(delta: float) -> void:
 	velocity = dir * speed
 	move_and_slide()
 
-	if dir.length() > 0.1:
+	var moving := dir.length() > 0.1
+	if moving:
 		# choose facing by dominant axis (side-view stages stay left/right)
 		if lock_vertical or abs(dir.x) > abs(dir.y):
 			_facing = "right" if dir.x > 0 else "left"
@@ -54,6 +56,16 @@ func _physics_process(delta: float) -> void:
 		if _frame != 0:
 			_frame = 0
 			_apply_frame()
+	_update_walk_sound(moving)
+
+func _update_walk_sound(moving: bool) -> void:
+	if _walk_sound == null:
+		return
+	if moving:
+		if not _walk_sound.playing:
+			_walk_sound.play()
+	elif _walk_sound.playing:
+		_walk_sound.stop()
 
 func _apply_frame() -> void:
 	if _sprite and _frames.has(_facing):

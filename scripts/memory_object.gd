@@ -36,7 +36,7 @@ func _refresh_glow() -> void:
 		glow.visible = _is_active()
 
 func _is_active() -> bool:
-ass	return not ambient and GameState.is_active(stage_name)
+	return not ambient and GameState.is_active(stage_name)
 
 func _on_enter(body: Node) -> void:
 	if body.is_in_group("player"):

@@ -1,14 +1,16 @@
 extends Node2D
-## The house hub, built procedurally in an oblique (2.5D) pixel style: a floor
-## seen from above, a north wall whose papered face + window you actually see,
-## and furniture drawn with visible front faces. One memory glows at a time;
-## entering it drifts the player into that stage's dream. Completing a stage
-## warms the house a little (the grey grade lifts).
+## The house hub. The floor, the north wall you actually see, the colour grade
+## and the rain are built in code; the interior walls, all the furniture and the
+## interactable doors live as real nodes in house.tscn so they can be dragged and
+## arranged in the editor. The player, the glowing memory objects and the story
+## flow are still spawned here. One memory glows at a time; entering it drifts the
+## player into that stage's dream, and completing a stage warms the house.
 
 const PlayerScene := preload("res://scenes/actors/player.tscn")
 const MemoryScript := preload("res://scripts/memory_object.gd")
 
 const A := "res://assets/art/house/"
+const ART := "res://assets/art/"
 const PROP := "res://assets/art/props/"
 const FX := "res://assets/art/fx/"
 
@@ -20,29 +22,28 @@ const BOTTOM := 640
 const TILE := 64
 
 var player: CharacterBody2D
-var _world: Node2D          # y-sorted layer (furniture + player)
 var _grade: CanvasModulate
+
+@onready var _floor: Node2D = $Floor
+@onready var _northwall: Node2D = $NorthWall
+@onready var _world: Node2D = $World      # y-sorted: furniture (from scene) + player + memories
 
 # stage_name -> [prop_texture, scene_path, feet_x, feet_y, locked_line]
 var MEMORIES := {
-	"Denial": [PROP + "mug.png", "res://scenes/stages/stage_denial.tscn", 700, 300,
+	"Denial": [PROP + "mug.png", "res://scenes/stages/stage_denial.tscn", 700, 320,
 		"Their mug. Half a ring of coffee, dried. ...I'm not ready."],
-	"Bargaining": [PROP + "photo.png", "res://scenes/stages/stage_bargaining.tscn", 470, 585,
+	"Bargaining": [PROP + "photo.png", "res://scenes/stages/stage_bargaining.tscn", 664, 532,
 		"That photograph. The last good day. Not yet. I can't look at that one yet."],
-	"Depression": [PROP + "record.png", "res://scenes/stages/stage_depression.tscn", 300, 620,
+	"Depression": [PROP + "record.png", "res://scenes/stages/stage_depression.tscn", 285, 604,
 		"Their voice is on that tape. ...I'm not ready to hear it."],
-	"Acceptance": [PROP + "coat.png", "res://scenes/stages/stage_acceptance.tscn", 770, 620,
+	"Acceptance": [PROP + "coat.png", "res://scenes/stages/stage_acceptance.tscn", 150, 360,
 		"Their coat. Still smells like rain. Not yet."],
 }
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_build_floor()
-	_build_walls()
-	_world = Node2D.new()
-	_world.y_sort_enabled = true
-	add_child(_world)
-	_build_furniture()
+	_build_north_wall()
 	_spawn_player()
 	_build_memories()
 	_build_grade()
@@ -66,18 +67,6 @@ func _tl(parent: Node, tex: Texture2D, x: int, y: int, s := 2.0, mod := Color.WH
 	parent.add_child(sp)
 	return sp
 
-func _feet(parent: Node, path: String, fx: int, fy: int, s := 2.0) -> Sprite2D:
-	var tex: Texture2D = load(path)
-	var sp := Sprite2D.new()
-	sp.texture = tex
-	sp.centered = false
-	sp.offset = Vector2(-tex.get_width() / 2.0, -tex.get_height())
-	sp.position = Vector2(fx, fy)
-	sp.scale = Vector2(s, s)
-	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	parent.add_child(sp)
-	return sp
-
 func _collider(x: int, y: int, w: int, h: int) -> void:
 	var body := StaticBody2D.new()
 	var cs := CollisionShape2D.new()
@@ -90,78 +79,46 @@ func _collider(x: int, y: int, w: int, h: int) -> void:
 
 # -------------------------------------------------------------- build
 func _build_floor() -> void:
-	var floors := Node2D.new()
-	add_child(floors)
 	var wood: Texture2D = load(A + "floor_wood.png")
 	var tile: Texture2D = load(A + "floor_tile.png")
 	var x := LEFT
 	while x < RIGHT:
 		var y := TOP
 		while y < BOTTOM:
-			var kitchen := x >= 600 and y < 320
-			_tl(floors, tile if kitchen else wood, x, y, 2.0)
+			var kitchen := x >= 552 and y < 372          # kitchen/dining (top-right)
+			var bath := x >= 352 and x < 552 and y < 300  # bathroom (top-center)
+			_tl(_floor, tile if (kitchen or bath) else wood, x, y, 2.0)
 			y += TILE
 		x += TILE
-	# living-room rug (floor decal)
-	_tl(floors, load(A + "rug.png"), 360, 430, 2.0)
 
-func _build_walls() -> void:
-	var walls := Node2D.new()
-	add_child(walls)
+func _build_north_wall() -> void:
 	var face: Texture2D = load(A + "wall_face.png")     # 32x48 -> 64x96 @2
-	# north wall: a row of papered faces, bottom resting on the floor's top edge
 	var x := LEFT
 	while x < RIGHT:
-		_tl(walls, face, x, TOP - 96, 2.0)
+		_tl(_northwall, face, x, TOP - 96, 2.0)
 		x += TILE
-	# window set into the north wall
-	_tl(walls, load(A + "wall_window.png"), 760, TOP - 92, 2.0)
+	_tl(_northwall, load(A + "wall_window.png"), 760, TOP - 92, 2.0)
 	# side wall caps (simple dark borders so the room reads as enclosed)
 	var dark := Color(0.22, 0.20, 0.22)
 	var west := ColorRect.new(); west.color = dark
 	west.position = Vector2(LEFT - 16, TOP - 96); west.size = Vector2(16, BOTTOM - TOP + 96)
-	add_child(west)
+	_northwall.add_child(west)
 	var east := ColorRect.new(); east.color = dark
 	east.position = Vector2(RIGHT, TOP - 96); east.size = Vector2(16, BOTTOM - TOP + 96)
-	add_child(east)
+	_northwall.add_child(east)
 	var south := ColorRect.new(); south.color = dark
 	south.position = Vector2(LEFT - 16, BOTTOM); south.size = Vector2(RIGHT - LEFT + 32, 16)
-	add_child(south)
+	_northwall.add_child(south)
 	# perimeter colliders
 	_collider(LEFT - 24, TOP - 8, RIGHT - LEFT + 48, 16)   # north
 	_collider(LEFT - 24, BOTTOM, RIGHT - LEFT + 48, 24)    # south
 	_collider(LEFT - 24, TOP - 96, 24, BOTTOM - TOP + 120) # west
 	_collider(RIGHT, TOP - 96, 24, BOTTOM - TOP + 120)     # east
 
-func _build_furniture() -> void:
-	# bedroom (top-left)
-	_feet(_world, A + "bed.png", 190, 300); _collider(120, 200, 130, 100)
-	_feet(_world, A + "nightstand.png", 300, 296); _collider(276, 250, 48, 44)
-	_feet(_world, A + "wardrobe.png", 150, 470); _collider(96, 410, 88, 60)
-	# kitchen (top-right)
-	_feet(_world, A + "sink_counter.png", 660, 250); _collider(575, 196, 150, 50)
-	_feet(_world, A + "counter.png", 540, 250); _collider(465, 196, 150, 50)
-	_feet(_world, A + "stove.png", 860, 252); _collider(826, 198, 70, 54)
-	_feet(_world, A + "fridge.png", 920, 300); _collider(896, 232, 50, 64)
-	_feet(_world, A + "dining_table.png", 720, 390); _collider(640, 340, 168, 56)
-	_feet(_world, A + "chair.png", 680, 420)
-	_feet(_world, A + "chair.png", 770, 420)
-	# living (bottom)
-	_feet(_world, A + "couch.png", 470, 470); _collider(380, 420, 190, 56)
-	_feet(_world, A + "coffee_table.png", 470, 560); _collider(420, 525, 110, 36)
-	_feet(_world, A + "tv_stand.png", 470, 638); _collider(410, 612, 120, 28)
-	_feet(_world, A + "armchair.png", 880, 560); _collider(836, 505, 84, 56)
-	_feet(_world, A + "record_player.png", 300, 612); _collider(270, 582, 76, 30)
-	_feet(_world, A + "bookshelf.png", 150, 612); _collider(110, 540, 88, 72)
-	_feet(_world, A + "plant.png", 600, 612)
-	# ambient flavour memory on the bookshelf
-	_make_memory_raw("Book", PROP + "book.png", 150, 590, true,
-		"A half-finished book. The bookmark hasn't moved in weeks.")
-
 func _spawn_player() -> void:
 	player = PlayerScene.instantiate()
 	# start asleep in the window armchair
-	player.position = Vector2(880, 545)
+	player.position = Vector2(860, 576)
 	player.can_move = false
 	player.add_to_group("player")
 	_world.add_child(player)
@@ -172,6 +129,9 @@ func _build_memories() -> void:
 		var d = MEMORIES[stage]
 		var m := _make_memory(stage, d[0], d[2], d[3], d[4])
 		m.stage_scene = d[1]
+	# ambient flavour memory on the bedroom-2 bookshelf
+	_make_memory_raw("Book", PROP + "book.png", 120, 600, true,
+		"A half-finished book. The bookmark hasn't moved in weeks.")
 
 func _make_memory(stage: String, tex_path: String, fx: int, fy: int, locked: String) -> Area2D:
 	var area := Area2D.new()
