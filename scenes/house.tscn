@@ -75,6 +75,90 @@ centered = false
 [node name="Furniture" type="Node2D" parent="." unique_id=2101305807]
 y_sort_enabled = true
 
+[node name="StaticBody2D" type="StaticBody2D" parent="Furniture" unique_id=859794206]
+position = Vector2(224, 96)
+scale = Vector2(4, 4)
+
+[node name="C_Nightstand1" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=902868166]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(227, 99, 261, 99, 261, 133, 227, 133)
+
+[node name="C_Wardrobe1" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=1040764052]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(99, 291, 193, 291, 193, 329, 99, 329)
+
+[node name="C_Bed2" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=3496328]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(99, 563, 233, 563, 233, 677, 99, 677)
+
+[node name="C_Dresser2" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=482162610]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(253, 387, 327, 387, 327, 425, 253, 425)
+
+[node name="C_Tub" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=1734994848]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(375, 93, 509, 93, 509, 135, 375, 135)
+
+[node name="C_Sink" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=937376334]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(375, 163, 417, 163, 417, 197, 375, 197)
+
+[node name="C_Toilet" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=1715165204]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(453, 173, 487, 173, 487, 215, 453, 215)
+
+[node name="C_CounterTop" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=45215891]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(571, 93, 925, 93, 925, 127, 571, 127)
+
+[node name="C_CounterRight" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=60231493]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(891, 93, 925, 93, 925, 267, 891, 267)
+
+[node name="C_Stove" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=1711074748]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(703, 93, 745, 93, 745, 127, 703, 127)
+
+[node name="C_DiningTable" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=2092738968]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(643, 213, 777, 213, 777, 295, 643, 295)
+
+[node name="C_Couch" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=1732396274]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(703, 423, 845, 423, 845, 477, 703, 477)
+
+[node name="C_CoffeeTable" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=246955259]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(733, 503, 815, 503, 815, 553, 733, 553)
+
+[node name="C_TVStand" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=135935117]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(763, 647, 897, 647, 897, 669, 763, 669)
+
+[node name="C_WindowChair" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=701376872]
+position = Vector2(-56, -24)
+scale = Vector2(0.25, 0.25)
+polygon = PackedVector2Array(879, 503, 929, 503, 929, 553, 879, 553)
+
+[node name="C_Bed1" type="CollisionPolygon2D" parent="Furniture/StaticBody2D" unique_id=775452869]
+position = Vector2(-51.210526, -23.999994)
+scale = Vector2(0.2192982, 0.24999994)
+polygon = PackedVector2Array(99, 99, 213, 99, 213, 253, 99, 253)
+
 [node name="Rug" type="Sprite2D" parent="Furniture" unique_id=159481114]
 position = Vector2(683, 479)
 scale = Vector2(4, 4)
@@ -87,25 +171,11 @@ scale = Vector2(4, 4)
 texture = ExtResource("9_q425y")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Nightstand1" unique_id=859794206]
-
-[node name="C_Nightstand1" type="CollisionPolygon2D" parent="Furniture/Nightstand1/StaticBody2D" unique_id=902868166]
-position = Vector2(-56, -24)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(227, 99, 261, 99, 261, 133, 227, 133)
-
 [node name="Wardrobe1" type="Sprite2D" parent="Furniture" unique_id=966470158]
 position = Vector2(96, 288)
 scale = Vector2(4, 4)
 texture = ExtResource("10_in3qe")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Wardrobe1" unique_id=436241211]
-
-[node name="C_Wardrobe1" type="CollisionPolygon2D" parent="Furniture/Wardrobe1/StaticBody2D" unique_id=1040764052]
-position = Vector2(-24, -72)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(99, 291, 193, 291, 193, 329, 99, 329)
 
 [node name="Bed2" type="Sprite2D" parent="Furniture" unique_id=1984352738]
 position = Vector2(236, 680)
@@ -114,26 +184,11 @@ scale = Vector2(4, 4)
 texture = ExtResource("11_m31jp")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Bed2" unique_id=1700758222]
-
-[node name="C_Bed2" type="CollisionPolygon2D" parent="Furniture/Bed2/StaticBody2D" unique_id=3496328]
-position = Vector2(59.000015, 170)
-rotation = 3.1415925
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(99, 563, 233, 563, 233, 677, 99, 677)
-
 [node name="Dresser2" type="Sprite2D" parent="Furniture" unique_id=1310471006]
 position = Vector2(250, 384)
 scale = Vector2(4, 4)
 texture = ExtResource("12_kn7tx")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Dresser2" unique_id=1610126139]
-
-[node name="C_Dresser2" type="CollisionPolygon2D" parent="Furniture/Dresser2/StaticBody2D" unique_id=482162610]
-position = Vector2(-62.5, -96)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(253, 387, 327, 387, 327, 425, 253, 425)
 
 [node name="Tub" type="Sprite2D" parent="Furniture" unique_id=1922535388]
 position = Vector2(372, 90)
@@ -141,25 +196,11 @@ scale = Vector2(4, 4)
 texture = ExtResource("13_xdv06")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Tub" unique_id=161836984]
-
-[node name="C_Tub" type="CollisionPolygon2D" parent="Furniture/Tub/StaticBody2D" unique_id=1734994848]
-position = Vector2(-93, -22.5)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(375, 93, 509, 93, 509, 135, 375, 135)
-
 [node name="Sink" type="Sprite2D" parent="Furniture" unique_id=1172134871]
 position = Vector2(372, 160)
 scale = Vector2(4, 4)
 texture = ExtResource("14_0l2s1")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Sink" unique_id=1168094377]
-
-[node name="C_Sink" type="CollisionPolygon2D" parent="Furniture/Sink/StaticBody2D" unique_id=937376334]
-position = Vector2(-93, -40)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(375, 163, 417, 163, 417, 197, 375, 197)
 
 [node name="Toilet" type="Sprite2D" parent="Furniture" unique_id=1999908687]
 position = Vector2(450, 170)
@@ -167,25 +208,11 @@ scale = Vector2(4, 4)
 texture = ExtResource("15_a0083")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Toilet" unique_id=1003603161]
-
-[node name="C_Toilet" type="CollisionPolygon2D" parent="Furniture/Toilet/StaticBody2D" unique_id=1715165204]
-position = Vector2(-112.5, -42.5)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(453, 173, 487, 173, 487, 215, 453, 215)
-
 [node name="CounterTop" type="Sprite2D" parent="Furniture" unique_id=1030172908]
 position = Vector2(568, 90)
 scale = Vector2(4, 4)
 texture = ExtResource("16_idhyc")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/CounterTop" unique_id=1813276068]
-
-[node name="C_CounterTop" type="CollisionPolygon2D" parent="Furniture/CounterTop/StaticBody2D" unique_id=45215891]
-position = Vector2(-142, -22.5)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(571, 93, 925, 93, 925, 127, 571, 127)
 
 [node name="CounterRight" type="Sprite2D" parent="Furniture" unique_id=863299886]
 position = Vector2(888, 90)
@@ -193,25 +220,11 @@ scale = Vector2(4, 4)
 texture = ExtResource("17_nlkie")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/CounterRight" unique_id=1840629633]
-
-[node name="C_CounterRight" type="CollisionPolygon2D" parent="Furniture/CounterRight/StaticBody2D" unique_id=60231493]
-position = Vector2(-222, -22.5)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(891, 93, 925, 93, 925, 267, 891, 267)
-
 [node name="Stove" type="Sprite2D" parent="Furniture" unique_id=1107171783]
 position = Vector2(700, 90)
 scale = Vector2(4, 4)
 texture = ExtResource("18_2jwha")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Stove" unique_id=1524739231]
-
-[node name="C_Stove" type="CollisionPolygon2D" parent="Furniture/Stove/StaticBody2D" unique_id=1711074748]
-position = Vector2(-175, -22.5)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(703, 93, 745, 93, 745, 127, 703, 127)
 
 [node name="DiningTable" type="Sprite2D" parent="Furniture" unique_id=1479412484]
 position = Vector2(640, 210)
@@ -219,25 +232,11 @@ scale = Vector2(4, 4)
 texture = ExtResource("19_llqda")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/DiningTable" unique_id=1001722690]
-
-[node name="C_DiningTable" type="CollisionPolygon2D" parent="Furniture/DiningTable/StaticBody2D" unique_id=2092738968]
-position = Vector2(-160, -52.5)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(643, 213, 777, 213, 777, 295, 643, 295)
-
 [node name="Couch" type="Sprite2D" parent="Furniture" unique_id=725677873]
 position = Vector2(700, 420)
 scale = Vector2(4, 4)
 texture = ExtResource("20_kfaq3")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/Couch" unique_id=1028741550]
-
-[node name="C_Couch" type="CollisionPolygon2D" parent="Furniture/Couch/StaticBody2D" unique_id=1732396274]
-position = Vector2(-175, -105)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(703, 423, 845, 423, 845, 477, 703, 477)
 
 [node name="CoffeeTable" type="Sprite2D" parent="Furniture" unique_id=870366624]
 position = Vector2(730, 500)
@@ -245,38 +244,17 @@ scale = Vector2(4, 4)
 texture = ExtResource("21_t68hv")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/CoffeeTable" unique_id=531583335]
-
-[node name="C_CoffeeTable" type="CollisionPolygon2D" parent="Furniture/CoffeeTable/StaticBody2D" unique_id=246955259]
-position = Vector2(-182.5, -125)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(733, 503, 815, 503, 815, 553, 733, 553)
-
 [node name="TVStand" type="Sprite2D" parent="Furniture" unique_id=520020251]
 position = Vector2(760, 644)
 scale = Vector2(4, 4)
 texture = ExtResource("22_xfqeg")
 centered = false
 
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/TVStand" unique_id=1020610130]
-
-[node name="C_TVStand" type="CollisionPolygon2D" parent="Furniture/TVStand/StaticBody2D" unique_id=135935117]
-position = Vector2(-190, -161)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(763, 647, 897, 647, 897, 669, 763, 669)
-
 [node name="WindowChair" type="Sprite2D" parent="Furniture" unique_id=1681814789]
 position = Vector2(876, 500)
 scale = Vector2(4, 4)
 texture = ExtResource("23_fmono")
 centered = false
-
-[node name="StaticBody2D" type="StaticBody2D" parent="Furniture/WindowChair" unique_id=1390602737]
-
-[node name="C_WindowChair" type="CollisionPolygon2D" parent="Furniture/WindowChair/StaticBody2D" unique_id=701376872]
-position = Vector2(-219, -125)
-scale = Vector2(0.25, 0.25)
-polygon = PackedVector2Array(879, 503, 929, 503, 929, 553, 879, 553)
 
 [node name="Plant" type="Sprite2D" parent="Furniture" unique_id=1942301401]
 position = Vector2(472, 276)
@@ -295,15 +273,6 @@ position = Vector2(83, 96)
 scale = Vector2(0.27256945, 0.27256945)
 texture = ExtResource("8_80gfe")
 centered = false
-
-[node name="Bed 1 Body" type="StaticBody2D" parent="Furniture/Bed1" unique_id=1834887218]
-position = Vector2(-304.50955, -352.2038)
-scale = Vector2(3.6687896, 3.6687896)
-
-[node name="C_Bed1" type="CollisionPolygon2D" parent="Furniture/Bed1/Bed 1 Body" unique_id=775452869]
-position = Vector2(19.157902, 1.5258789e-05)
-scale = Vector2(0.87719285, 0.9999998)
-polygon = PackedVector2Array(99, 99, 213, 99, 213, 253, 99, 253)
 
 [node name="Walls" type="StaticBody2D" parent="." unique_id=729460899]
 
