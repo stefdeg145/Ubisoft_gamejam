@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jvnjqxkymt1q"
-path="res://.godot/imported/Mug Unspilled for Denial.png-671aba90fb34c2b23d0cc3fbfbf20aa7.ctex"
+uid="uid://b7fk4ht6tbwjb"
+path="res://.godot/imported/background.jpg-f0e9ee62b8b0d107d7dec9ffeecce4a5.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/denial_stage/Mug Unspilled for Denial.png"
-dest_files=["res://.godot/imported/Mug Unspilled for Denial.png-671aba90fb34c2b23d0cc3fbfbf20aa7.ctex"]
+source_file="res://scenes/stages/background.jpg"
+dest_files=["res://.godot/imported/background.jpg-f0e9ee62b8b0d107d7dec9ffeecce4a5.ctex"]
 
 [params]
 

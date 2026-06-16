@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ca5chcmfr4ycb"
-path="res://.godot/imported/Denial Background.jpg-6c30021ccb4b15639ce94a56582f66c4.ctex"
+uid="uid://dau63d8glfxav"
+path="res://.godot/imported/painting.png-f64aaf690d6615d7ccff81a3497af3d8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/denial_stage/Denial Background.jpg"
-dest_files=["res://.godot/imported/Denial Background.jpg-6c30021ccb4b15639ce94a56582f66c4.ctex"]
+source_file="res://assets/art/denial_stage/painting.png"
+dest_files=["res://.godot/imported/painting.png-f64aaf690d6615d7ccff81a3497af3d8.ctex"]
 
 [params]
 
