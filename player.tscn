@@ -9,7 +9,7 @@
 [ext_resource type="AudioStream" uid="uid://c0v0g2uf2ovou" path="res://assets/Sound/walksound.wav" id="7_1jxqw"]
 
 [sub_resource type="RectangleShape2D" id="shape_player"]
-size = Vector2(340.00024, 106.667694)
+size = Vector2(220.0003, 106.667694)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4jkga"]
 atlas = ExtResource("4_b26j0")
@@ -156,8 +156,8 @@ scale = Vector2(2, 2)
 texture = ExtResource("2_1jxqw")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1121288736]
-position = Vector2(-3.3339844, 133.3335)
-scale = Vector2(0.99999994, 0.99999994)
+position = Vector2(-10, 133.3335)
+scale = Vector2(0.99999976, 0.99999976)
 shape = SubResource("shape_player")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1213791554]
