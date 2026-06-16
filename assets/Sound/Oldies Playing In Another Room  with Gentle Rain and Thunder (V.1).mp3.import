@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://da8ae6e5rrxqu"
+path="res://.godot/imported/Oldies Playing In Another Room  with Gentle Rain and Thunder (V.1).mp3-8e9012070b979090a1a666e9560c12e2.mp3str"
+
+[deps]
+
+source_file="res://assets/Sound/Oldies Playing In Another Room  with Gentle Rain and Thunder (V.1).mp3"
+dest_files=["res://.godot/imported/Oldies Playing In Another Room  with Gentle Rain and Thunder (V.1).mp3-8e9012070b979090a1a666e9560c12e2.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

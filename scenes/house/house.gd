@@ -17,6 +17,7 @@ const A := "res://assets/art/house/"
 const ART := "res://assets/art/"
 const PROP := "res://assets/art/props/"
 const FX := "res://assets/art/fx/"
+const MUSIC := "res://assets/Sound/Oldies Playing In Another Room  with Gentle Rain and Thunder (V.1).mp3"
 
 # world bounds for the play area (interior)
 const LEFT := 64
@@ -27,6 +28,7 @@ const TILE := 64
 
 var player: CharacterBody2D
 var _grade: CanvasModulate
+var _music: AudioStreamPlayer
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -55,6 +57,7 @@ func _ready() -> void:
 	_build_interactions()
 	_build_grade()
 	_build_rain()
+	_build_music()
 	_update_grade()
 
 	if GameState.first_wake:
@@ -270,6 +273,25 @@ func _update_grade() -> void:
 	var cold := Color(0.55, 0.57, 0.66)
 	_grade.color = cold.lerp(Color(1, 1, 1), w)
 
+# -------------------------------------------------------------- music
+func _build_music() -> void:
+	_music = AudioStreamPlayer.new()
+	_music.stream = load(MUSIC)        # imported with loop = true
+	_music.volume_db = -8.0
+	add_child(_music)
+
+func _play_music() -> void:
+	if _music and not _music.playing:
+		_music.volume_db = -8.0
+		_music.play()
+
+func _fade_out_music(dur := 2.0) -> void:
+	if _music == null or not _music.playing:
+		return
+	var t := create_tween()
+	t.tween_property(_music, "volume_db", -40.0, dur)
+	t.tween_callback(_music.stop)
+
 # -------------------------------------------------------------- flow
 func _intro() -> void:
 	Game.set_black(true)
@@ -280,6 +302,7 @@ func _intro() -> void:
 	await Game.say("The house is so quiet now.", 2.6)
 	player.can_move = true
 	GameState.first_wake = false
+	_play_music()                                  # the house comes alive once you can move
 	await get_tree().create_timer(0.4).timeout
 	Game.flash("I can't keep my eyes open. Maybe I should lie down. (WASD to move, E to interact)", 4.5)
 
@@ -287,6 +310,7 @@ func _return_from_dream() -> void:
 	_update_grade()
 	await Game.wake(1.8)
 	player.can_move = true
+	_play_music()
 	if GameState.completed.size() >= GameState.STAGES.size():
 		await Game.say("It's quiet. But the grey is almost gone.", 3.0)
 	else:
@@ -295,6 +319,7 @@ func _return_from_dream() -> void:
 func _on_memory_chosen(node: Node) -> void:
 	player.can_move = false
 	Game.hide_prompt()
+	_fade_out_music(2.0)                            # let the oldies fade as we drift off
 	await Game.drift_to_sleep(2.2)
 	if not GameState.title_shown:
 		GameState.title_shown = true
