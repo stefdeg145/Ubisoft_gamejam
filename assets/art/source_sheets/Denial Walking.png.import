@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://be6peogtjxnyb"
-path="res://.godot/imported/plate.png-7d1c362d57fea465b95f4a651a97eab8.ctex"
+uid="uid://bs6xy5rwpg83l"
+path="res://.godot/imported/Denial Walking.png-e75f1ed982d90f31380cfcd20d19c193.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/stage1/plate.png"
-dest_files=["res://.godot/imported/plate.png-7d1c362d57fea465b95f4a651a97eab8.ctex"]
+source_file="res://assets/art/source_sheets/Denial Walking.png"
+dest_files=["res://.godot/imported/Denial Walking.png-e75f1ed982d90f31380cfcd20d19c193.ctex"]
 
 [params]
 

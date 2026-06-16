@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b1366d831v055"
-path="res://.godot/imported/chair.png-4b01166d8f859cbde191e1c3b63f4a58.ctex"
+uid="uid://dvbjl23shbht6"
+path="res://.godot/imported/Denial_walk_right_2.png-e2fbc098371843f87dedf5b320ad7410.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/stage1/chair.png"
-dest_files=["res://.godot/imported/chair.png-4b01166d8f859cbde191e1c3b63f4a58.ctex"]
+source_file="res://assets/art/characters/Denial_walk_right_2.png"
+dest_files=["res://.godot/imported/Denial_walk_right_2.png-e2fbc098371843f87dedf5b320ad7410.ctex"]
 
 [params]
 
