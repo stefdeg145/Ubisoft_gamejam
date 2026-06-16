@@ -43,10 +43,12 @@ func update_animation(direction: Vector2) -> void:
 			last_direction_animation = "Up"
 
 func update_walk_sound(is_moving: bool) -> void:
-	if is_moving and not was_moving:
-		walk_sound.play()
-	elif not is_moving and was_moving:
-		walk_sound.stop()
+	if is_moving:
+		if not walk_sound.playing:
+			walk_sound.play()
+	else:
+		if walk_sound.playing:
+			walk_sound.stop()
 	
 	was_moving = is_moving
 

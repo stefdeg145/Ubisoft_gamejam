@@ -423,3 +423,4 @@ polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 shape = SubResource("shape_interact")
 
 [node name="Player" parent="." unique_id=605165646 instance=ExtResource("27_ivbqp")]
+position = Vector2(571, 569)
