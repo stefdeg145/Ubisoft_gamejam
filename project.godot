@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 GameState="*res://scripts/autoload/game_state.gd"
 Game="*res://scripts/autoload/game.gd"
+DebugConsole="*uid://dcch7ua5chbuj"
 
 [display]
 

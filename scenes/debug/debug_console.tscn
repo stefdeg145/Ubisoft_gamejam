@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://dcch7ua5chbuj"]
+
+[ext_resource type="Script" uid="uid://ci4gskyiucyd0" path="res://scripts/Debug/debug_console.gd" id="1_klfic"]
+
+[node name="DebugConsole" type="CanvasLayer" unique_id=1116993229]
+script = ExtResource("1_klfic")
