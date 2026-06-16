@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://obrpjtwx5k4w"]
 
 [ext_resource type="Texture2D" uid="uid://bvtcymcc1gdhu" path="res://sierrassets furniture pack/furniture/individual sprites/part-Slice 156.png" id="3_12j21"]
-[ext_resource type="Texture2D" uid="uid://dom618r3hkjc5" path="res://sierrassets furniture pack/furniture/individual sprites/part-Slice 148.png" id="6_ycl3c"]
+[ext_resource type="Texture2D" uid="uid://bpxf0ira3a0hx" path="res://assets/art/New Red Bed1.png" id="6_yj2u4"]
 [ext_resource type="Texture2D" uid="uid://b8rhqwouv8k7d" path="res://pixelinterior_LRK_v1/cabinets_LRK.png" id="cab"]
 [ext_resource type="Texture2D" uid="uid://duhjca3kxgl70" path="res://pixelinterior_LRK_v1/decorations_LRK.png" id="deco"]
 [ext_resource type="Texture2D" uid="uid://w7b0ajw4yjno" path="res://pixelinterior_BA_v1/fixtures_BA.png" id="fix"]
@@ -14,10 +14,10 @@ atlas = ExtResource("living")
 region = Rect2(144, 256, 64, 32)
 
 [sub_resource type="RectangleShape2D" id="rs_15"]
-size = Vector2(12, 182)
+size = Vector2(12, 192)
 
 [sub_resource type="RectangleShape2D" id="rs_16"]
-size = Vector2(16, 66)
+size = Vector2(16, 105.75)
 
 [sub_resource type="RectangleShape2D" id="rs_17"]
 size = Vector2(288, 12)
@@ -26,7 +26,7 @@ size = Vector2(288, 12)
 size = Vector2(12, 259)
 
 [sub_resource type="RectangleShape2D" id="rs_19"]
-size = Vector2(62, 12)
+size = Vector2(67, 12)
 
 [sub_resource type="RectangleShape2D" id="rs_20"]
 size = Vector2(49, 7)
@@ -35,7 +35,7 @@ size = Vector2(49, 7)
 size = Vector2(240, 12)
 
 [sub_resource type="RectangleShape2D" id="rs_0"]
-size = Vector2(111, 124)
+size = Vector2(83, 124)
 
 [sub_resource type="RectangleShape2D" id="rs_1"]
 size = Vector2(32, 86)
@@ -179,7 +179,7 @@ centered = false
 
 [node name="WallBody0" type="ColorRect" parent="Walls" unique_id=897040324]
 offset_left = 372.0
-offset_top = 130.0
+offset_top = 117.0
 offset_right = 384.0
 offset_bottom = 312.0
 color = Color(0.2, 0.18, 0.22, 1)
@@ -235,7 +235,7 @@ color = Color(0.33, 0.3, 0.35, 1)
 
 [node name="WallBody4" type="ColorRect" parent="Walls" unique_id=1704287890]
 offset_left = 563.0
-offset_top = 131.0
+offset_top = 118.0
 offset_right = 575.0
 offset_bottom = 381.0
 color = Color(0.2, 0.18, 0.22, 1)
@@ -250,7 +250,7 @@ color = Color(0.33, 0.3, 0.35, 1)
 [node name="WallBody5" type="ColorRect" parent="Walls" unique_id=1859397119]
 offset_left = 372.0
 offset_top = 309.0
-offset_right = 430.0
+offset_right = 439.0
 offset_bottom = 321.0
 color = Color(0.2, 0.18, 0.22, 1)
 
@@ -308,19 +308,19 @@ color = Color(0.33, 0.3, 0.35, 1)
 [node name="WC0" type="StaticBody2D" parent="Solid" unique_id=2023907128]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC0" unique_id=106303239]
-position = Vector2(378, 219)
+position = Vector2(378, 214)
 shape = SubResource("rs_15")
 
 [node name="WC1" type="StaticBody2D" parent="Solid" unique_id=1171195626]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC1" unique_id=8785979]
-position = Vector2(346, 415)
+position = Vector2(346, 417.5)
 shape = SubResource("rs_16")
 
 [node name="WC2" type="StaticBody2D" parent="Solid" unique_id=359016962]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC2" unique_id=59120498]
-position = Vector2(344, 607)
+position = Vector2(345, 603.125)
 shape = SubResource("rs_16")
 
 [node name="WC3" type="StaticBody2D" parent="Solid" unique_id=1742342210]
@@ -338,13 +338,13 @@ shape = SubResource("rs_18")
 [node name="WC5" type="StaticBody2D" parent="Solid" unique_id=1178417693]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC5" unique_id=1201546955]
-position = Vector2(404, 314)
+position = Vector2(405.5, 314)
 shape = SubResource("rs_19")
 
 [node name="WC6" type="StaticBody2D" parent="Solid" unique_id=1942911874]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC6" unique_id=1539775485]
-position = Vector2(521, 314)
+position = Vector2(524, 314)
 shape = SubResource("rs_19")
 
 [node name="WC7" type="StaticBody2D" parent="Solid" unique_id=1521086280]
@@ -380,7 +380,7 @@ shape = SubResource("rs_2")
 [node name="FC_Bed2" type="StaticBody2D" parent="Solid" unique_id=1953088011]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Bed2" unique_id=2133448113]
-position = Vector2(114.5, 466)
+position = Vector2(100.5, 466)
 shape = SubResource("rs_0")
 
 [node name="FC_Nightstand2" type="StaticBody2D" parent="Solid" unique_id=1000387369]
@@ -498,9 +498,9 @@ offset = Vector2(-8, -47)
 
 [node name="Bed2" type="Sprite2D" parent="World" unique_id=1061183487]
 texture_filter = 1
-position = Vector2(248, 771)
-scale = Vector2(5.375, 4.387097)
-texture = ExtResource("6_ycl3c")
+position = Vector2(45.858025, 419.53198)
+scale = Vector2(0.22820213, 0.21932246)
+texture = ExtResource("6_yj2u4")
 centered = false
 offset = Vector2(-32, -86)
 
