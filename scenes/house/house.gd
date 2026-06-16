@@ -27,6 +27,7 @@ const TILE := 64
 
 var player: CharacterBody2D
 var _grade: CanvasModulate
+var _denial_popup: ObjectivePopup
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -56,6 +57,9 @@ func _ready() -> void:
 	_build_grade()
 	_build_rain()
 	_update_grade()
+
+	# Bargaining entry (self-contained; only acts once F1 is pressed).
+	add_child(preload("res://scripts/bargaining_controller.gd").new())
 
 	if GameState.first_wake:
 		_intro()
@@ -143,7 +147,7 @@ func _build_interactions() -> void:
 	# find the bed nodes and pick the most top-left one (by on-screen position)
 	var beds: Array = []
 	for c in _world.get_children():
-		if c is Sprite2D and c.name.begins_with("Bed"):
+		if c is Sprite2D and (c as Sprite2D).texture != null and c.name.begins_with("Bed"):
 			beds.append(c)
 	var my_bed: Node = null
 	var best := INF
@@ -154,7 +158,7 @@ func _build_interactions() -> void:
 			my_bed = b
 
 	for c in _world.get_children():
-		if not (c is Sprite2D):
+		if not (c is Sprite2D) or (c as Sprite2D).texture == null:
 			continue
 		if c.name.begins_with("Bed"):
 			_add_bed_zone(inter, c, c == my_bed)
@@ -164,6 +168,8 @@ func _build_interactions() -> void:
 func _visual_aabb(sp: Sprite2D) -> Rect2:
 	# Sprite2D is centered=false with an offset, so the drawn rect starts at
 	# position + offset*scale and spans texture_size*scale.
+	if sp == null or sp.texture == null:
+		return Rect2(sp.position if sp else Vector2.ZERO, Vector2(32, 32))
 	var ts: Vector2 = sp.texture.get_size()
 	var top_left: Vector2 = sp.position + sp.offset * sp.scale
 	return Rect2(top_left, ts * sp.scale)
@@ -242,11 +248,11 @@ func _make_memory(stage: String, tex_path: String, fx: int, fy: int, locked: Str
 	area.chosen.connect(_on_memory_chosen)
 	return area
 
-func _make_memory_raw(name: String, tex_path: String, fx: int, fy: int, ambient: bool, line: String) -> void:
-	var m := _make_memory(name, tex_path, fx, fy, "")
+func _make_memory_raw(mem_name: String, tex_path: String, fx: int, fy: int, ambient: bool, line: String) -> void:
+	var m := _make_memory(mem_name, tex_path, fx, fy, "")
 	m.ambient = ambient
 	m.idle_line = line
-	m.name = name
+	m.name = mem_name
 
 func _build_grade() -> void:
 	_grade = CanvasModulate.new()
@@ -282,6 +288,10 @@ func _intro() -> void:
 	GameState.first_wake = false
 	await get_tree().create_timer(0.4).timeout
 	Game.flash("I can't keep my eyes open. Maybe I should lie down. (WASD to move, E to interact)", 4.5)
+	# Objective card for the start of the Denial part.
+	_denial_popup = ObjectivePopup.new()
+	add_child(_denial_popup)
+	_denial_popup.show_objective("NEW OBJECTIVE", "You can barely keep your eyes open. Go to your bed and sleep.")
 
 func _return_from_dream() -> void:
 	_update_grade()
@@ -295,6 +305,9 @@ func _return_from_dream() -> void:
 func _on_memory_chosen(node: Node) -> void:
 	player.can_move = false
 	Game.hide_prompt()
+	if _denial_popup:
+		_denial_popup.dismiss()
+		_denial_popup = null
 	await Game.drift_to_sleep(2.2)
 	if not GameState.title_shown:
 		GameState.title_shown = true

@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://clastmorn0denial"]
+[gd_scene format=3 uid="uid://cpj3rn525q7jb"]
 
-[ext_resource type="Script" path="res://scenes/stages/stage_denial.gd" id="1_den"]
+[ext_resource type="Script" uid="uid://qvgl83sme8ou" path="res://scenes/stages/stage_denial.gd" id="1_den"]
 
-[node name="StageDenial" type="Node2D"]
+[node name="StageDenial" type="Node2D" unique_id=1799209065]
 script = ExtResource("1_den")
