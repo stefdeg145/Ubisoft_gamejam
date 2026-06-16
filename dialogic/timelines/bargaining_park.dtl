@@ -1,0 +1,38 @@
+Me: (We're back here. The park. That grey afternoon.)
+Sam: I should get going. My train's at four.
+Me: Already? You only just got here.
+Sam: We've been over this. I can't keep doing this with you.
+Me: Doing what? I didn't even say anything—
+Sam: That. Exactly that.
+Sam: Take care of yourself.
+Me: (And they walked off. That was the last time I ever saw them.)
+Me: (...But what if I'd said something else? Let me try again. Let me fix it.)
+
+label attempt1
+Me: (The bench. The grey sky. They're standing to leave. I could say...)
+- "I'm sorry. I didn't mean what I said."
+	Sam: You never do, though. It's a little late for sorry.
+	jump attempt2
+- "Don't go yet. Please. Five more minutes."
+	Sam: I really can't. The train won't wait for me.
+	jump attempt2
+- "Can we just start over? Properly this time."
+	Sam: We always start over. And nothing ever changes.
+	jump attempt2
+
+label attempt2
+Me: (No. That wasn't right either. Try again. Say the right thing this time.)
+- "I love you. You know that, don't you?"
+	Sam: ...I know. That was never really the problem.
+	jump ending
+- "Stay. Just for tonight. The train can wait."
+	Sam: I have a train to catch. Take care of yourself.
+	jump ending
+- "Forget the train. Just talk to me. Please."
+	Sam: There's nothing left to say. Not today.
+	jump ending
+
+label ending
+Me: (Whatever I say, the train still leaves. The door still closes.)
+Me: (Maybe it was never theirs to fix.)
+Me: ...Maybe I was the one at fault.
