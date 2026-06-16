@@ -36,6 +36,8 @@ var _grade: CanvasModulate
 var _music: AudioStreamPlayer
 ## [{zone, sprite}] pairs kept in sync each frame so interactions track furniture.
 var _follow_zones: Array = []
+## "Your bed" sprite (the top-left one) — used to spawn beside it after a dream.
+var _my_bed: Sprite2D
 var _denial_popup: ObjectivePopup
 
 @onready var _floor: Node2D = $Floor
@@ -148,6 +150,16 @@ func _spawn_player() -> void:
 	_world.add_child(player)
 	player.face("left")
 
+## A standing spot just below/beside "your bed", clamped inside the play area.
+func _bed_spawn_point() -> Vector2:
+	if _my_bed == null or not is_instance_valid(_my_bed):
+		return Vector2(860, 576)
+	var r := _visual_aabb(_my_bed)
+	var p := Vector2(r.position.x + r.size.x * 0.5, r.position.y + r.size.y + 28.0)
+	p.x = clampf(p.x, LEFT + 24, RIGHT - 24)
+	p.y = clampf(p.y, TOP + 24, BOTTOM - 24)
+	return p
+
 # -------------------------------------------------------------- interactions
 ## Wraps the furniture (already placed in house.tscn) with interaction zones in
 ## code, so the editable layout is never touched. Beds get the sleep behaviour;
@@ -169,6 +181,7 @@ func _build_interactions() -> void:
 		if ctr.x + ctr.y < best:
 			best = ctr.x + ctr.y
 			my_bed = b
+	_my_bed = my_bed as Sprite2D
 
 	for c in _world.get_children():
 		if not (c is Sprite2D) or (c as Sprite2D).texture == null:
@@ -352,6 +365,10 @@ func _intro() -> void:
 
 func _return_from_dream() -> void:
 	_update_grade()
+	# wake up beside the bed (where you fell asleep into the dream), not the chair
+	if _my_bed and is_instance_valid(_my_bed):
+		player.position = _bed_spawn_point()
+		player.face("down")
 	await Game.wake(1.8)
 	_play_music()
 	# After Denial, the waking house turns hostile — the Anger "Bleed".

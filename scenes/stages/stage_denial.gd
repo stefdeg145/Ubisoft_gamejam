@@ -27,6 +27,7 @@ const FIXABLES := [
 
 var _tries := 0
 var _resolved := false
+var _fixing := false             # blocks re-triggering a fix while one is playing
 var _fix_objects := {}          # Area2D -> {sprite, home_rot, home_pos, wrong_tex, fixed_tex}
 var _music: AudioStreamPlayer
 
@@ -128,11 +129,12 @@ func _register_fix(node_name: String, prompt: String, clean_path: String, reach 
 
 # ------------------------------------------------------------------ fixing
 func _on_fix(area: Area2D) -> void:
-	if _resolved:
+	if _resolved or _fixing:
 		return
 	var d = _fix_objects.get(area)
 	if d == null:
 		return
+	_fixing = true
 	var sp: Sprite2D = d["sprite"]
 	_tries += 1
 	# straighten it (and, for the mug, wipe it clean)...
@@ -150,11 +152,24 @@ func _on_fix(area: Area2D) -> void:
 	t2.tween_property(sp, "rotation", d["home_rot"], 0.4)
 	t2.tween_property(sp, "position:y", d["home_pos"].y, 0.2)
 
+	var hold := 3.0
 	match _tries:
-		1: Game.flash("There. ...No. It tipped again.", 2.4)
-		2: Game.flash("Nothing stays fixed. The room won't let it.", 2.6)
-		3: Game.flash("You can't make this morning normal. It wasn't.", 3.0)
-		_: Game.flash("Maybe it isn't the room that needs fixing.", 3.0)
+		1:
+			hold = 2.6
+			Game.flash("There. ...No. It tipped again.", hold)
+		2:
+			hold = 2.8
+			Game.flash("Nothing stays fixed. The room won't let it.", hold)
+		3:
+			hold = 3.2
+			Game.flash("You can't make this morning normal. It wasn't.", hold)
+		_:
+			hold = 3.2
+			Game.flash("Maybe it isn't the room that needs fixing.", hold)
+
+	# keep the line on screen long enough to read before another fix can interrupt
+	await get_tree().create_timer(hold).timeout
+	_fixing = false
 
 # ------------------------------------------------------------------ resolve
 func _on_sit(_a: Area2D) -> void:

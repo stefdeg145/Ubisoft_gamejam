@@ -15,6 +15,7 @@ var _title: Label
 var _subtitle: Label
 var _prompt: Label
 var _prompt_tween: Tween
+var _caption_tween: Tween
 
 func _ready() -> void:
 	layer = 100
@@ -128,21 +129,26 @@ func change_scene(path: String) -> void:
 
 # ---------------------------------------------------------------- text
 func say(text: String, hold := 2.6, fade := 0.6) -> void:
+	if _caption_tween and _caption_tween.is_valid():
+		_caption_tween.kill()
 	_caption.text = text
-	var t := create_tween()
-	t.tween_property(_caption, "modulate:a", 1.0, fade)
-	t.tween_interval(hold)
-	t.tween_property(_caption, "modulate:a", 0.0, fade)
-	await t.finished
+	_caption_tween = create_tween()
+	_caption_tween.tween_property(_caption, "modulate:a", 1.0, fade)
+	_caption_tween.tween_interval(hold)
+	_caption_tween.tween_property(_caption, "modulate:a", 0.0, fade)
+	await _caption_tween.finished
 
 ## Non-blocking caption that stays until cleared (for locked-line flashes).
 func flash(text: String, hold := 2.2) -> void:
+	# cancel any in-flight caption fade so this line shows for its full duration
+	if _caption_tween and _caption_tween.is_valid():
+		_caption_tween.kill()
 	_caption.text = text
 	_caption.modulate.a = 0.0
-	var t := create_tween()
-	t.tween_property(_caption, "modulate:a", 1.0, 0.35)
-	t.tween_interval(hold)
-	t.tween_property(_caption, "modulate:a", 0.0, 0.6)
+	_caption_tween = create_tween()
+	_caption_tween.tween_property(_caption, "modulate:a", 1.0, 0.35)
+	_caption_tween.tween_interval(hold)
+	_caption_tween.tween_property(_caption, "modulate:a", 0.0, 0.6)
 
 func show_prompt(text: String) -> void:
 	_prompt.text = text
