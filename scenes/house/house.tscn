@@ -17,7 +17,7 @@ region = Rect2(144, 256, 64, 32)
 size = Vector2(12, 192)
 
 [sub_resource type="RectangleShape2D" id="rs_16"]
-size = Vector2(16, 105.75)
+size = Vector2(10, 117.9375)
 
 [sub_resource type="RectangleShape2D" id="rs_17"]
 size = Vector2(288, 12)
@@ -195,7 +195,7 @@ color = Color(0.33, 0.3, 0.35, 1)
 offset_left = 340.0
 offset_top = 360.0
 offset_right = 352.0
-offset_bottom = 470.0
+offset_bottom = 482.0
 color = Color(0.2, 0.18, 0.22, 1)
 
 [node name="WallTop1" type="ColorRect" parent="Walls" unique_id=1894476877]
@@ -314,13 +314,13 @@ shape = SubResource("rs_15")
 [node name="WC1" type="StaticBody2D" parent="Solid" unique_id=1171195626]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC1" unique_id=8785979]
-position = Vector2(346, 417.5)
+position = Vector2(346, 422.96875)
 shape = SubResource("rs_16")
 
 [node name="WC2" type="StaticBody2D" parent="Solid" unique_id=359016962]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC2" unique_id=59120498]
-position = Vector2(345, 603.125)
+position = Vector2(346, 610)
 shape = SubResource("rs_16")
 
 [node name="WC3" type="StaticBody2D" parent="Solid" unique_id=1742342210]
@@ -386,7 +386,7 @@ shape = SubResource("rs_0")
 [node name="FC_Nightstand2" type="StaticBody2D" parent="Solid" unique_id=1000387369]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Nightstand2" unique_id=1798286600]
-position = Vector2(308, 453)
+position = Vector2(323, 435)
 shape = SubResource("rs_1")
 
 [node name="FC_Bookshelf2" type="StaticBody2D" parent="Solid" unique_id=682727783]
@@ -506,7 +506,7 @@ offset = Vector2(-32, -86)
 
 [node name="Nightstand2" type="Sprite2D" parent="World" unique_id=1297701579]
 texture_filter = 1
-position = Vector2(307, 499)
+position = Vector2(322, 481)
 scale = Vector2(2, 2)
 texture = SubResource("at_nstand")
 centered = false
