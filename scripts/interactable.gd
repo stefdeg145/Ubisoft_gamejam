@@ -13,6 +13,11 @@ signal used(node)
 var follow_target: Node2D = null
 var follow_offset: Vector2 = Vector2.ZERO
 
+## Optional: the prop sprite this trigger represents. Used only to anchor the
+## floating "E" to the object's visual top — it does NOT move the trigger, so a
+## trigger placed by hand in the editor stays exactly where it's placed.
+var source_sprite: Node2D = null
+
 func _ready() -> void:
 	body_entered.connect(_on_enter)
 	body_exited.connect(_on_exit)

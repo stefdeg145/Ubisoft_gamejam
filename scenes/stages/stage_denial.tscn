@@ -1,6 +1,27 @@
-[gd_scene load_steps=2 format=3 uid="uid://clastmorn0denial"]
+[gd_scene format=3 uid="uid://cpj3rn525q7jb"]
 
-[ext_resource type="Script" path="res://scenes/stages/stage_denial.gd" id="1_den"]
+[ext_resource type="Script" uid="uid://qvgl83sme8ou" path="res://scenes/stages/stage_denial.gd" id="1_den"]
+[ext_resource type="Texture2D" uid="uid://cawwvob022wpx" path="res://assets/art/denial_stage/background.jpg" id="2_kxse8"]
+[ext_resource type="Texture2D" uid="uid://w1uxo74y5rr6" path="res://assets/art/denial_stage/mug1.png" id="3_kqoer"]
+[ext_resource type="Texture2D" uid="uid://dau63d8glfxav" path="res://assets/art/denial_stage/painting.png" id="5_dd44h"]
+[ext_resource type="Texture2D" uid="uid://b653ybnog7f7n" path="res://assets/art/denial_stage/chair1.png" id="6_i5x8y"]
 
-[node name="StageDenial" type="Node2D"]
+[node name="StageDenial" type="Node2D" unique_id=1434950221]
 script = ExtResource("1_den")
+background_texture = ExtResource("2_kxse8")
+background_scale = 0.25
+
+[node name="mug_sprite" type="Sprite2D" parent="." unique_id=912267166]
+position = Vector2(146.99998, 129.99998)
+scale = Vector2(0.06640626, 0.06640626)
+texture = ExtResource("3_kqoer")
+
+[node name="painting_sprite" type="Sprite2D" parent="." unique_id=1437028439]
+position = Vector2(122, 66.00001)
+scale = Vector2(0.08246528, 0.08246528)
+texture = ExtResource("5_dd44h")
+
+[node name="chair_sprite" type="Sprite2D" parent="." unique_id=1383103197]
+position = Vector2(105, 149)
+scale = Vector2(0.17895442, 0.17895442)
+texture = ExtResource("6_i5x8y")

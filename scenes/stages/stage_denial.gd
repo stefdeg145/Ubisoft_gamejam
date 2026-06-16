@@ -1,48 +1,121 @@
+@tool
 extends StageBase
 ## STAGE 1 — DENIAL · "The Ordinary Morning" (side-view kitchen).
 ## The room won't let things be wrong: every object you straighten quietly undoes
 ## itself, and the door stays sealed. The way through is to stop fixing — sit at
 ## the table and let the broken morning be broken.
 
+# Adding 'set(value)' forces the editor to redraw immediately when changed
+@export var background_texture: Texture2D:
+	set(value):
+		background_texture = value
+		_setup_editor_visuals()
+
+@export var background_scale := 8.0:
+	set(value):
+		background_scale = value
+		_setup_editor_visuals()
+
+@export_group("Fixable Objects")
+@export var mug_sprite: Sprite2D:
+	set(value):
+		mug_sprite = value
+		_setup_editor_visuals()
+@export var mug_trigger: Area2D
+@export var mug_tilt := -0.6:
+	set(value):
+		mug_tilt = value
+		_setup_editor_visuals()
+
+@export var plate_sprite: Sprite2D:
+	set(value):
+		plate_sprite = value
+		_setup_editor_visuals()
+@export var plate_trigger: Area2D
+
+@export var chair_sprite: Sprite2D:
+	set(value):
+		chair_sprite = value
+		_setup_editor_visuals()
+@export var chair_trigger: Area2D
+
+@export var painting_sprite: Sprite2D:
+	set(value):
+		painting_sprite = value
+		_setup_editor_visuals()
+@export var painting_trigger: Area2D
+@export var painting_tilt := 0.3:
+	set(value):
+		painting_tilt = value
+		_setup_editor_visuals()
+
+@export_group("Interaction")
+@export var sit_trigger: Area2D
+
 var _tries := 0
 var _resolved := false
-var _fix_objects := {}     # Area2D -> Sprite2D
+var _fix_objects := {}
 
 func _ready() -> void:
-	setup_sideview("res://assets/art/stage1/kitchen_bg.png", 8.0)
+	if Engine.is_editor_hint():
+		_setup_editor_visuals()
+		return
+
+	# RUNNING GAMEPLAY LOOP
 	spawn_player(Vector2(230, 600), true)
-	player.face("right")
+	
+	if player:
+		player.face("right")
 
-	# breakfast table + seat
-	add_prop("res://assets/art/house/dining_table.png", 640, 540, 4.0)
-	var seat := add_prop("res://assets/art/house/chair.png", 520, 590, 4.0)
-	seat.modulate = Color(1, 1, 1)
+	# Ensure the scene tree is completely loaded before registering props
+	await get_tree().process_frame
 
-	# things that are subtly "wrong"
-	_make_fix("res://assets/art/stage1/cup.png", 700, 545, "Straighten the cup",
-		Vector2(700, 545), -0.6)
-	_make_fix("res://assets/art/stage1/plate.png", 560, 600, "Wipe the spill",
-		Vector2(560, 600), 0.0, Vector2(0.5, 0.5))
-	_make_fix("res://assets/art/house/chair.png", 820, 600, "Push the chair in",
-		Vector2(820, 600), 0.5)
+	_register_fix(mug_trigger, mug_sprite, mug_tilt)
+	_register_fix(plate_trigger, plate_sprite, 0.0)
+	_register_fix(chair_trigger, chair_sprite, 0.0)
+	_register_fix(painting_trigger, painting_sprite, painting_tilt)
 
-	# the table seat: sit and accept
-	var sit := add_interactable(600, 560, 90, "Sit down (E)")
-	sit.used.connect(_on_sit)
+	if sit_trigger:
+		sit_trigger.used.connect(_on_sit)
 
 	await Game.wake(1.8)
 	await Game.say("It's that morning again. An ordinary breakfast.", 3.0)
 	await Game.say("But everything is a little out of place. Fix it. Make it normal.", 3.4)
 	player.can_move = true
 
-func _make_fix(tex: String, x: float, y: float, prompt: String, home: Vector2, tilt: float, scl := Vector2(4, 4)) -> void:
-	var sp := add_prop(tex, x, y, 1.0)
-	sp.scale = scl
-	sp.rotation = tilt                 # the "wrong" pose
-	# Glue the zone + "E" to this prop so they follow it wherever it's placed.
-	var area := add_interactable(x, y, 64, prompt, sp)
+# This function updates your 2D editor view in real-time
+func _setup_editor_visuals() -> void:
+	# 1. Handle background generation inside the editor viewport
+	var existing_bg = get_node_or_null("EditorBackgroundPreview")
+	if existing_bg:
+		existing_bg.queue_free()
+		
+	if background_texture:
+		var bg_preview := Sprite2D.new()
+		bg_preview.name = "EditorBackgroundPreview"
+		bg_preview.texture = background_texture
+		bg_preview.centered = false
+		bg_preview.scale = Vector2(background_scale, background_scale)
+		bg_preview.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		bg_preview.z_index = -100
+		add_child(bg_preview)
+		
+	# 2. Handle object rotations inside the editor viewport
+	if mug_sprite: 
+		mug_sprite.rotation = mug_tilt
+	if painting_sprite: 
+		painting_sprite.rotation = painting_tilt
+
+func _register_fix(area: Area2D, sp: Sprite2D, tilt: float) -> void:
+	if not area or not sp: return
+	sp.rotation = tilt
+	# Keep my E-pill sync: anchor the floating "E" to the prop's sprite so it sits
+	# on the object even if the trigger is nudged in the editor. (Trigger position
+	# stays exactly where it's placed in the scene.)
+	if "source_sprite" in area:
+		area.source_sprite = sp
 	area.used.connect(_on_fix)
-	_fix_objects[area] = {"sprite": sp, "home_rot": tilt, "home_pos": home}
+	_fix_objects[area] = {"sprite": sp, "home_rot": tilt, "home_pos": sp.position}
 
 func _on_fix(area: Area2D) -> void:
 	if _resolved:
@@ -52,13 +125,15 @@ func _on_fix(area: Area2D) -> void:
 		return
 	var sp: Sprite2D = d["sprite"]
 	_tries += 1
-	# straighten it...
+	
 	var t := create_tween()
 	t.tween_property(sp, "rotation", 0.0, 0.25)
-	t.tween_property(sp, "position:y", sp.position.y - 6, 0.15)
+	if sp.rotation != 0:
+		t.tween_property(sp, "position:y", sp.position.y - 6, 0.15)
+	
 	await t.finished
 	await get_tree().create_timer(0.7).timeout
-	# ...and the room quietly puts it back wrong
+	
 	var t2 := create_tween()
 	t2.tween_property(sp, "rotation", d["home_rot"], 0.4)
 	t2.tween_property(sp, "position:y", d["home_pos"].y, 0.2)
@@ -79,7 +154,7 @@ func _on_sit(_a: Area2D) -> void:
 	player.face("right")
 	await Game.say("You stop. You sit down with everything still wrong.", 3.2)
 	await Game.say("You let the broken morning be broken.", 3.0)
-	# the distortion releases
+	
 	for area in _fix_objects.keys():
 		var sp: Sprite2D = _fix_objects[area]["sprite"]
 		create_tween().tween_property(sp, "modulate:a", 0.5, 1.2)

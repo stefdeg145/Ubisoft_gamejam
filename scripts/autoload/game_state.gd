@@ -2,8 +2,8 @@ extends Node
 ## Global progress tracker for "The Last Morning".
 ## Autoloaded as `GameState`. Holds run state in memory (prototype – no save file).
 
-## The five grief stages, in order. Acceptance is the finale.
-const STAGES := ["Denial", "Bargaining", "Depression", "Acceptance"]
+## The grief stages, in order. Acceptance is the finale.
+const STAGES := ["Denial", "Anger", "Bargaining", "Depression", "Acceptance"]
 
 ## Index of the memory the player can currently face (the one that glows).
 var current_index := 0
@@ -13,6 +13,9 @@ var completed: Array[String] = []
 
 ## Memory fragments collected (flavour text shown on the pause/among the HUD).
 var fragments: Array[String] = []
+
+## Set once the player pockets the photograph in Anger; bridges to Bargaining.
+var has_photo := false
 
 ## True until the player has woken for the first time (drives the intro beats).
 var first_wake := true
@@ -43,5 +46,6 @@ func reset() -> void:
 	current_index = 0
 	completed.clear()
 	fragments.clear()
+	has_photo = false
 	first_wake = true
 	title_shown = false

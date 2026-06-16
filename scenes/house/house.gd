@@ -10,6 +10,7 @@ const PlayerScene := preload("res://scenes/actors/player.tscn")
 const MemoryScript := preload("res://scripts/memory_object.gd")
 const TiredScript := preload("res://scripts/tired_prop.gd")
 const BedScript := preload("res://scripts/bed.gd")
+const AngerScene := preload("res://scripts/anger_sequence.gd")
 
 const DENIAL_SCENE := "res://scenes/stages/stage_denial.tscn"
 
@@ -335,12 +336,61 @@ func _intro() -> void:
 func _return_from_dream() -> void:
 	_update_grade()
 	await Game.wake(1.8)
-	player.can_move = true
 	_play_music()
+	# After Denial, the waking house turns hostile — the Anger "Bleed".
+	if GameState.completed.has("Denial") and not GameState.completed.has("Anger"):
+		_start_anger()
+		return
+	player.can_move = true
 	if GameState.completed.size() >= GameState.STAGES.size():
 		await Game.say("It's quiet. But the grey is almost gone.", 3.0)
 	else:
 		await Game.say("You wake. The house feels a little less heavy than before.", 3.0)
+
+# -------------------------------------------------------------- anger bleed
+func _start_anger() -> void:
+	_set_house_interactions(false)        # silence the "too tired" props mid-bleed
+	var seq := AngerScene.new()
+	var rug := get_node_or_null("Decals/RugLiving")
+	var chair := _find_world_sprite("Chair")
+	var table := _find_world_sprite("DiningTable")
+	var table_top := Vector2(700, 300)
+	if table != null:
+		var r := _visual_aabb_global(table)
+		table_top = Vector2(r.position.x + r.size.x * 0.5, r.position.y + 10.0)
+	seq.setup(player, _world, Rect2(LEFT, TOP, RIGHT - LEFT, BOTTOM - TOP),
+		rug, chair, table_top)
+	add_child(seq)
+	seq.finished.connect(_on_anger_finished)
+	seq.start()
+
+func _on_anger_finished() -> void:
+	_update_grade()                       # house warms a notch now Anger is resolved
+	_set_house_interactions(true)
+	player.can_move = true
+	await Game.say("The mug is in pieces. The rain keeps on, softer now.", 3.0)
+	await Game.say("...But the photograph is in my pocket. I can carry that.", 3.2)
+
+func _find_world_sprite(prefix: String) -> Sprite2D:
+	for c in _world.get_children():
+		if c is Sprite2D and c.name.begins_with(prefix):
+			return c
+	return null
+
+## Toggle the house's own interaction zones (beds / tired props) on or off, e.g.
+## so they don't compete with a scripted sequence like the Anger bleed.
+func _set_house_interactions(enabled: bool) -> void:
+	var inter := get_node_or_null("Interactions")
+	if inter == null:
+		return
+	for z in inter.get_children():
+		if z is Area2D:
+			z.monitoring = enabled
+			z.monitorable = enabled
+			if not enabled and is_instance_valid(player):
+				player.remove_interactable(z)
+	if not enabled and is_instance_valid(player):
+		player.nearby_object = null
 
 func _on_memory_chosen(node: Node) -> void:
 	player.can_move = false
