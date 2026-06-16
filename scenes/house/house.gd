@@ -8,6 +8,10 @@ extends Node2D
 
 const PlayerScene := preload("res://scenes/actors/player.tscn")
 const MemoryScript := preload("res://scripts/memory_object.gd")
+const TiredScript := preload("res://scripts/tired_prop.gd")
+const BedScript := preload("res://scripts/bed.gd")
+
+const DENIAL_SCENE := "res://scenes/stages/stage_denial.tscn"
 
 const A := "res://assets/art/house/"
 const ART := "res://assets/art/"
@@ -45,7 +49,10 @@ func _ready() -> void:
 	_build_floor()
 	_build_north_wall()
 	_spawn_player()
-	_build_memories()
+	# Denial entry is now sleep-based: most furniture is "too tired", and only the
+	# top-left bed lets the player sleep into the dream. (The old glowing-memory
+	# entrances are off for now — we'll rework stage entries when designing levels.)
+	_build_interactions()
 	_build_grade()
 	_build_rain()
 	_update_grade()
@@ -123,6 +130,74 @@ func _spawn_player() -> void:
 	player.add_to_group("player")
 	_world.add_child(player)
 	player.face("left")
+
+# -------------------------------------------------------------- interactions
+## Wraps the furniture (already placed in house.tscn) with interaction zones in
+## code, so the editable layout is never touched. Beds get the sleep behaviour;
+## the most top-left bed is "your bed". Everything else gives a "too tired" line.
+func _build_interactions() -> void:
+	var inter := Node2D.new()
+	inter.name = "Interactions"
+	add_child(inter)
+
+	# find the bed nodes and pick the most top-left one (by on-screen position)
+	var beds: Array = []
+	for c in _world.get_children():
+		if c is Sprite2D and c.name.begins_with("Bed"):
+			beds.append(c)
+	var my_bed: Node = null
+	var best := INF
+	for b in beds:
+		var ctr := _visual_center(b)
+		if ctr.x + ctr.y < best:
+			best = ctr.x + ctr.y
+			my_bed = b
+
+	for c in _world.get_children():
+		if not (c is Sprite2D):
+			continue
+		if c.name.begins_with("Bed"):
+			_add_bed_zone(inter, c, c == my_bed)
+		else:
+			_add_tired_zone(inter, c)
+
+func _visual_aabb(sp: Sprite2D) -> Rect2:
+	# Sprite2D is centered=false with an offset, so the drawn rect starts at
+	# position + offset*scale and spans texture_size*scale.
+	var ts: Vector2 = sp.texture.get_size()
+	var top_left: Vector2 = sp.position + sp.offset * sp.scale
+	return Rect2(top_left, ts * sp.scale)
+
+func _visual_center(sp: Sprite2D) -> Vector2:
+	var r := _visual_aabb(sp)
+	return r.position + r.size * 0.5
+
+# Builds the Area2D + detection shape but does NOT add it to the tree yet, so the
+# caller can attach the script and set properties before _ready() fires.
+func _zone(sp: Sprite2D, pad: float) -> Area2D:
+	var a := Area2D.new()
+	var r := _visual_aabb(sp)
+	a.position = r.position + r.size * 0.5
+	var cs := CollisionShape2D.new()
+	var shape := RectangleShape2D.new()
+	shape.size = r.size + Vector2(pad, pad)
+	cs.shape = shape
+	a.add_child(cs)
+	return a
+
+func _add_tired_zone(parent: Node, sp: Sprite2D) -> void:
+	var a := _zone(sp, 28.0)
+	a.set_script(TiredScript)
+	parent.add_child(a)
+
+func _add_bed_zone(parent: Node, sp: Sprite2D, mine: bool) -> void:
+	var a := _zone(sp, 48.0)
+	a.set_script(BedScript)
+	a.is_my_bed = mine
+	a.stage_scene = DENIAL_SCENE
+	if mine:
+		a.chosen.connect(_on_memory_chosen)   # reuse drift-to-sleep -> dream flow
+	parent.add_child(a)
 
 func _build_memories() -> void:
 	for stage in MEMORIES.keys():
@@ -206,7 +281,7 @@ func _intro() -> void:
 	player.can_move = true
 	GameState.first_wake = false
 	await get_tree().create_timer(0.4).timeout
-	Game.flash("Something across the room is glowing. Go to it. (arrows / WASD, E to look)", 4.0)
+	Game.flash("I can't keep my eyes open. Maybe I should lie down. (arrows / WASD, E to interact)", 4.5)
 
 func _return_from_dream() -> void:
 	_update_grade()
@@ -215,8 +290,7 @@ func _return_from_dream() -> void:
 	if GameState.completed.size() >= GameState.STAGES.size():
 		await Game.say("It's quiet. But the grey is almost gone.", 3.0)
 	else:
-		await Game.say("You wake in the chair. The house feels a little warmer.", 3.0)
-		Game.flash("Another memory has begun to glow.", 3.0)
+		await Game.say("You wake. The house feels a little less heavy than before.", 3.0)
 
 func _on_memory_chosen(node: Node) -> void:
 	player.can_move = false

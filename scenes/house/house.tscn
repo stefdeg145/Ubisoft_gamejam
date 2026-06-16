@@ -17,7 +17,7 @@ region = Rect2(144, 256, 64, 32)
 size = Vector2(12, 182)
 
 [sub_resource type="RectangleShape2D" id="rs_16"]
-size = Vector2(13, 97)
+size = Vector2(16, 66)
 
 [sub_resource type="RectangleShape2D" id="rs_17"]
 size = Vector2(288, 12)
@@ -35,7 +35,7 @@ size = Vector2(49, 7)
 size = Vector2(240, 12)
 
 [sub_resource type="RectangleShape2D" id="rs_0"]
-size = Vector2(118.5, 137)
+size = Vector2(111, 124)
 
 [sub_resource type="RectangleShape2D" id="rs_1"]
 size = Vector2(32, 86)
@@ -71,13 +71,13 @@ size = Vector2(96, 50)
 size = Vector2(92, 42)
 
 [sub_resource type="RectangleShape2D" id="rs_12"]
-size = Vector2(60, 26)
+size = Vector2(60, 18)
 
 [sub_resource type="RectangleShape2D" id="rs_13"]
-size = Vector2(92, 56)
+size = Vector2(92, 35)
 
 [sub_resource type="RectangleShape2D" id="rs_14"]
-size = Vector2(60, 56)
+size = Vector2(60, 32)
 
 [sub_resource type="AtlasTexture" id="at_nstand"]
 atlas = ExtResource("cab")
@@ -320,7 +320,7 @@ shape = SubResource("rs_16")
 [node name="WC2" type="StaticBody2D" parent="Solid" unique_id=359016962]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC2" unique_id=59120498]
-position = Vector2(345.5, 591.5)
+position = Vector2(344, 607)
 shape = SubResource("rs_16")
 
 [node name="WC3" type="StaticBody2D" parent="Solid" unique_id=1742342210]
@@ -380,7 +380,7 @@ shape = SubResource("rs_2")
 [node name="FC_Bed2" type="StaticBody2D" parent="Solid" unique_id=1953088011]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Bed2" unique_id=2133448113]
-position = Vector2(120.5, 466)
+position = Vector2(114.5, 466)
 shape = SubResource("rs_0")
 
 [node name="FC_Nightstand2" type="StaticBody2D" parent="Solid" unique_id=1000387369]
@@ -446,19 +446,19 @@ shape = SubResource("rs_11")
 [node name="FC_CoffeeTable" type="StaticBody2D" parent="Solid" unique_id=2111055923]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_CoffeeTable" unique_id=478604070]
-position = Vector2(640, 530)
+position = Vector2(640, 534)
 shape = SubResource("rs_12")
 
 [node name="FC_Couch" type="StaticBody2D" parent="Solid" unique_id=980530088]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Couch" unique_id=994434176]
-position = Vector2(640, 590)
+position = Vector2(640, 600.5)
 shape = SubResource("rs_13")
 
 [node name="FC_Armchair" type="StaticBody2D" parent="Solid" unique_id=576576787]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Armchair" unique_id=1866900159]
-position = Vector2(860, 570)
+position = Vector2(860, 582)
 shape = SubResource("rs_14")
 
 [node name="World" type="Node2D" parent="." unique_id=1502813882]
@@ -610,8 +610,8 @@ offset = Vector2(-24, -25)
 
 [node name="TV" type="Sprite2D" parent="World" unique_id=288615197]
 texture_filter = 1
-position = Vector2(640, 448)
-scale = Vector2(2, 2)
+position = Vector2(640, 421)
+scale = Vector2(2, 1.6)
 texture = SubResource("at_tv")
 centered = false
 offset = Vector2(-18, -20)
@@ -619,7 +619,7 @@ offset = Vector2(-18, -20)
 [node name="CoffeeTable" type="Sprite2D" parent="World" unique_id=178172972]
 texture_filter = 1
 position = Vector2(640, 545)
-scale = Vector2(2, 2)
+scale = Vector2(2, 2.1875)
 texture = SubResource("at_coffee")
 centered = false
 offset = Vector2(-16, -16)

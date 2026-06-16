@@ -19,8 +19,38 @@ var _timer := 0.0
 @onready var _sprite: Sprite2D = $Sprite
 @onready var _walk_sound: AudioStreamPlayer2D = $WalkSound
 
-## The memory object currently in range (set by memory_object.gd), or null.
+## The interactable currently in range (legacy single-target, e.g. stage props), or null.
 var nearby_object: Node = null
+## All interactables currently overlapping; on interact we pick the closest.
+var _interactables: Array = []
+
+func add_interactable(o: Node) -> void:
+	if not _interactables.has(o):
+		_interactables.append(o)
+
+func remove_interactable(o: Node) -> void:
+	_interactables.erase(o)
+	if nearby_object == o:
+		nearby_object = null
+
+func _closest_interactable() -> Node:
+	var best: Node = null
+	var best_d := INF
+	for o in _interactables:
+		if not is_instance_valid(o):
+			continue
+		var d := global_position.distance_to(o.global_position)
+		if d < best_d:
+			best_d = d
+			best = o
+	# fall back to the legacy single-target system used by stage props
+	if best == null and is_instance_valid(nearby_object):
+		best = nearby_object
+	return best
+
+## Floating "E" shown above the closest interactable so the player can tell what
+## responds. Lives in world space (top_level) and is repositioned each frame.
+var _hint: Label
 
 func _ready() -> void:
 	add_to_group("player")
@@ -30,6 +60,41 @@ func _ready() -> void:
 			arr.append(load("res://assets/art/characters/walk_%s_%d.png" % [d, i]))
 		_frames[d] = arr
 	_apply_frame()
+	_make_hint()
+
+func _make_hint() -> void:
+	_hint = Label.new()
+	_hint.text = "E"
+	_hint.top_level = true
+	_hint.z_index = 200
+	_hint.visible = false
+	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint.custom_minimum_size = Vector2(16, 0)
+	_hint.add_theme_font_size_override("font_size", 16)
+	_hint.add_theme_color_override("font_color", Color(0.96, 0.94, 0.86))
+	_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_hint.add_theme_constant_override("shadow_offset_x", 1)
+	_hint.add_theme_constant_override("shadow_offset_y", 1)
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.08, 0.08, 0.1, 0.6)
+	box.set_corner_radius_all(4)
+	box.content_margin_left = 5
+	box.content_margin_right = 5
+	box.content_margin_top = 2
+	box.content_margin_bottom = 2
+	_hint.add_theme_stylebox_override("normal", box)
+	add_child(_hint)
+
+func _update_hint() -> void:
+	if _hint == null:
+		return
+	var target := _closest_interactable()
+	if can_move and target != null and target is Node2D:
+		var bob := sin(Time.get_ticks_msec() / 200.0) * 2.0
+		_hint.global_position = (target as Node2D).global_position + Vector2(-13, -44 + bob)
+		_hint.visible = true
+	else:
+		_hint.visible = false
 
 func _physics_process(delta: float) -> void:
 	var dir := Vector2.ZERO
@@ -57,6 +122,7 @@ func _physics_process(delta: float) -> void:
 			_frame = 0
 			_apply_frame()
 	_update_walk_sound(moving)
+	_update_hint()
 
 func _update_walk_sound(moving: bool) -> void:
 	if _walk_sound == null:
@@ -74,8 +140,10 @@ func _apply_frame() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not can_move:
 		return
-	if event.is_action_pressed("ui_accept") and nearby_object != null:
-		nearby_object.interact()
+	if event.is_action_pressed("ui_accept"):
+		var target := _closest_interactable()
+		if target != null and target.has_method("interact"):
+			target.interact()
 
 func face(dir: String) -> void:
 	_facing = dir

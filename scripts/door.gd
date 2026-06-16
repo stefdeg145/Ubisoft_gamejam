@@ -14,12 +14,12 @@ func _ready() -> void:
 	_refresh()
 
 func _on_enter(body: Node) -> void:
-	if body.is_in_group("player"):
-		body.nearby_object = self
+	if body.is_in_group("player") and body.has_method("add_interactable"):
+		body.add_interactable(self)
 
 func _on_exit(body: Node) -> void:
-	if body.is_in_group("player") and body.nearby_object == self:
-		body.nearby_object = null
+	if body.is_in_group("player") and body.has_method("remove_interactable"):
+		body.remove_interactable(self)
 
 func interact() -> void:
 	is_open = not is_open
