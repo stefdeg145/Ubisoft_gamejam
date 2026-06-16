@@ -1,5 +1,5 @@
 extends Area2D
-## An interactable door. Press E / Enter while standing next to it to open or
+## An interactable door. Press E while standing next to it to open or
 ## close it; an open door stops blocking the doorway so the player can pass.
 ## The two textures are assigned in the scene (closed / open states).
 

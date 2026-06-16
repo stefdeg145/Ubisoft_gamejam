@@ -92,7 +92,7 @@ func _run() -> void:
 	await Game.show_title("THE LAST MORNING", 3.5)
 	await Game.say("thank you for staying.", 3.0)
 	_accept_done = true
-	Game.show_prompt("press any key")
+	Game.show_prompt("press E")
 
 func _build_window_scene() -> void:
 	var s := Node2D.new(); add_child(s)
@@ -117,7 +117,7 @@ func _tween_a(node: CanvasItem, to: float, dur: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not _accept_done:
 		return
-	if (event is InputEventKey or event is InputEventMouseButton) and event.pressed:
+	if event.is_action_pressed("ui_accept"):
 		_accept_done = false
 		Game.hide_prompt()
 		GameState.reset()

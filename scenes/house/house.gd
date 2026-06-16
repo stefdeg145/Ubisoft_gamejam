@@ -281,7 +281,7 @@ func _intro() -> void:
 	player.can_move = true
 	GameState.first_wake = false
 	await get_tree().create_timer(0.4).timeout
-	Game.flash("I can't keep my eyes open. Maybe I should lie down. (arrows / WASD, E to interact)", 4.5)
+	Game.flash("I can't keep my eyes open. Maybe I should lie down. (WASD to move, E to interact)", 4.5)
 
 func _return_from_dream() -> void:
 	_update_grade()

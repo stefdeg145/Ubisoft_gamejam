@@ -43,7 +43,7 @@ func _on_enter(body: Node) -> void:
 		body.nearby_object = self
 		_in_range = true
 		if _is_active():
-			Game.flash("Something here is awake. (press E / Enter)")
+			Game.flash("Something here is awake. (press E)")
 		elif ambient and idle_line != "":
 			pass # thought only shown on interact, to teach the verb gently
 
