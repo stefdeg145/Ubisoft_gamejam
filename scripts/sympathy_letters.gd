@@ -66,6 +66,7 @@ func _ready() -> void:
 
 # ---------------------------------------------------------------- the prop
 func _build_visual() -> void:
+	z_index = 2          # sit ON the table, not behind it (over furniture at z 0)
 	# warm pulse so the cards read as "the thing to face" in the grey room
 	if ResourceLoader.exists("res://assets/art/fx/glow_warm.png"):
 		_glow = Sprite2D.new()
