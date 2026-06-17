@@ -2,7 +2,6 @@ extends CanvasLayer
 ## ─────────────────────────────────────────────
 ##  DEBUG CONSOLE  (admin / developer only)
 ##  Toggle with:  F1  (or ` backtick)
-##  Type a command and press Enter.
 ##  Only active in debug builds — stripped in export.
 ## ─────────────────────────────────────────────
 
@@ -26,13 +25,13 @@ func _ready() -> void:
 		queue_free()
 		return
 
+	# FIX 1: persist across scene changes since this is an autoload
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_ui()
 	hide_console()
 
 
 func _build_ui() -> void:
-	# Window node gives us free dragging + resizing built in
 	_panel = Window.new()
 	_panel.title         = "▶ DEBUG CONSOLE  (F1 to close)"
 	_panel.size          = Vector2i(700, 380)
@@ -41,6 +40,7 @@ func _build_ui() -> void:
 	_panel.unresizable   = false
 	_panel.exclusive     = false
 	_panel.always_on_top = true
+	_panel.mouse_passthrough = false
 	_panel.close_requested.connect(hide_console)
 	add_child(_panel)
 
@@ -49,7 +49,6 @@ func _build_ui() -> void:
 	vbox.add_theme_constant_override("separation", 4)
 	_panel.add_child(vbox)
 
-	# Hint label
 	var hint := Label.new()
 	hint.text = "  type a command below — 'help' for the full list"
 	hint.add_theme_color_override("font_color", Color(0.4, 1.0, 0.6))
@@ -58,7 +57,6 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	# Log output
 	_log = RichTextLabel.new()
 	_log.bbcode_enabled = true
 	_log.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -67,7 +65,6 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	# Input row
 	var hbox := HBoxContainer.new()
 	vbox.add_child(hbox)
 
@@ -92,6 +89,20 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_F1 or event.keycode == KEY_QUOTELEFT:
 			_toggle()
 			get_viewport().set_input_as_handled()
+		elif _visible:
+			# FIX 2: swallow all keypresses so they never reach the game
+			get_viewport().set_input_as_handled()
+
+
+func _process(_delta: float) -> void:
+	# FIX 3: while console is open, zero out all movement axes directly
+	# This stops the player moving even though Input.get_vector is polled
+	# in _physics_process (which ignores set_input_as_handled)
+	if _visible:
+		Input.action_release("ui_left")
+		Input.action_release("ui_right")
+		Input.action_release("ui_up")
+		Input.action_release("ui_down")
 
 
 func _toggle() -> void:
@@ -105,13 +116,24 @@ func _toggle() -> void:
 func show_console() -> void:
 	_visible = true
 	_panel.show()
-	_line_edit.grab_focus()
-	_line_edit.clear()
+	await get_tree().create_timer(0.05).timeout
+	_regrab_focus()
 
 
 func hide_console() -> void:
 	_visible = false
 	_panel.hide()
+	# Release all movement keys so player doesn't drift after closing
+	Input.action_release("ui_left")
+	Input.action_release("ui_right")
+	Input.action_release("ui_up")
+	Input.action_release("ui_down")
+
+
+func _regrab_focus() -> void:
+	if _visible and _line_edit:
+		_line_edit.grab_focus()
+		_line_edit.clear()
 
 
 # ── Command handler ───────────────────────────
@@ -119,6 +141,9 @@ func hide_console() -> void:
 func _on_command(raw: String) -> void:
 	var text := raw.strip_edges().to_lower()
 	_line_edit.clear()
+
+	# FIX 4: always re-grab focus after every command
+	_regrab_focus()
 
 	if text == "":
 		return
@@ -156,9 +181,14 @@ func _on_command(raw: String) -> void:
 				_log_error("Usage: goto <scene_name>")
 			elif SCENES.has(arg):
 				_log_ok("Jumping to: " + arg)
-				hide_console()
+				# FIX 5: don't hide console on goto — keep it open after scene change
 				Game.set_black(true)
+				await get_tree().create_timer(0.1).timeout
 				get_tree().change_scene_to_file(SCENES[arg])
+				await get_tree().create_timer(0.2).timeout
+				# Re-show and re-focus after scene loads
+				_panel.show()
+				_regrab_focus()
 			else:
 				_log_error("Unknown scene: '" + arg + "'. Valid: " + ", ".join(SCENES.keys()))
 
@@ -178,10 +208,12 @@ func _on_command(raw: String) -> void:
 		"reset":
 			GameState.reset()
 			_log_ok("GameState reset. Returning to cold open...")
-			hide_console()
-			await get_tree().create_timer(0.3).timeout
 			Game.set_black(true)
+			await get_tree().create_timer(0.3).timeout
 			get_tree().change_scene_to_file(SCENES["cold_open"])
+			await get_tree().create_timer(0.2).timeout
+			_panel.show()
+			_regrab_focus()
 
 		"state":
 			_log_line("[color=yellow]── GameState ──[/color]")
@@ -199,7 +231,11 @@ func _on_command(raw: String) -> void:
 				_log_ok("Player movement unlocked.")
 			else:
 				_log_error("No player found in scene.")
-			Game.hide_prompt()
+			if Game.has_method("hide_prompt"):
+				Game.hide_prompt()
+			# FIX 6: re-grab focus explicitly after skip
+			await get_tree().create_timer(0.05).timeout
+			_regrab_focus()
 
 		"nowake":
 			GameState.first_wake = false
