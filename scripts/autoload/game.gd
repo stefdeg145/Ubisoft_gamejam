@@ -8,9 +8,15 @@ const VIGNETTE := preload("res://assets/art/fx/vignette.png")
 const FONT_PATH := "res://assets/fonts/Lora.ttf"
 const TITLE_HIT := "res://assets/Sound/Titlecard_hit_sound.mp3"
 
+const _CAPTION_FONT_SIZE  := 34
+const _CAPTION_LINE_H     := _CAPTION_FONT_SIZE * 1.35   # px per wrapped line
+const _CAPTION_MAX_W_FRAC := 0.8                          # fraction of viewport width
+const _CAPTION_PAD        := 16.0                         # padding inside the bg box
+
 var _font: Font
 var _fade: ColorRect
 var _vig: TextureRect
+var _caption_bg: Panel   # dark panel behind every say()/flash() line
 var _caption: Label
 var _title: Label
 var _subtitle: Label
@@ -43,7 +49,12 @@ func _ready() -> void:
 	_vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_vig)
 
-	_caption = _make_label(34, Color(0.92, 0.90, 0.84))
+	# Background panel added BEFORE the caption label so it renders behind the text.
+	_caption_bg = _make_caption_bg()
+	_caption_bg.modulate.a = 0.0
+	add_child(_caption_bg)
+
+	_caption = _make_label(_CAPTION_FONT_SIZE, Color(0.92, 0.90, 0.84))
 	_caption.modulate.a = 0.0
 	add_child(_caption)
 
@@ -83,14 +94,59 @@ func _make_label(size: int, col: Color) -> Label:
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
 
+## Same dark style as the bargaining dialogue box.
+func _make_caption_bg() -> Panel:
+	var p := Panel.new()
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.06, 0.05, 0.10, 0.91)
+	box.set_corner_radius_all(10)
+	box.set_border_width_all(2)
+	box.border_color = Color(0.68, 0.58, 0.36, 0.88)
+	box.shadow_color = Color(0, 0, 0, 0.50)
+	box.shadow_size = 6
+	box.set_content_margin_all(0)
+	p.add_theme_stylebox_override("panel", box)
+	p.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return p
+
+## Resize _caption_bg to hug the current caption text tightly.
+## Must be called after at least one layout frame so get_line_count() is valid.
+func _fit_caption_bg() -> void:
+	if _caption == null or _caption_bg == null:
+		return
+	var vs := get_viewport().get_visible_rect().size
+	var max_w := vs.x * _CAPTION_MAX_W_FRAC
+
+	# Width: natural single-line width of the text, capped at the max allowed.
+	var raw_w := 0.0
+	if _font:
+		raw_w = _font.get_string_size(
+				_caption.text, HORIZONTAL_ALIGNMENT_LEFT, -1, _CAPTION_FONT_SIZE).x
+	var content_w := minf(raw_w, max_w)
+
+	# Height: number of wrapped lines × line height.
+	var lines := maxf(float(_caption.get_line_count()), 1.0)
+	var content_h := lines * _CAPTION_LINE_H
+
+	var bg_w := content_w + _CAPTION_PAD * 2.0
+	var bg_h := content_h + _CAPTION_PAD * 2.0
+
+	# Keep the box centred at the same vertical midpoint as the caption label.
+	var mid_x := _caption.position.x + _caption.size.x * 0.5
+	var mid_y := _caption.position.y + _caption.size.y * 0.5
+	_caption_bg.size     = Vector2(bg_w, bg_h)
+	_caption_bg.position = Vector2(mid_x - bg_w * 0.5, mid_y - bg_h * 0.5)
+
 func _resize() -> void:
 	var vs := get_viewport().get_visible_rect().size
 	_fade.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	# caption: lower third
+	# caption: lower third — fixed rect so autowrap has a known width to work with.
 	_caption.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_caption.position = Vector2(vs.x * 0.5 - vs.x * 0.4, vs.y * 0.72)
-	_caption.size = Vector2(vs.x * 0.8, 120)
+	_caption.position = Vector2(vs.x * 0.5 - vs.x * _CAPTION_MAX_W_FRAC * 0.5, vs.y * 0.72)
+	_caption.size = Vector2(vs.x * _CAPTION_MAX_W_FRAC, 120)
+	# Refit the background for the current text (no-op when caption is invisible).
+	_fit_caption_bg()
 	_title.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_title.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.42)
 	_title.size = Vector2(vs.x * 0.9, 120)
@@ -147,13 +203,21 @@ func say(text: String, hold := 2.6, fade := 0.6) -> void:
 		_caption_tween.kill()
 	_caption.text = text
 	_caption.modulate.a = 0.0
+	_caption_bg.modulate.a = 0.0
 	_say_token += 1
 	var my_token := _say_token
 	_saying = true
+	# Wait one frame so the label's line-wrap has been computed, then fit the box.
+	await get_tree().process_frame
+	_fit_caption_bg()
 	_caption_tween = create_tween()
+	# fade in — caption and background in parallel
 	_caption_tween.tween_property(_caption, "modulate:a", 1.0, fade)
+	_caption_tween.parallel().tween_property(_caption_bg, "modulate:a", 1.0, fade)
 	_caption_tween.tween_interval(hold)
+	# fade out — parallel
 	_caption_tween.tween_property(_caption, "modulate:a", 0.0, fade)
+	_caption_tween.parallel().tween_property(_caption_bg, "modulate:a", 0.0, fade)
 	# IMPORTANT: wait on a real timer, NOT on _caption_tween.finished. If another
 	# say()/flash() kills this tween mid-line, Tween.kill() does NOT emit finished,
 	# so awaiting the signal would hang this coroutine forever — and with it, any
@@ -169,15 +233,21 @@ func flash(text: String, hold := 2.2) -> void:
 	# Never let an incidental proximity prompt overwrite a blocking spoken line.
 	if _saying:
 		return
-	# cancel any in-flight caption fade so this line shows for its full duration
+	# Cancel any in-flight caption fade so this line shows for its full duration.
 	if _caption_tween and _caption_tween.is_valid():
 		_caption_tween.kill()
 	_caption.text = text
 	_caption.modulate.a = 0.0
+	_caption_bg.modulate.a = 0.0
+	# Fit the background after the layout frame, then kick off the tween.
+	await get_tree().process_frame
+	_fit_caption_bg()
 	_caption_tween = create_tween()
 	_caption_tween.tween_property(_caption, "modulate:a", 1.0, 0.35)
+	_caption_tween.parallel().tween_property(_caption_bg, "modulate:a", 1.0, 0.35)
 	_caption_tween.tween_interval(hold)
 	_caption_tween.tween_property(_caption, "modulate:a", 0.0, 0.6)
+	_caption_tween.parallel().tween_property(_caption_bg, "modulate:a", 0.0, 0.6)
 
 func show_prompt(text: String) -> void:
 	_prompt.text = text
