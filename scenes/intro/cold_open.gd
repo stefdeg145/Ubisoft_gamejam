@@ -9,6 +9,7 @@ var _monitor: AudioStreamPlayer
 const ECG_AMP := 120.0
 const ECG_SCROLL := 220.0
 const ECG_PERIOD := 240.0
+const ECG_PIXEL := 10  # grid size for the chunky pixel look
 var _ecg_layer: CanvasLayer
 var _ecg: Line2D
 var _ecg_running := false
@@ -85,9 +86,12 @@ func _build_ecg() -> void:
 	_ecg_layer.layer = 101
 	add_child(_ecg_layer)
 	_ecg = Line2D.new()
-	_ecg.width = 3.0
+	_ecg.width = float(ECG_PIXEL)
 	_ecg.default_color = Color(0.45, 1.0, 0.55, 0.0)
-	_ecg.joint_mode = Line2D.LINE_JOINT_ROUND
+	_ecg.joint_mode = Line2D.LINE_JOINT_SHARP
+	_ecg.begin_cap_mode = Line2D.LINE_CAP_BOX
+	_ecg.end_cap_mode = Line2D.LINE_CAP_BOX
+	_ecg.antialiased = false
 	_ecg_layer.add_child(_ecg)
 	_rebuild_ecg()
 
@@ -114,12 +118,27 @@ func _process(delta: float) -> void:
 func _rebuild_ecg() -> void:
 	var vp := get_viewport().get_visible_rect().size
 	var baseline := vp.y * 0.5
+	var g := float(ECG_PIXEL)
+	# Snap the scroll to the pixel grid so the trace steps across in chunks.
+	var phase: float = floor(_ecg_phase / g) * g
 	var pts := PackedVector2Array()
 	var x := 0.0
-	while x <= vp.x:
-		pts.append(Vector2(x, baseline - _ecg_value(x + _ecg_phase) * ECG_AMP))
-		x += 4.0
+	var prev_y := _ecg_pixel_y(baseline, x + phase, g)
+	pts.append(Vector2(0.0, prev_y))
+	while x <= vp.x + g:
+		var qy := _ecg_pixel_y(baseline, x + phase, g)
+		if qy != prev_y:
+			# vertical riser, then horizontal run -> blocky staircase
+			pts.append(Vector2(x, prev_y))
+			pts.append(Vector2(x, qy))
+			prev_y = qy
+		pts.append(Vector2(x + g, qy))
+		x += g
 	_ecg.points = pts
+
+func _ecg_pixel_y(baseline: float, d: float, g: float) -> float:
+	var y := baseline - _ecg_value(d) * ECG_AMP
+	return round(y / g) * g
 
 func _ecg_value(d: float) -> float:
 	if _ecg_flat:
