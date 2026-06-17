@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://clastmorn0intro"]
+[gd_scene format=3 uid="uid://obrpjtwy4j37"]
 
-[ext_resource type="Script" path="res://scenes/intro/cold_open.gd" id="1_intro"]
+[ext_resource type="Script" uid="uid://furyas4wrnsr" path="res://scenes/intro/cold_open.gd" id="1_intro"]
 
-[node name="ColdOpen" type="Node2D"]
+[node name="ColdOpen" type="Node2D" unique_id=178220113]
 script = ExtResource("1_intro")
