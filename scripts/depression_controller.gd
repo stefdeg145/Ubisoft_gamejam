@@ -6,10 +6,10 @@ extends Node
 ## thing in reach is Eli's phone on the coffee table; replaying the voicemail sinks
 ## the room darker each time, until one ordinary line — "...get some rest, okay?
 ## Love you" — finally lands as permission. He stands, a warm glow waits at the
-## chair by the window (the very seat from the cold open), he crosses the dark
-## house to it, the rain on the glass eases, and the dawn blooms into the
-## Acceptance morning. No bed, no clever fix: you don't solve depression, you
-## survive it and let one small kindness move you.
+## front door, he crosses the dark house to it, opens it, and the morning light
+## floods in — the rain has stopped — blooming into the Acceptance morning. No bed,
+## no clever fix: you don't solve depression, you survive it and let one small
+## kindness move you toward the door.
 
 const FX := "res://assets/art/fx/"
 const ACCEPTANCE_SCENE := "res://scenes/stages/stage_acceptance.tscn"
@@ -19,9 +19,9 @@ var world: Node2D
 var house: Node
 
 # world-space anchors (house coordinates)
-var _phone_point := Vector2(640, 548)     # on the coffee table in front of the couch
-var _window_point := Vector2(812, 566)    # standing spot beside the cold-open armchair
-var _glow_point := Vector2(884, 540)      # the warm light at that window
+var _phone_point := Vector2(640, 530)     # ON the coffee table surface in front of the couch
+var _door_point := Vector2(470, 600)      # floor spot in front of the front door
+var _glow_point := Vector2(470, 632)      # the warm morning light spilling in at the door
 
 var _layer: CanvasLayer
 var _dark: ColorRect
@@ -36,7 +36,7 @@ var _pill: Label
 var _plays := 0
 var _busy := false        # a voicemail line is playing; ignore further input
 var _can_rise := false    # the "get some rest" beat has freed him to stand
-var _ending := false      # the window dissolve has begun
+var _ending := false      # the door-opening / dawn bloom has begun
 var _ache_until := 0.0    # throttle the "I can't get up" lines
 
 func setup(p_player: CharacterBody2D, p_world: Node2D, p_house: Node) -> void:
@@ -201,7 +201,8 @@ func _allow_rise() -> void:
 		create_tween().tween_property(_phone_glow, "modulate:a", 0.0, 1.0)
 	if _phone_sp and is_instance_valid(_phone_sp):
 		create_tween().tween_property(_phone_sp, "modulate:a", 0.25, 1.2)
-	# the window becomes the one warm thing in the room
+	# the front door becomes the one warm thing in the room — a thread of morning
+	# light under it, the way out of the long night
 	_glow = Sprite2D.new()
 	_glow.texture = load(FX + "glow_warm.png")
 	_glow.position = _glow_point
@@ -214,31 +215,34 @@ func _allow_rise() -> void:
 	await Game.say("...Up. Just — up.", 2.6)
 	if player:
 		player.can_move = true
-	Game.show_prompt("Go to the window — the chair by the glass")
+	Game.show_prompt("Go to the front door")
 
-# ------------------------------------------------------------------ the window
+# ------------------------------------------------------------------ the door
 func _process(_dt: float) -> void:
 	if _ending or not _can_rise or player == null:
 		return
-	if player.global_position.distance_to(_window_point) < 64.0:
-		_to_window()
+	if player.global_position.distance_to(_door_point) < 64.0:
+		_to_door()
 
-func _to_window() -> void:
+func _to_door() -> void:
 	_ending = true
 	if player:
 		player.can_move = false
-		player.face("right")
+		player.face("down")
 	Game.hide_prompt()
-	await Game.say("The rain on the glass. ...It's letting up.", 3.2)
-	# rain eases, the dark lifts, the held breath of the night finally exhales
+	await Game.say("The front door. I haven't opened it in days.", 3.2)
+	await Game.say("...Okay. Let's just open it.", 2.6)
+	# the door opens: morning floods in, the dark lifts, the rain finally stops, and
+	# the held breath of the night exhales
 	var t := create_tween(); t.set_parallel(true)
 	t.tween_property(_rain_tex, "modulate:a", 0.0, 3.0)
 	t.tween_property(_dark, "color:a", 0.0, 3.0)
 	t.tween_property(_vig, "modulate:a", 0.12, 3.0)
 	if _glow:
-		t.tween_property(_glow, "modulate:a", 0.0, 2.0)
+		t.tween_property(_glow, "scale", Vector2(5.5, 5.5), 2.6)
+		t.tween_property(_glow, "modulate:a", 1.0, 1.6)
 	await t.finished
-	await Game.say("...Morning.", 2.4)
+	await Game.say("...Morning. The rain's stopped.", 2.6)
 	# bloom to soft dawn light — this becomes the Acceptance morning
 	var w := create_tween()
 	w.tween_property(_dawn, "color:a", 1.0, 2.8)

@@ -43,6 +43,7 @@ var _my_bed_zone                # the bed's interaction Area2D (locked until car
 var _letters: SympathyLetters   # the sympathy cards: the first thing to face on waking
 var _letters_read := false
 var _denial_popup: ObjectivePopup
+var _bed_glow: ObjectiveGlow    # warm beacon on "your bed" while sleep is the objective
 var _bargaining: Node      # couch->Bargaining flow; started once Anger resolves
 
 @onready var _floor: Node2D = $Floor
@@ -226,6 +227,11 @@ func _build_interactions() -> void:
 
 	for c in _world.get_children():
 		if not (c is Sprite2D) or (c as Sprite2D).texture == null:
+			continue
+		# The dining-table region belongs to the sympathy cards alone. The chairs
+		# and the table itself get NO interaction zone, so nothing can steal the
+		# E-prompt from the letter that sits on the table. (See _build_letters.)
+		if c.name.begins_with("Chair") or c.name.begins_with("DiningTable"):
 			continue
 		if c.name.begins_with("Bed"):
 			_add_bed_zone(inter, c, c == my_bed)
@@ -448,6 +454,25 @@ func _on_letters_read() -> void:
 	_denial_popup = ObjectivePopup.new()
 	add_child(_denial_popup)
 	_denial_popup.show_objective("NEW OBJECTIVE", "You can barely keep your eyes open. Go to your bed and sleep.")
+	_show_bed_glow()
+
+## A warm beacon over "your bed" so it's obvious where to go to sleep. Removed once
+## the player drifts into the dream (see _on_memory_chosen).
+func _show_bed_glow() -> void:
+	if _bed_glow and is_instance_valid(_bed_glow):
+		return
+	if _my_bed == null or not is_instance_valid(_my_bed):
+		return
+	_bed_glow = ObjectiveGlow.new()
+	_world.add_child(_bed_glow)
+	var r := _visual_aabb_global(_my_bed)
+	var center := r.position + r.size * 0.5
+	_bed_glow.bind_to(_my_bed, center - _my_bed.global_position)
+
+func _hide_bed_glow() -> void:
+	if _bed_glow and is_instance_valid(_bed_glow):
+		_bed_glow.dismiss()
+	_bed_glow = null
 
 func _return_from_dream() -> void:
 	_update_grade()
@@ -506,17 +531,21 @@ func _on_anger_finished() -> void:
 # -------------------------------------------------------------- depression
 ## After Bargaining: the player surfaces on the couch for the Depression "long
 ## night", which plays out inside the house (no scene change). The controller owns
-## the wake, the voicemail beats and the final walk to the window that blooms into
-## Acceptance, so all we do here is place him on the couch, silence the house's own
-## interactions (so he can't accidentally sleep back into Denial) and start it.
+## the wake, the voicemail beats and the final walk to the front door that blooms
+## into Acceptance, so all we do here is seat him ON the couch (its visual centre,
+## facing the TV — not behind it), silence the house's own interactions (so he
+## can't accidentally sleep back into Denial) and start it.
 func _start_depression() -> void:
 	_set_house_interactions(false)
-	# surface on the couch (where the Bargaining flashback began), not the chair/bed
-	var couch := _world.get_node_or_null("Couch")
-	if couch and couch is Node2D:
-		player.position = (couch as Node2D).global_position + Vector2(0, -8)
+	# surface seated on the couch (where the Bargaining flashback began). The Couch
+	# sprite's node "position" sits at its bottom edge, so use the visual centre and
+	# nudge up onto the seat rather than dropping him behind the couch.
+	var couch := _world.get_node_or_null("Couch") as Sprite2D
+	if couch:
+		var r := _visual_aabb_global(couch)
+		player.position = Vector2(r.position.x + r.size.x * 0.5, r.position.y + r.size.y * 0.35)
 	else:
-		player.position = Vector2(640, 600)
+		player.position = Vector2(640, 582)
 	player.can_move = false
 	player.face("up")
 	var dep := preload("res://scripts/depression_controller.gd").new()
@@ -549,6 +578,7 @@ func _on_memory_chosen(node: Node) -> void:
 	player.can_move = false
 	Game.hide_prompt()
 	_fade_out_music(2.0)                            # let the oldies fade as we drift off
+	_hide_bed_glow()                                # objective reached — drop the beacon
 	if _denial_popup:
 		_denial_popup.dismiss()
 		_denial_popup = null

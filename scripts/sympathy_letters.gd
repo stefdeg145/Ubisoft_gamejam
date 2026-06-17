@@ -75,13 +75,14 @@ func _build_visual() -> void:
 	if ResourceLoader.exists("res://assets/art/fx/glow_warm.png"):
 		_glow = Sprite2D.new()
 		_glow.texture = load("res://assets/art/fx/glow_warm.png")
-		_glow.scale = Vector2(1.25, 1.25)
+		_glow.scale = Vector2(2.3, 2.3)               # large enough to read as a clear beacon
 		_glow.position = Vector2(0, -4)
+		_glow.modulate = Color(1.0, 0.94, 0.78, 0.85) # warm, matches the objective glow
 		_glow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		add_child(_glow)
 		var g := create_tween().set_loops()
-		g.tween_property(_glow, "modulate:a", 0.5, 1.3)
-		g.tween_property(_glow, "modulate:a", 0.95, 1.3)
+		g.tween_property(_glow, "modulate:a", 0.55, 1.1).set_trans(Tween.TRANS_SINE)
+		g.tween_property(_glow, "modulate:a", 1.0, 1.1).set_trans(Tween.TRANS_SINE)
 
 	# the stack of cards lying on the table
 	var sp := Sprite2D.new()

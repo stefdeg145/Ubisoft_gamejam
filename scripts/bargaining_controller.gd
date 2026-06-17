@@ -30,6 +30,7 @@ var _couch_point := COUCH_FALLBACK
 var _player: Node2D
 var _popup: ObjectivePopup
 var _photo_layer: CanvasLayer
+var _couch_glow: ObjectiveGlow   # warm beacon on the couch while "go sit" is the objective
 
 const PHOTO_TEX := "res://assets/art/props/photo.png"
 
@@ -95,11 +96,20 @@ func _show_mission() -> void:
 	add_child(_popup)
 	_popup.show_objective("NEW OBJECTIVE",
 		"Sit on the couch facing the TV and look at the photograph of the two of you.")
+	# Warm beacon on the couch so the objective is visually obvious.
+	var world := get_parent().get_node_or_null("World")
+	if world:
+		_couch_glow = ObjectiveGlow.new()
+		world.add_child(_couch_glow)
+		_couch_glow.mark(_couch_point)
 
 func _hide_mission() -> void:
 	if _popup:
 		_popup.dismiss()
 		_popup = null
+	if _couch_glow and is_instance_valid(_couch_glow):
+		_couch_glow.dismiss()
+	_couch_glow = null
 
 # ----------------------------------------------------------------- couch
 func _rest_on_couch() -> void:
