@@ -11,6 +11,7 @@ const MemoryScript := preload("res://scripts/memory_object.gd")
 const TiredScript := preload("res://scripts/tired_prop.gd")
 const BedScript := preload("res://scripts/bed.gd")
 const AngerScene := preload("res://scripts/anger_sequence.gd")
+const LettersScript := preload("res://scripts/sympathy_letters.gd")
 
 const DENIAL_SCENE := "res://scenes/stages/stage_denial.tscn"
 ## Where the Anger bleed leads once it resolves: the Bargaining stage (being
@@ -38,6 +39,9 @@ var _music: AudioStreamPlayer
 var _follow_zones: Array = []
 ## "Your bed" sprite (the top-left one) — used to spawn beside it after a dream.
 var _my_bed: Sprite2D
+var _my_bed_zone                # the bed's interaction Area2D (locked until cards are read)
+var _letters: SympathyLetters   # the sympathy cards: the first thing to face on waking
+var _letters_read := false
 var _denial_popup: ObjectivePopup
 var _bargaining: Node      # couch->Bargaining flow; started once Anger resolves
 
@@ -81,6 +85,8 @@ func _ready() -> void:
 	# resolved, returning to the house always goes through the wake-from-dream path
 	# (so finishing Denial leads into Anger, not back to the intro).
 	if GameState.first_wake and GameState.completed.is_empty():
+		_build_letters()
+		_gate_props_until_cards(true)   # nothing else responds until the cards are read
 		_intro()
 	else:
 		_return_from_dream()
@@ -267,6 +273,9 @@ func _add_bed_zone(parent: Node, sp: Sprite2D, mine: bool) -> void:
 	a.stage_scene = DENIAL_SCENE
 	if mine:
 		a.chosen.connect(_on_memory_chosen)   # reuse drift-to-sleep -> dream flow
+		_my_bed_zone = a
+		# On a fresh start the cards must be read before sleep unlocks Denial.
+		a.sleep_locked = GameState.first_wake and GameState.completed.is_empty()
 	parent.add_child(a)
 	_follow_zones.append({"zone": a, "sprite": sp})
 
@@ -394,8 +403,48 @@ func _intro() -> void:
 	await get_tree().create_timer(0.4).timeout
 	var _move_hint := "Left Stick / D-Pad" if InputManager.is_controller() else "WASD"
 	var _act_hint  := "A" if InputManager.is_controller() else "E"
-	Game.flash("I can't keep my eyes open. Maybe I should lie down. (%s to move, %s to interact)" % [_move_hint, _act_hint], 4.5)
-	# Objective card for the start of the Denial part.
+	Game.flash("Cards. People keep leaving cards on the table. (%s to move, %s to interact)" % [_move_hint, _act_hint], 4.5)
+	# First objective: read the sympathy cards before the morning can begin.
+	_denial_popup = ObjectivePopup.new()
+	add_child(_denial_popup)
+	_denial_popup.show_objective("NEW OBJECTIVE", "Read the cards people left on the table.")
+
+# -------------------------------------------------------------- sympathy cards
+## Drop the sympathy-card stack on the dining table (falls back to a fixed spot
+## if the table sprite isn't found) and wait for the player to read them.
+func _build_letters() -> void:
+	_letters = LettersScript.new()
+	var table := _find_world_sprite("DiningTable")
+	if table != null:
+		var c := _visual_center(table)
+		_letters.position = Vector2(c.x, c.y - 6)
+	else:
+		_letters.position = Vector2(700, 300)
+	_world.add_child(_letters)
+	_letters.finished.connect(_on_letters_read)
+
+## Before the cards are read, every prop (and your bed) steers the player back to
+## them; afterwards the house behaves normally. The cards themselves live in
+## _world, so they stay interactable while everything else is gated.
+func _gate_props_until_cards(gated: bool) -> void:
+	var inter := get_node_or_null("Interactions")
+	if inter != null:
+		for z in inter.get_children():
+			if "gated" in z:                  # tired props
+				z.gated = gated
+	if _my_bed_zone and is_instance_valid(_my_bed_zone):
+		_my_bed_zone.sleep_locked = gated
+
+## Once the cards are read: unlock the bed and hand over the "go to sleep" objective.
+func _on_letters_read() -> void:
+	if _letters_read:
+		return
+	_letters_read = true
+	if _denial_popup:
+		_denial_popup.dismiss()
+		_denial_popup = null
+	_gate_props_until_cards(false)       # the house responds normally now
+	await Game.say("...I can't keep my eyes open. Maybe in the dream, it's still that morning.", 4.0)
 	_denial_popup = ObjectivePopup.new()
 	add_child(_denial_popup)
 	_denial_popup.show_objective("NEW OBJECTIVE", "You can barely keep your eyes open. Go to your bed and sleep.")
