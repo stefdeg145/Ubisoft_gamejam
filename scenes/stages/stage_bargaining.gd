@@ -229,7 +229,7 @@ func _on_timeline_ended() -> void:
 	# Let the park fade with the flashback rather than cutting out.
 	if _ambience and is_instance_valid(_ambience):
 		create_tween().tween_property(_ambience, "volume_db", -40.0, 1.6)
-	# Bleed reverses straight into Depression: he surfaces from the flashback still
-	# sitting on the couch (stage_depression opens there), drained, unable to move.
+	# Bleed reverses back into the house, where the Depression "long night" plays out:
+	# he surfaces still on the couch, drained. (house.gd _return_from_dream handles it.)
 	await Game.fade_out(1.6)
-	Game.change_scene("res://scenes/stages/stage_depression.tscn")
+	Game.change_scene("res://scenes/house/house.tscn")

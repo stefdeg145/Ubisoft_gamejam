@@ -15,6 +15,13 @@ var source_sprite: Node2D = null
 	"Not this one. It still smells like them.",
 	"This was never mine. I shouldn't be lying here.",
 ]
+## When true, even your own bed won't let you sleep yet (e.g. the sympathy cards
+## still need reading first). The house flips this off once that's done.
+@export var sleep_locked := false
+@export var locked_sleep_lines: PackedStringArray = [
+	"Not yet. I can't close my eyes. ...Those cards on the table. I should read them first.",
+	"I can't sleep. Not until I've read what they left.",
+]
 
 var _used := false
 
@@ -34,6 +41,10 @@ func interact() -> void:
 	if not is_my_bed:
 		if not_my_bed_lines.size() > 0:
 			Game.flash(not_my_bed_lines[randi() % not_my_bed_lines.size()], 2.8)
+		return
+	if sleep_locked:
+		if locked_sleep_lines.size() > 0:
+			Game.flash(locked_sleep_lines[randi() % locked_sleep_lines.size()], 3.2)
 		return
 	if _used:
 		return
