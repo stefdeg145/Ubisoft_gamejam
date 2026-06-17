@@ -42,17 +42,18 @@ func _unhandled_input(event: InputEvent) -> void:
 func _begin() -> void:
 	Game.hide_prompt()
 	await get_tree().create_timer(1.2).timeout
+	_monitor.volume_db = -20.0                           # 20 dB quieter than default
 	_monitor.play()                                      # steady heartbeat under the line...
 	_start_ecg()                                         # ...and the trace starts beating
 	# The clip flatlines from ~4.2s; flatten the trace to match.
 	get_tree().create_timer(4.2).timeout.connect(_flatline_ecg)
-	await Game.say("Eli. Stay with me.", 3.2)
+	await Game.say("Eli. Stay with me.", 1.0)
 	await get_tree().create_timer(2.0).timeout          # ...the monitor flatlines, held too long
-	await Game.say("...", 1.6)                            # the line goes flat
+	await Game.say("...", 1.0)                           # the line goes flat
 	await get_tree().create_timer(1.6).timeout
 	_fade_monitor_out()                                  # the tone gives way to the rain
 	_fade_ecg_out(1.4)
-	await Game.say("Only the rain, now.", 2.6)
+	await Game.say("Only the rain, now.", 1.0)
 	await get_tree().create_timer(0.8).timeout
 	# Title card: the game name, then the jam credit, over the black.
 	await Game.show_title_card("After", "Ubisoft Gamejam 2026", 3.2)

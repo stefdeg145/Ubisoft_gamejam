@@ -142,6 +142,7 @@ func change_scene(path: String) -> void:
 
 # ---------------------------------------------------------------- text
 func say(text: String, hold := 2.6, fade := 0.6) -> void:
+	hold = hold * 0.5   # global display-time scale — halves every caption in the game
 	if _caption_tween and _caption_tween.is_valid():
 		_caption_tween.kill()
 	_caption.text = text
@@ -164,6 +165,7 @@ func say(text: String, hold := 2.6, fade := 0.6) -> void:
 
 ## Non-blocking caption that stays until cleared (for locked-line flashes).
 func flash(text: String, hold := 2.2) -> void:
+	hold = hold * 0.5   # global display-time scale — matches say()
 	# Never let an incidental proximity prompt overwrite a blocking spoken line.
 	if _saying:
 		return
