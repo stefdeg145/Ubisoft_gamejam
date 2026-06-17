@@ -1,38 +1,80 @@
 Me: (We're back here. The park. That grey afternoon.)
 Sam: I should get going. My train's at four.
 Me: Already? You only just got here.
-Sam: We've been over this. I can't keep doing this with you.
-Me: Doing what? I didn't even say anything—
-Sam: That. Exactly that.
-Sam: Take care of yourself.
-Me: (And they walked off. That was the last time I ever saw them.)
-Me: (...But what if I'd said something else? Let me try again. Let me fix it.)
+Sam: I'm tired. I'm tired of everything.
+Sam: You included.
+Me: Wait — please, don't leave.
+Sam: Oh. So you suddenly care now?
 
 label attempt1
-Me: (The bench. The grey sky. They're standing to leave. I could say...)
-- "I'm sorry. I didn't mean what I said."
-	Sam: You never do, though. It's a little late for sorry.
-	jump attempt2
-- "Don't go yet. Please. Five more minutes."
-	Sam: I really can't. The train won't wait for me.
-	jump attempt2
-- "Can we just start over? Properly this time."
-	Sam: We always start over. And nothing ever changes.
-	jump attempt2
+Me: (The bench. The grey sky. The moment still hanging there. Say something. Say the right thing.)
+- "Of course I care. I always did."
+	Sam: Really? Because if that's so, you're showing it very badly.
+	- "I know that. I'm so sorry — I'll try to do better. I don't want to lose you."
+		Sam: You say that all the time. And yet, here we are.
+		Sam: If you want to make things right, you have to let me go. I'm sorry.
+		jump attempt2
+	- "Well, maybe if you tried to understand me, you'd know why I act this way."
+		Sam: So now you're putting the blame on me?
+		Sam: I didn't want things to end like this. But our relationship is broken beyond repair.
+		jump attempt2
+- "What do you mean?"
+	Sam: You know exactly what I mean.
+	- "No... I really don't."
+		Sam: Never mind. It's useless to argue with you anyway.
+		jump attempt2
+	- "I'm sorry. I really am trying my best."
+		Sam: Your best is the equivalent of my bare minimum.
+		Sam: I can't keep doing this.
+		jump attempt2
+- "Don't say it like that."
+	Sam: See? You won't even admit that something is clearly very wrong.
+	Sam: That's why I'm tired.
+	- "I'm sorry... but I'm tired too. Please..."
+		Sam: I'm tired. You're tired. Everyone's tired.
+		Sam: So why are we still here?
+		jump attempt2
+	- "You're right. Can we talk? Properly this time?"
+		Sam: I know you mean well.
+		Sam: But we really can't keep doing this. It isn't good for either of us.
+		jump attempt2
 
 label attempt2
-Me: (No. That wasn't right either. Try again. Say the right thing this time.)
+Me: (No. That still came out wrong. Try again. Say something real. Something that actually means something.)
+Sam: My train—
 - "I love you. You know that, don't you?"
-	Sam: ...I know. That was never really the problem.
-	jump ending
-- "Stay. Just for tonight. The train can wait."
-	Sam: I have a train to catch. Take care of yourself.
-	jump ending
-- "Forget the train. Just talk to me. Please."
+	Sam: ...I know.
+	Sam: That was never really the problem.
+	jump attempt3
+- "Five more minutes. Please. Just five more minutes."
+	Sam: The train won't wait. And I don't think I can either.
+	jump attempt3
+- "Forget the train. Just talk to me."
 	Sam: There's nothing left to say. Not today.
+	jump attempt3
+
+label attempt3
+Me: (Every attempt ends the same way. The door keeps closing. Try one more time. Say the thing you never said.)
+Sam: (They turn to leave. One last chance.)
+- "I'm sorry. For all of it. Every time I pushed you away."
+	Sam: ...
+	Sam: I know you are. I'm sorry too.
+	Sam: But sorry doesn't hold a door open once it's shut.
+	Sam: Take care of yourself.
+	jump ending
+- "I need you. Not just today — I need you to stay in my life."
+	Sam: That's the kindest thing you've ever said to me.
+	Sam: ...And it's too late.
+	jump ending
+- "What if we started over? Completely."
+	Sam: We've started over so many times.
+	Sam: Something always ends up the same.
+	Sam: Goodbye.
 	jump ending
 
 label ending
-Me: (Whatever I say, the train still leaves. The door still closes.)
-Me: (Maybe it was never theirs to fix.)
-Me: ...Maybe I was the one at fault.
+Me: (The path empties. The grey light stays.)
+Me: (I run it back. Every branch. Every door I could have opened.)
+Me: (Every version ends the same way.)
+Me: (Because the words were never the problem.)
+Me: ...I was the one at fault.
