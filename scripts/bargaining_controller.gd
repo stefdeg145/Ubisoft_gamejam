@@ -35,6 +35,7 @@ const PHOTO_TEX := "res://assets/art/props/photo.png"
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	InputManager.device_changed.connect(_on_device_changed)
 	# Locate the couch in the house so the rest-point is exact (fallback if not).
 	var couch := get_parent().get_node_or_null("World/Couch")
 	if couch and couch is Node2D:
@@ -45,6 +46,11 @@ func _find_player() -> void:
 		_player = get_tree().get_first_node_in_group("player")
 
 # ----------------------------------------------------------------- input
+## Update the couch prompt if the player switches input device mid-mission.
+func _on_device_changed(_device: String) -> void:
+	if _started and not _resting and _near:
+		Game.show_prompt("Press %s to sit" % InputManager.hint("accept"))
+
 func _input(event: InputEvent) -> void:
 	# INSERT force-starts the mission (dev shortcut; normally house.gd starts it).
 	if not _started and event is InputEventKey and event.pressed and not event.echo \
@@ -69,7 +75,7 @@ func _process(_delta: float) -> void:
 	if near != _near:
 		_near = near
 		if _near:
-			Game.show_prompt("Press E to sit")
+			Game.show_prompt("Press %s to sit" % InputManager.hint("accept"))
 		else:
 			Game.hide_prompt()
 
@@ -114,10 +120,6 @@ func _rest_on_couch() -> void:
 	await _show_photo_closeup()
 
 	Dialogic.start(_load_timeline(COUCH_TIMELINE))
-	# Wait for Dialogic to build its layout nodes, then style the name label white.
-	for _i in range(4):
-		await get_tree().process_frame
-	_style_dialog_box()
 	await Dialogic.timeline_ended
 
 	# Distinct "look-back" transition: the room warms and washes out, like slipping
@@ -128,7 +130,7 @@ func _rest_on_couch() -> void:
 # ----------------------------------------------------------------- photo + transition
 func _show_photo_closeup() -> void:
 	_photo_layer = CanvasLayer.new()
-	_photo_layer.layer = 0            # below Dialogic's canvas layer (1) so text stays readable
+	_photo_layer.layer = 30           # above the world, below Game's captions (100)
 	add_child(_photo_layer)
 
 	# dim the room behind the photo
@@ -189,12 +191,6 @@ func _memory_look_back() -> void:
 	t.tween_property(warm, "color:a", 0.95, 1.8)
 	await t.finished
 	await Game.fade_out(0.9)          # settle to black; the park scene wakes from here
-
-## Force the Dialogic name label to white so it's readable over dark backgrounds.
-func _style_dialog_box() -> void:
-	var name_label := get_tree().root.find_child("DialogicNode_NameLabel", true, false)
-	if name_label is Label:
-		(name_label as Label).add_theme_color_override("font_color", Color.WHITE)
 
 ## Build the timeline from the .dtl text directly (robust at runtime, while the
 ## files stay editable in the Dialogic editor).
