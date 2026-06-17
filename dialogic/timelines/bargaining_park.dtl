@@ -1,6 +1,6 @@
 Me: (We're back here. The park. That grey afternoon.)
 Sam: I should get going. My train's at four.
-Me: Already? You only just got here.
+Me: Already? You only just got back.
 Sam: I'm tired. I'm tired of everything.
 Sam: You included.
 Me: Wait — please, don't leave.
@@ -16,7 +16,7 @@ Me: (The bench. The grey sky. The moment still hanging there. Say something. Say
 		jump attempt2
 	- "Well, maybe if you tried to understand me, you'd know why I act this way."
 		Sam: So now you're putting the blame on me?
-		Sam: I didn't want things to end like this. But our relationship is broken beyond repair.
+		Sam: I didn't want things to end like this. But our marriage is broken beyond repair.
 		jump attempt2
 - "What do you mean?"
 	Sam: You know exactly what I mean.
@@ -62,19 +62,20 @@ Sam: (They turn to leave. One last chance.)
 	Sam: But sorry doesn't hold a door open once it's shut.
 	Sam: Take care of yourself.
 	jump ending
-- "I need you. Not just today — I need you to stay in my life."
+- "I need you. Please — just come home."
+	Sam: ...
 	Sam: That's the kindest thing you've ever said to me.
-	Sam: ...And it's too late.
+	Sam: And it's too late.
 	jump ending
 - "What if we started over? Completely."
-	Sam: We've started over so many times.
+	Sam: We've started over so many times. We always said this one would be different.
 	Sam: Something always ends up the same.
 	Sam: Goodbye.
 	jump ending
 
 label ending
 Me: (The path empties. The grey light stays.)
-Me: (I run it back. Every branch. Every door I could have opened.)
+Me: (I run it back. Every branch. Every door I could have opened — every room in every life we could have had.)
 Me: (Every version ends the same way.)
 Me: (Because the words were never the problem.)
 Me: ...I was the one at fault.
