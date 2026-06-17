@@ -17,8 +17,9 @@ func _init() -> void:
 func show_objective(title_text: String, body_text: String) -> void:
 	_panel = Panel.new()
 	_panel.position = Vector2(1280 - CARD_W - MARGIN, MARGIN)
-	_panel.custom_minimum_size = Vector2(CARD_W, 92)
-	_panel.size = Vector2(CARD_W, 92)
+	# Height is unconstrained — we resize to fit content after the first layout frame.
+	_panel.custom_minimum_size = Vector2(CARD_W, 0)
+	_panel.size = Vector2(CARD_W, 120)
 	var box := StyleBoxFlat.new()
 	box.bg_color = Color(0.10, 0.09, 0.12, 0.92)
 	box.set_corner_radius_all(8)
@@ -28,12 +29,12 @@ func show_objective(title_text: String, body_text: String) -> void:
 	_panel.add_theme_stylebox_override("panel", box)
 	add_child(_panel)
 
+	# VBoxContainer is NOT anchor-stretched — it sizes freely to its children so we
+	# can read its minimum height and apply it to the panel.
 	var vb := VBoxContainer.new()
-	vb.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	vb.offset_left = 14
-	vb.offset_top = 12
-	vb.offset_right = -14
-	vb.offset_bottom = -12
+	vb.position = Vector2(14, 12)
+	vb.size = Vector2(CARD_W - 28, 0)
+	vb.custom_minimum_size = Vector2(CARD_W - 28, 0)
 	vb.add_theme_constant_override("separation", 4)
 	_panel.add_child(vb)
 
@@ -46,6 +47,7 @@ func show_objective(title_text: String, body_text: String) -> void:
 	var body := Label.new()
 	body.text = body_text
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	body.custom_minimum_size = Vector2(CARD_W - 28, 0)
 	body.add_theme_font_size_override("font_size", 18)
 	body.add_theme_color_override("font_color", Color(0.93, 0.91, 0.86))
 	vb.add_child(body)
@@ -58,6 +60,14 @@ func show_objective(title_text: String, body_text: String) -> void:
 	t.set_parallel(true)
 	t.tween_property(_panel, "modulate:a", 1.0, 0.5)
 	t.tween_property(_panel, "position", rest, 0.5).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+
+	# Wait two frames for the layout system to compute label wrap heights, then
+	# resize the panel so it fits the content exactly.
+	await get_tree().process_frame
+	await get_tree().process_frame
+	var needed_h: float = vb.get_combined_minimum_size().y + 24.0
+	_panel.custom_minimum_size = Vector2(CARD_W, needed_h)
+	_panel.size = Vector2(CARD_W, needed_h)
 
 func dismiss() -> void:
 	if _dismissing:

@@ -236,6 +236,11 @@ func _style_dialog_box() -> void:
 
 	if name_label:
 		name_label.add_theme_color_override("font_color", Color.WHITE)
+		# Dialogic sets self_modulate to the character's colour on every speaker
+		# update — reset it here and disable that behaviour so white always wins.
+		name_label.self_modulate = Color(1, 1, 1, 1)
+		if "use_character_color" in name_label:
+			name_label.use_character_color = false
 
 # ---------------------------------------------------------------- speaker fx
 func _on_speaker_updated(character: DialogicCharacter) -> void:
