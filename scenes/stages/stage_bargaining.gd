@@ -22,9 +22,9 @@ const PARK_AMBIENCE := "res://assets/Sound/Park ambience sound  (Royalty Free).m
 const PROT_NAME := "Me"
 const DEAD_NAME := "Sam"     # the lost relative — rename here AND in the .dtl to taste
 
-const TARGET_H := 300.0      # on-screen height of the big character sprites
-const PROT_POS := Vector2(300, 450)
-const DEAD_POS := Vector2(980, 450)
+const TARGET_H := 225.0      # on-screen height of the big character sprites
+const PROT_POS := Vector2(300, 540)
+const DEAD_POS := Vector2(1000, 535)
 
 var _prot: Sprite2D
 var _dead: Sprite2D
@@ -52,6 +52,10 @@ func _ready() -> void:
 	Dialogic.timeline_ended.connect(_on_timeline_ended, CONNECT_ONE_SHOT)
 
 	Dialogic.start(_load_timeline(PARK_TIMELINE))
+	# Wait a few frames for Dialogic to build and add its layout nodes to the tree.
+	for _i in range(4):
+		await get_tree().process_frame
+	_style_dialog_box()
 
 func _exit_tree() -> void:
 	if Dialogic.Text.speaker_updated.is_connected(_on_speaker_updated):
@@ -120,7 +124,7 @@ func _ground_shadow(center: Vector2, rx: float, ry: float) -> void:
 		pts.append(center + Vector2(cos(a) * rx, sin(a) * ry))
 	var p := Polygon2D.new()
 	p.polygon = pts
-	p.color = Color(0, 0, 0, 0.22)
+	p.color = Color(0.0, 0.0, 0.0, 0.318)
 	add_child(p)
 
 # ---------------------------------------------------------------- characters
@@ -164,14 +168,19 @@ func _build_speaker_portrait() -> void:
 	add_child(cl)
 
 	_portrait_frame = Panel.new()
-	_portrait_frame.position = Vector2(28, 470)
-	_portrait_frame.size = Vector2(150, 150)
+	# Sit the portrait at the left of the screen, aligned with the dialog box top edge
+	_portrait_frame.position = Vector2(24, 488)
+	_portrait_frame.size = Vector2(175, 195)
+
 	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.10, 0.09, 0.12, 0.92)
-	box.set_corner_radius_all(8)
-	box.set_border_width_all(3)
-	box.border_color = Color(0.85, 0.78, 0.62, 0.9)
-	box.set_content_margin_all(8)
+	box.bg_color = Color(0.06, 0.05, 0.10, 0.93)
+	box.set_corner_radius_all(10)
+	box.set_border_width_all(2)
+	box.border_color = Color(0.68, 0.58, 0.36, 0.88)
+	# extra shadow-like inner inset
+	box.shadow_color = Color(0, 0, 0, 0.45)
+	box.shadow_size = 4
+	box.set_content_margin_all(6)
 	_portrait_frame.add_theme_stylebox_override("panel", box)
 	cl.add_child(_portrait_frame)
 
@@ -180,13 +189,53 @@ func _build_speaker_portrait() -> void:
 	_portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_portrait.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_portrait.offset_left = 8
-	_portrait.offset_top = 8
-	_portrait.offset_right = -8
-	_portrait.offset_bottom = -8
+	_portrait.offset_left = 6
+	_portrait.offset_top = 6
+	_portrait.offset_right = -6
+	_portrait.offset_bottom = -6
 	_portrait_frame.add_child(_portrait)
 
 	_portrait_frame.visible = false
+
+# ------------------------------------------------ dialogue box styling
+func _find_dialogic_node(node_name: String) -> Node:
+	return get_tree().root.find_child(node_name, true, false)
+
+func _style_dialog_box() -> void:
+	var dialog_panel := _find_dialogic_node("DialogTextPanel") as PanelContainer
+	var name_panel   := _find_dialogic_node("NameLabelPanel")  as PanelContainer
+	var name_label   := _find_dialogic_node("DialogicNode_NameLabel") as Label
+
+	# Main text box: dark blue-purple with warm golden border
+	var main_style := StyleBoxFlat.new()
+	main_style.bg_color = Color(0.06, 0.05, 0.10, 0.91)
+	main_style.set_corner_radius_all(10)
+	main_style.set_border_width_all(2)
+	main_style.border_color = Color(0.68, 0.58, 0.36, 0.88)
+	main_style.shadow_color = Color(0, 0, 0, 0.50)
+	main_style.shadow_size = 6
+	main_style.set_content_margin_all(16)
+
+	if dialog_panel:
+		dialog_panel.self_modulate = Color(1, 1, 1, 1)
+		dialog_panel.add_theme_stylebox_override("panel", main_style)
+
+	# Name tab: slightly lighter, matching border
+	var name_style := StyleBoxFlat.new()
+	name_style.bg_color = Color(0.12, 0.09, 0.20, 0.96)
+	name_style.set_corner_radius_all(8)
+	name_style.set_border_width_all(2)
+	name_style.border_color = Color(0.68, 0.58, 0.36, 0.88)
+	name_style.set_content_margin_all(8)
+	name_style.content_margin_left = 14
+	name_style.content_margin_right = 14
+
+	if name_panel:
+		name_panel.self_modulate = Color(1, 1, 1, 1)
+		name_panel.add_theme_stylebox_override("panel", name_style)
+
+	if name_label:
+		name_label.add_theme_color_override("font_color", Color.WHITE)
 
 # ---------------------------------------------------------------- speaker fx
 func _on_speaker_updated(character: DialogicCharacter) -> void:

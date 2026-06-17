@@ -114,6 +114,10 @@ func _rest_on_couch() -> void:
 	await _show_photo_closeup()
 
 	Dialogic.start(_load_timeline(COUCH_TIMELINE))
+	# Wait for Dialogic to build its layout nodes, then style the name label white.
+	for _i in range(4):
+		await get_tree().process_frame
+	_style_dialog_box()
 	await Dialogic.timeline_ended
 
 	# Distinct "look-back" transition: the room warms and washes out, like slipping
@@ -124,7 +128,7 @@ func _rest_on_couch() -> void:
 # ----------------------------------------------------------------- photo + transition
 func _show_photo_closeup() -> void:
 	_photo_layer = CanvasLayer.new()
-	_photo_layer.layer = 30           # above the world, below Game's captions (100)
+	_photo_layer.layer = 0            # below Dialogic's canvas layer (1) so text stays readable
 	add_child(_photo_layer)
 
 	# dim the room behind the photo
@@ -185,6 +189,12 @@ func _memory_look_back() -> void:
 	t.tween_property(warm, "color:a", 0.95, 1.8)
 	await t.finished
 	await Game.fade_out(0.9)          # settle to black; the park scene wakes from here
+
+## Force the Dialogic name label to white so it's readable over dark backgrounds.
+func _style_dialog_box() -> void:
+	var name_label := get_tree().root.find_child("DialogicNode_NameLabel", true, false)
+	if name_label is Label:
+		(name_label as Label).add_theme_color_override("font_color", Color.WHITE)
 
 ## Build the timeline from the .dtl text directly (robust at runtime, while the
 ## files stay editable in the Dialogic editor).
