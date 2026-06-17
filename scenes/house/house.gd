@@ -603,6 +603,12 @@ func _start_anger() -> void:
 	seq.finished.connect(_on_anger_finished)
 	seq.start()
 
+## Called by the debug console via "goto anger"
+func debug_trigger_anger() -> void:
+	if player:
+		player.can_move = true
+	_start_anger()
+
 func _on_anger_finished() -> void:
 	_update_grade()                       # house warms a notch now Anger is resolved
 	await Game.say("The mug is in pieces. The rain keeps on, softer now.", 3.0)

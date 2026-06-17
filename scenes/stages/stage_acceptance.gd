@@ -92,7 +92,8 @@ func _run() -> void:
 	await Game.show_title("THE LAST MORNING", 3.5)
 	await Game.say("thank you for staying.", 3.0)
 	_accept_done = true
-	Game.show_prompt("press E")
+	_update_accept_prompt()
+	InputManager.device_changed.connect(_on_device_changed)
 
 func _build_window_scene() -> void:
 	var s := Node2D.new(); add_child(s)
@@ -113,6 +114,16 @@ func _tween_a(node: CanvasItem, to: float, dur: float) -> void:
 	else:
 		t.tween_property(node, "modulate:a", to, dur)
 	await t.finished
+
+func _update_accept_prompt() -> void:
+	if InputManager.is_controller():
+		Game.show_prompt("press", "A")
+	else:
+		Game.show_prompt("press E")
+
+func _on_device_changed(_device: String) -> void:
+	if _accept_done:
+		_update_accept_prompt()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _accept_done:

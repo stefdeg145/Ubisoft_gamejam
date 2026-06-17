@@ -46,6 +46,7 @@ func setup(p_player: CharacterBody2D, p_world: Node2D, p_house: Node) -> void:
 
 func start() -> void:
 	_build_overlays()
+	InputManager.device_changed.connect(_on_device_changed)
 	if player:
 		player.can_move = false
 		player.speed = 46.0                   # heavy, slow shuffle once he can move
@@ -113,11 +114,11 @@ func _add_phone() -> void:
 
 	# a bobbing "E" pill on the table + a persistent on-screen prompt
 	_make_pill()
-	Game.show_prompt("Eli's old voicemail — press E")
+	_update_voicemail_prompt()
 
 func _make_pill() -> void:
 	_pill = Label.new()
-	_pill.text = "E"
+	_pill.text = InputManager.hint("accept")
 	_pill.z_index = 60
 	_pill.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pill.add_theme_font_size_override("font_size", 18)
@@ -137,6 +138,20 @@ func _make_pill() -> void:
 	var t := create_tween().set_loops()
 	t.tween_property(_pill, "position:y", by - 5.0, 0.6).set_trans(Tween.TRANS_SINE)
 	t.tween_property(_pill, "position:y", by, 0.6).set_trans(Tween.TRANS_SINE)
+
+# ------------------------------------------------------------------ device
+func _update_voicemail_prompt() -> void:
+	var btn := InputManager.hint("accept")
+	if _plays == 0:
+		Game.show_prompt("Eli's old voicemail — press " + btn)
+	else:
+		Game.show_prompt("Play it again — press " + btn)
+
+func _on_device_changed(_device: String) -> void:
+	if _pill and is_instance_valid(_pill):
+		_pill.text = InputManager.hint("accept")
+	if not _busy and not _can_rise and not _ending:
+		_update_voicemail_prompt()
 
 # ------------------------------------------------------------------ input
 func _unhandled_input(event: InputEvent) -> void:
@@ -173,13 +188,13 @@ func _play_voicemail() -> void:
 			await Game.say("Eli: \"Don't wait up. Get some rest, okay? ...Love you.\"", 3.8)
 			await Game.say("...I'll play it again.", 2.4)
 			_darken(0.58)
-			Game.show_prompt("Play it again — press E")
+			_update_voicemail_prompt()
 			_busy = false
 		2:
 			await Game.say("Eli: \"...Get some rest, okay? ...Love you.\"", 3.4)
 			await Game.say("...Again.", 2.0)
 			_darken(0.74)
-			Game.show_prompt("Play it again — press E")
+			_update_voicemail_prompt()
 			_busy = false
 		_:
 			await Game.say("Eli: \"...Get some rest.\"", 2.8)
