@@ -181,7 +181,12 @@ func _on_command(raw: String) -> void:
 				_log_error("Usage: goto <scene_name>")
 			elif SCENES.has(arg):
 				_log_ok("Jumping to: " + arg)
-				# FIX 5: don't hide console on goto — keep it open after scene change
+				
+				# --- FIX: Clear any hanging UI prompts before jumping ---
+				if Game.has_method("hide_prompt"):
+					Game.hide_prompt()
+				# --------------------------------------------------------
+				
 				Game.set_black(true)
 				await get_tree().create_timer(0.1).timeout
 				get_tree().change_scene_to_file(SCENES[arg])

@@ -45,6 +45,11 @@ var _letters_read := false
 var _denial_popup: ObjectivePopup
 var _bed_glow: ObjectiveGlow    # warm beacon on "your bed" while sleep is the objective
 var _bargaining: Node      # couch->Bargaining flow; started once Anger resolves
+## The front door, set into the south wall border at the Acceptance glow spot.
+## A wooden leaf lies flat along the wall when shut and swings up into the room
+## as the morning light blooms at the end of Depression (see open_front_door).
+var _door_leaf: Sprite2D
+var _door_opening: ColorRect
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -66,6 +71,7 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_build_floor()
 	_build_north_wall()
+	_build_front_door()
 	_spawn_player()
 	# Denial entry is now sleep-based: most furniture is "too tired", and only the
 	# top-left bed lets the player sleep into the dream. (The old glowing-memory
@@ -151,6 +157,87 @@ func _build_north_wall() -> void:
 	_collider(LEFT - 24, BOTTOM, RIGHT - LEFT + 48, 24)    # south
 	_collider(LEFT - 24, TOP - 96, 24, BOTTOM - TOP + 120) # west
 	_collider(RIGHT, TOP - 96, 24, BOTTOM - TOP + 120)     # east
+
+# -------------------------------------------------------------- front door
+## Where the door sits: centred on the Acceptance morning-glow spot
+## (depression_controller._glow_point ~ x=470), based at the south wall.
+const DOOR_CENTER_X := 470
+const DOOR_BASE_Y := 640          # meets the south wall / threshold
+const DOOR_PX := 2                 # pixel scale (matches the 2x house art)
+
+# Door palette, harmonised with wall_face.png / wall_window.png.
+# (vars, not consts, because Color8() is a function call.)
+var DC_FRAME_D  := Color8(52, 42, 34)
+var DC_FRAME    := Color8(80, 62, 46)
+var DC_WOOD_A   := Color8(120, 92, 62)
+var DC_WOOD_B   := Color8(104, 78, 52)
+var DC_PANEL    := Color8(92, 68, 46)
+var DC_PANEL_HI := Color8(132, 102, 70)
+var DC_KNOB     := Color8(214, 182, 96)
+var DC_DARK     := Color8(40, 32, 26)
+var DC_LIGHT_A  := Color8(255, 245, 218)   # warm morning, top of opening
+var DC_LIGHT_B  := Color8(255, 214, 150)   # warmer, lower in the opening
+const DOORWAY_W := 64              # width of the opening in the south wall border
+const LEAF_THICK := 16             # how thick the door leaf reads in the wall
+
+## Builds the front door as a top-down hinge door: a lit opening set into the
+## south wall border, covered by a wooden leaf that lies flat along the wall when
+## shut and swings up into the room (hinged on its left end) when morning comes.
+## Lives in the NorthWall node so it sits in the wall border, not on the floor.
+func _build_front_door() -> void:
+	var hinge := Vector2(DOOR_CENTER_X - DOORWAY_W / 2.0, DOOR_BASE_Y + LEAF_THICK / 2.0)
+
+	# the lit opening behind the door — morning floods in once the leaf swings away
+	_door_opening = ColorRect.new()
+	_door_opening.color = DC_LIGHT_B
+	_door_opening.position = Vector2(hinge.x, DOOR_BASE_Y - 2)
+	_door_opening.size = Vector2(DOORWAY_W, LEAF_THICK + 6)
+	_door_opening.modulate = Color(1, 1, 1, 0.0)     # hidden behind the shut door
+	_northwall.add_child(_door_opening)
+
+	# the door leaf: a wooden plank lying flat in the wall, hinged on its left end
+	_door_leaf = Sprite2D.new()
+	_door_leaf.name = "FrontDoorLeaf"
+	_door_leaf.texture = _make_leaf_texture()
+	_door_leaf.centered = false
+	_door_leaf.offset = Vector2(0, -4)               # centre the 8px-tall art on the hinge line
+	_door_leaf.position = hinge                       # rotation pivots here = the hinge
+	_door_leaf.scale = Vector2(DOOR_PX, DOOR_PX)
+	_door_leaf.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_northwall.add_child(_door_leaf)
+
+## Swings the door open at the end of Depression: the leaf rotates from flat on
+## the wall (0°) up into the room to vertical (-90°) on its left hinge, while the
+## morning light blooms through the opening it leaves behind.
+func open_front_door(dur := 2.4) -> void:
+	if _door_leaf == null or not is_instance_valid(_door_leaf):
+		return
+	var t := create_tween()
+	t.set_parallel(true)
+	t.tween_property(_door_leaf, "rotation", -PI / 2.0, dur).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	if _door_opening and is_instance_valid(_door_opening):
+		t.tween_property(_door_opening, "modulate:a", 1.0, dur * 0.8)
+
+## Paints the door leaf as a small horizontal wooden plank (32x8, scaled 2x):
+## dark frame, plank seams, hinge knuckles on the left and a brass knob on the
+## free (right) end so the swing reads clearly from above.
+func _make_leaf_texture() -> ImageTexture:
+	var w := 32
+	var h := 8
+	var img := Image.create(w, h, false, Image.FORMAT_RGBA8)
+	for y in range(h):
+		for x in range(w):
+			if y == 0 or y == h - 1 or x == 0 or x == w - 1:
+				img.set_pixel(x, y, DC_FRAME_D)
+			else:
+				img.set_pixel(x, y, DC_WOOD_B if (x % 6 == 0) else DC_WOOD_A)
+	# hinge knuckles on the left end
+	img.set_pixel(1, 1, DC_DARK)
+	img.set_pixel(1, h - 2, DC_DARK)
+	# brass knob near the free (right) end
+	img.set_pixel(w - 3, 3, DC_KNOB)
+	img.set_pixel(w - 3, 4, DC_KNOB)
+	return ImageTexture.create_from_image(img)
 
 func _spawn_player() -> void:
 	player = PlayerScene.instantiate()
