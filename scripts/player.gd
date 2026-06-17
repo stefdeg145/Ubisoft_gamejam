@@ -12,16 +12,14 @@ extends CharacterBody2D
 const FRAME_TIME := 0.14
 const DIRS := ["down", "left", "up", "right"]
 
-var _frames := {}                 # dir -> Array[Texture2D]
+var _frames := {}
 var _facing := "down"
 var _frame := 0
 var _timer := 0.0
 @onready var _sprite: Sprite2D = $Sprite
 @onready var _walk_sound: AudioStreamPlayer2D = $WalkSound
 
-## The interactable currently in range (legacy single-target, e.g. stage props), or null.
 var nearby_object: Node = null
-## All interactables currently overlapping; on interact we pick the closest.
 var _interactables: Array = []
 
 func add_interactable(o: Node) -> void:
@@ -43,13 +41,13 @@ func _closest_interactable() -> Node:
 		if d < best_d:
 			best_d = d
 			best = o
-	# fall back to the legacy single-target system used by stage props
 	if best == null and is_instance_valid(nearby_object):
 		best = nearby_object
 	return best
 
-## Floating "E" shown above the closest interactable so the player can tell what
-## responds. Lives in world space (top_level) and is repositioned each frame.
+## Floating hint shown above the closest interactable.
+## Keyboard: white "E" on dark rounded rectangle
+## Controller: green "A" on dark circle (Xbox aesthetic)
 var _hint: Label
 
 func _ready() -> void:
@@ -61,29 +59,56 @@ func _ready() -> void:
 		_frames[d] = arr
 	_apply_frame()
 	_make_hint()
+	InputManager.device_changed.connect(_on_device_changed)
 
 func _make_hint() -> void:
 	_hint = Label.new()
-	_hint.text = "E"
 	_hint.top_level = true
 	_hint.z_index = 200
 	_hint.visible = false
 	_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint.custom_minimum_size = Vector2(16, 0)
-	_hint.add_theme_font_size_override("font_size", 16)
-	_hint.add_theme_color_override("font_color", Color(0.96, 0.94, 0.86))
-	_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_hint.add_theme_constant_override("shadow_offset_x", 1)
 	_hint.add_theme_constant_override("shadow_offset_y", 1)
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.08, 0.08, 0.1, 0.6)
-	box.set_corner_radius_all(4)
-	box.content_margin_left = 5
-	box.content_margin_right = 5
-	box.content_margin_top = 2
-	box.content_margin_bottom = 2
-	_hint.add_theme_stylebox_override("normal", box)
 	add_child(_hint)
+	_refresh_hint_style()
+
+## Updates text, color and shape based on current input device
+func _refresh_hint_style() -> void:
+	if _hint == null:
+		return
+	var is_ctrl := InputManager.is_controller()
+	_hint.text = "A" if is_ctrl else "E"
+	# Controller: larger green circle; Keyboard: smaller white rounded rect
+	var size := 16
+	_hint.add_theme_font_size_override("font_size", size)
+	_hint.custom_minimum_size = Vector2(size + 8, size + 8)
+	# Font color: Xbox green for controller, warm white for keyboard
+	var font_col := Color(0.11, 0.85, 0.23) if is_ctrl else Color(0.96, 0.94, 0.86)
+	_hint.add_theme_color_override("font_color", font_col)
+	_hint.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	var box := StyleBoxFlat.new()
+	if is_ctrl:
+		# Xbox A button: dark circle, green text
+		box.bg_color = Color(0.08, 0.08, 0.1, 0.7)
+		var r := int((size + 8) / 2)
+		box.set_corner_radius_all(r)
+		box.content_margin_left   = 4
+		box.content_margin_right  = 4
+		box.content_margin_top    = 4
+		box.content_margin_bottom = 4
+	else:
+		# Keyboard E: dark rounded rectangle, white text
+		box.bg_color = Color(0.08, 0.08, 0.1, 0.7)
+		box.set_corner_radius_all(4)
+		box.content_margin_left   = 5
+		box.content_margin_right  = 5
+		box.content_margin_top    = 2
+		box.content_margin_bottom = 2
+	_hint.add_theme_stylebox_override("normal", box)
+
+func _on_device_changed(_device: String) -> void:
+	_refresh_hint_style()
 
 func _update_hint() -> void:
 	if _hint == null:
@@ -91,8 +116,6 @@ func _update_hint() -> void:
 	var target := _closest_interactable()
 	if can_move and target != null and target is Node2D:
 		var bob := sin(Time.get_ticks_msec() / 200.0) * 2.0
-		# Sit the "E" just above the actual object, centred on it, so it always
-		# reads as belonging to that piece of furniture regardless of its size.
 		var anchor := _hint_anchor(target)
 		var half_w: float = max(_hint.size.x, 16.0) * 0.5
 		_hint.global_position = anchor + Vector2(-half_w, bob)
@@ -100,9 +123,6 @@ func _update_hint() -> void:
 	else:
 		_hint.visible = false
 
-## World-space point the "E" should hover over for a given interactable. Prefers
-## the object's real sprite (top-centre of its drawn rect), so moving or resizing
-## furniture keeps the pill correctly placed.
 func _hint_anchor(target: Node) -> Vector2:
 	var spr = target.get("follow_target")
 	if spr == null or not is_instance_valid(spr):
@@ -111,8 +131,6 @@ func _hint_anchor(target: Node) -> Vector2:
 		return _sprite_top_center(spr) + Vector2(0, -10)
 	return (target as Node2D).global_position + Vector2(0, -44)
 
-## Top-centre of a Sprite2D's drawn rectangle in world space, handling both
-## centred and offset sprites.
 func _sprite_top_center(spr: Sprite2D) -> Vector2:
 	var ts: Vector2 = spr.texture.get_size()
 	var base_tl: Vector2 = spr.offset
@@ -132,7 +150,6 @@ func _physics_process(delta: float) -> void:
 
 	var moving := dir.length() > 0.1
 	if moving:
-		# choose facing by dominant axis (side-view stages stay left/right)
 		if lock_vertical or abs(dir.x) > abs(dir.y):
 			_facing = "right" if dir.x > 0 else "left"
 		else:

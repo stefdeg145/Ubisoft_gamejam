@@ -18,6 +18,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+InputManager="*uid://cn7ee71lg0ccr"
 GameState="*res://scripts/autoload/game_state.gd"
 Game="*res://scripts/autoload/game.gd"
 DebugConsole="*uid://dcch7ua5chbuj"

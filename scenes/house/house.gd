@@ -11,7 +11,6 @@ const MemoryScript := preload("res://scripts/memory_object.gd")
 const TiredScript := preload("res://scripts/tired_prop.gd")
 const BedScript := preload("res://scripts/bed.gd")
 const AngerScene := preload("res://scripts/anger_sequence.gd")
-const LettersScript := preload("res://scripts/sympathy_letters.gd")
 
 const DENIAL_SCENE := "res://scenes/stages/stage_denial.tscn"
 ## Where the Anger bleed leads once it resolves: the Bargaining stage (being
@@ -41,9 +40,6 @@ var _follow_zones: Array = []
 var _my_bed: Sprite2D
 var _denial_popup: ObjectivePopup
 var _bargaining: Node      # couch->Bargaining flow; started once Anger resolves
-var _my_bed_zone: Area2D   # the sleep zone on "your bed"; locked until the cards are read
-var _letters: SympathyLetters   # the sympathy cards: the first thing to face on waking
-var _letters_read := false
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -85,8 +81,6 @@ func _ready() -> void:
 	# resolved, returning to the house always goes through the wake-from-dream path
 	# (so finishing Denial leads into Anger, not back to the intro).
 	if GameState.first_wake and GameState.completed.is_empty():
-		_build_letters()
-		_gate_props_until_cards(true)   # nothing else responds until the cards are read
 		_intro()
 	else:
 		_return_from_dream()
@@ -273,9 +267,6 @@ func _add_bed_zone(parent: Node, sp: Sprite2D, mine: bool) -> void:
 	a.stage_scene = DENIAL_SCENE
 	if mine:
 		a.chosen.connect(_on_memory_chosen)   # reuse drift-to-sleep -> dream flow
-		_my_bed_zone = a
-		# On a fresh start the cards must be read before sleep unlocks Denial.
-		a.sleep_locked = GameState.first_wake and GameState.completed.is_empty()
 	parent.add_child(a)
 	_follow_zones.append({"zone": a, "sprite": sp})
 
@@ -374,12 +365,12 @@ func _update_grade() -> void:
 func _build_music() -> void:
 	_music = AudioStreamPlayer.new()
 	_music.stream = load(MUSIC)        # imported with loop = true
-	_music.volume_db = -4.0
+	_music.volume_db = -8.0
 	add_child(_music)
 
 func _play_music() -> void:
 	if _music and not _music.playing:
-		_music.volume_db = -4.0
+		_music.volume_db = -8.0
 		_music.play()
 
 func _fade_out_music(dur := 2.0) -> void:
@@ -395,66 +386,22 @@ func _intro() -> void:
 	await get_tree().create_timer(0.6).timeout
 	await Game.fade_in(3.0)                       # slow wake into the grey house
 	await get_tree().create_timer(0.8).timeout
-	await Game.say("You fell asleep in the chair by the window. Waiting for Eli.", 3.2)
+	await Game.say("You fell asleep in the chair by the window. Waiting.", 3.0)
 	await Game.say("The house is so quiet now.", 2.6)
 	player.can_move = true
 	GameState.first_wake = false
 	_play_music()                                  # the house comes alive once you can move
 	await get_tree().create_timer(0.4).timeout
-	Game.flash("Cards. People keep leaving cards on the table. (WASD to move, E to interact)", 4.5)
-	# First objective: read the sympathy cards before the morning can begin.
-	_denial_popup = ObjectivePopup.new()
-	add_child(_denial_popup)
-	_denial_popup.show_objective("NEW OBJECTIVE", "Read the cards people left on the table.")
-
-# -------------------------------------------------------------- sympathy cards
-## Drop the sympathy-card stack on the dining table (falls back to a fixed spot
-## if the table sprite isn't found) and wait for the player to read them.
-func _build_letters() -> void:
-	_letters = LettersScript.new()
-	var table := _find_world_sprite("DiningTable")
-	if table != null:
-		var c := _visual_center(table)
-		_letters.position = Vector2(c.x, c.y - 6)
-	else:
-		_letters.position = Vector2(700, 300)
-	_world.add_child(_letters)
-	_letters.finished.connect(_on_letters_read)
-
-## Before the cards are read, every prop (and your bed) steers the player back to
-## them; afterwards the house behaves normally. The cards themselves live in
-## _world, so they stay interactable while everything else is gated.
-func _gate_props_until_cards(gated: bool) -> void:
-	var inter := get_node_or_null("Interactions")
-	if inter != null:
-		for z in inter.get_children():
-			if "gated" in z:                  # tired props
-				z.gated = gated
-	if _my_bed_zone and is_instance_valid(_my_bed_zone):
-		_my_bed_zone.sleep_locked = gated
-
-## Once the cards are read: unlock the bed and hand over the "go to sleep" objective.
-func _on_letters_read() -> void:
-	if _letters_read:
-		return
-	_letters_read = true
-	if _denial_popup:
-		_denial_popup.dismiss()
-		_denial_popup = null
-	_gate_props_until_cards(false)       # the house responds normally now
-	await Game.say("...I can't keep my eyes open. Maybe in the dream, it's still that morning.", 4.0)
+	var _move_hint := "Left Stick / D-Pad" if InputManager.is_controller() else "WASD"
+	var _act_hint  := "A" if InputManager.is_controller() else "E"
+	Game.flash("I can't keep my eyes open. Maybe I should lie down. (%s to move, %s to interact)" % [_move_hint, _act_hint], 4.5)
+	# Objective card for the start of the Denial part.
 	_denial_popup = ObjectivePopup.new()
 	add_child(_denial_popup)
 	_denial_popup.show_objective("NEW OBJECTIVE", "You can barely keep your eyes open. Go to your bed and sleep.")
 
 func _return_from_dream() -> void:
 	_update_grade()
-	# After Bargaining, the Depression "long night" plays out IN the house (no scene
-	# change): he surfaces still on the living-room couch, too heavy to move. The
-	# controller runs its own wake, so bail before the normal bed-wake below.
-	if GameState.completed.has("Bargaining") and not GameState.completed.has("Depression"):
-		_start_depression()
-		return
 	# wake up beside the bed (where you fell asleep into the dream), not the chair
 	if _my_bed and is_instance_valid(_my_bed):
 		player.position = _bed_spawn_point()
@@ -500,28 +447,6 @@ func _on_anger_finished() -> void:
 		_bargaining.begin_mission()
 	else:
 		await Game.say("(The next memory isn't ready yet.)", 2.4)
-
-# -------------------------------------------------------------- depression
-## The Depression "long night", played inside the house. He wakes on the couch
-## where the Bargaining flashback took him, can't get up, and replays Eli's
-## voicemail until it frees him to cross to the chair by the window -> Acceptance.
-func _start_depression() -> void:
-	_set_house_interactions(false)            # silence beds / "too tired" props
-	if _bargaining and is_instance_valid(_bargaining):
-		_bargaining.queue_free()              # the couch flow is done; avoid double E
-	# seat him at the FRONT edge of the couch — on the seat visually, but clear of the
-	# couch's static collider so he isn't trapped when he finally gets up to move.
-	var couch := get_node_or_null("World/Couch")
-	if couch and couch is Node2D:
-		player.position = (couch as Node2D).global_position + Vector2(0, -45)
-	else:
-		player.position = Vector2(640, 575)
-	player.face("up")
-	player.can_move = false
-	var seq := preload("res://scripts/depression_controller.gd").new()
-	add_child(seq)
-	seq.setup(player, _world, self)
-	seq.start()
 
 func _find_world_sprite(prefix: String) -> Sprite2D:
 	for c in _world.get_children():
