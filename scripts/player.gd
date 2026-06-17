@@ -12,10 +12,51 @@ extends CharacterBody2D
 const FRAME_TIME := 0.14
 const DIRS := ["down", "left", "up", "right"]
 
+## Grief-grade shader: the MC starts as a dark silhouette with only a glowing
+## outline visible, then the fill brightens one notch per resolved stage until,
+## at Acceptance, it renders fully normal. `brightness` 0 = silhouette+outline,
+## 1 = untouched art.
+const GRADE_SHADER := """
+shader_type canvas_item;
+render_mode unshaded;
+
+uniform float brightness : hint_range(0.0, 1.0) = 0.0;
+uniform vec4 outline_color : source_color = vec4(0.82, 0.88, 1.0, 1.0);
+uniform float outline_width = 1.0;
+
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+	// Fill fades up from black silhouette to full colour as stages complete.
+	vec3 fill = tex.rgb * brightness;
+
+	// Sample the 8 neighbours' alpha to find the sprite's edge.
+	vec2 ps = TEXTURE_PIXEL_SIZE * outline_width;
+	float maxa = 0.0;
+	maxa = max(maxa, texture(TEXTURE, UV + vec2( ps.x, 0.0)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2(-ps.x, 0.0)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2(0.0,  ps.y)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2(0.0, -ps.y)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2( ps.x,  ps.y)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2(-ps.x,  ps.y)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2( ps.x, -ps.y)).a);
+	maxa = max(maxa, texture(TEXTURE, UV + vec2(-ps.x, -ps.y)).a);
+
+	// Outline lives just outside the silhouette and fades as brightness rises.
+	float edge = step(tex.a, 0.001) * step(0.001, maxa);
+	float outline_a = edge * (1.0 - brightness) * outline_color.a;
+
+	vec3 col = mix(fill, outline_color.rgb, outline_a);
+	float out_a = max(tex.a, outline_a);
+	COLOR = vec4(col, out_a) * COLOR;
+}
+"""
+
 var _frames := {}
 var _facing := "down"
 var _frame := 0
 var _timer := 0.0
+var _grade_mat: ShaderMaterial
+var _brightness := -1.0  # forced to snap to the real value on first frame
 @onready var _sprite: Sprite2D = $Sprite
 @onready var _walk_sound: AudioStreamPlayer2D = $WalkSound
 
@@ -58,8 +99,36 @@ func _ready() -> void:
 			arr.append(load("res://assets/art/characters/walk_%s_%d.png" % [d, i]))
 		_frames[d] = arr
 	_apply_frame()
+	_setup_grade()
 	_make_hint()
 	InputManager.device_changed.connect(_on_device_changed)
+
+## Builds the silhouette/outline shader and snaps brightness to the current
+## stage progress so re-entering a scene shows the right level immediately.
+func _setup_grade() -> void:
+	var sh := Shader.new()
+	sh.code = GRADE_SHADER
+	_grade_mat = ShaderMaterial.new()
+	_grade_mat.shader = sh
+	if _sprite:
+		_sprite.material = _grade_mat
+	_brightness = _target_brightness()
+	_grade_mat.set_shader_parameter("brightness", _brightness)
+
+## 0.0 with nothing resolved, +1/5 per completed grief stage, 1.0 at the end.
+func _target_brightness() -> float:
+	var n: int = GameState.STAGES.size()
+	if n <= 0:
+		return 1.0
+	return float(GameState.completed.size()) / float(n)
+
+func _update_grade(delta: float) -> void:
+	if _grade_mat == null:
+		return
+	var target := _target_brightness()
+	# Ease toward the target so a stage clearing within a scene reveals gently.
+	_brightness = move_toward(_brightness, target, delta * 0.6)
+	_grade_mat.set_shader_parameter("brightness", _brightness)
 
 func _make_hint() -> void:
 	_hint = Label.new()
@@ -165,6 +234,7 @@ func _physics_process(delta: float) -> void:
 			_apply_frame()
 	_update_walk_sound(moving)
 	_update_hint()
+	_update_grade(delta)
 
 func _update_walk_sound(moving: bool) -> void:
 	if _walk_sound == null:
