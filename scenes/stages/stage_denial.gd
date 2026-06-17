@@ -20,7 +20,7 @@ const COOKING_BGM := "res://assets/Sound/Cooking_sound_denial_BGM.mp3"
 ## `reach` is the radius of the interaction box — bump it for props the player
 ## can't stand right next to (e.g. a painting up on the wall).
 const FIXABLES := [
-	{"name": "Mug", "prompt": "Wipe the mug", "clean": MUG_CLEAN, "reach": 190.0},
+	{"name": "Mug", "prompt": "Clean the mug spill", "clean": MUG_CLEAN, "reach": 190.0},
 	{"name": "Painting", "prompt": "Straighten the painting", "clean": "", "reach": 270.0},
 	{"name": "ChairKnocked", "prompt": "Pick up the chair", "clean": "", "reach": 120.0},
 ]
