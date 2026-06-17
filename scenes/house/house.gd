@@ -45,6 +45,11 @@ var _letters_read := false
 var _denial_popup: ObjectivePopup
 var _bed_glow: ObjectiveGlow    # warm beacon on "your bed" while sleep is the objective
 var _bargaining: Node      # couch->Bargaining flow; started once Anger resolves
+## The front door, built into the south wall at the Acceptance glow spot. It
+## stays shut through the grey house and swings open as the morning light blooms
+## at the end of Depression (see open_front_door / depression_controller).
+var _front_door: Sprite2D
+var _front_door_open: Sprite2D
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -66,6 +71,7 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	_build_floor()
 	_build_north_wall()
+	_build_front_door()
 	_spawn_player()
 	# Denial entry is now sleep-based: most furniture is "too tired", and only the
 	# top-left bed lets the player sleep into the dream. (The old glowing-memory
@@ -151,6 +157,117 @@ func _build_north_wall() -> void:
 	_collider(LEFT - 24, BOTTOM, RIGHT - LEFT + 48, 24)    # south
 	_collider(LEFT - 24, TOP - 96, 24, BOTTOM - TOP + 120) # west
 	_collider(RIGHT, TOP - 96, 24, BOTTOM - TOP + 120)     # east
+
+# -------------------------------------------------------------- front door
+## Where the door sits: centred on the Acceptance morning-glow spot
+## (depression_controller._glow_point ~ x=470), based at the south wall.
+const DOOR_CENTER_X := 470
+const DOOR_BASE_Y := 640          # meets the south wall / threshold
+const DOOR_PX := 2                 # pixel scale (matches the 2x house art)
+
+# Door palette, harmonised with wall_face.png / wall_window.png.
+# (vars, not consts, because Color8() is a function call.)
+var DC_FRAME_D  := Color8(52, 42, 34)
+var DC_FRAME    := Color8(80, 62, 46)
+var DC_WOOD_A   := Color8(120, 92, 62)
+var DC_WOOD_B   := Color8(104, 78, 52)
+var DC_PANEL    := Color8(92, 68, 46)
+var DC_PANEL_HI := Color8(132, 102, 70)
+var DC_KNOB     := Color8(214, 182, 96)
+var DC_DARK     := Color8(40, 32, 26)
+var DC_LIGHT_A  := Color8(255, 245, 218)   # warm morning, top of opening
+var DC_LIGHT_B  := Color8(255, 214, 150)   # warmer, lower in the opening
+const DOOR_W := 32
+const DOOR_H := 52
+
+## Builds the closed door (always visible) plus an open/light-filled version
+## stacked on top, hidden until the morning floods in. Lives in the NorthWall
+## node so it renders behind the player and furniture, like a real wall fixture.
+func _build_front_door() -> void:
+	var w_px := DOOR_W * DOOR_PX
+	var h_px := DOOR_H * DOOR_PX
+	var top_left := Vector2(DOOR_CENTER_X - w_px / 2.0, DOOR_BASE_Y - h_px)
+
+	_front_door = Sprite2D.new()
+	_front_door.name = "FrontDoor"
+	_front_door.texture = _make_door_texture(false)
+	_front_door.centered = false
+	_front_door.position = top_left
+	_front_door.scale = Vector2(DOOR_PX, DOOR_PX)
+	_front_door.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_northwall.add_child(_front_door)
+
+	_front_door_open = Sprite2D.new()
+	_front_door_open.name = "FrontDoorOpen"
+	_front_door_open.texture = _make_door_texture(true)
+	_front_door_open.centered = false
+	_front_door_open.position = top_left
+	_front_door_open.scale = Vector2(DOOR_PX, DOOR_PX)
+	_front_door_open.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_front_door_open.modulate = Color(1, 1, 1, 0.0)
+	_front_door_open.visible = false
+	_northwall.add_child(_front_door_open)
+
+## Cross-fades the shut door to the open, light-filled one. Called as the dawn
+## blooms at the end of Depression so the door visibly opens with the light.
+func open_front_door(dur := 2.4) -> void:
+	if _front_door_open == null or not is_instance_valid(_front_door_open):
+		return
+	_front_door_open.visible = true
+	var t := create_tween()
+	t.set_parallel(true)
+	t.tween_property(_front_door_open, "modulate:a", 1.0, dur * 0.7)
+	if _front_door and is_instance_valid(_front_door):
+		t.tween_property(_front_door, "modulate:a", 0.0, dur * 0.6)
+
+## Paints the door pixel-by-pixel. open=false -> shut wooden door with two
+## recessed panels and a brass knob; open=true -> door ajar, warm morning light
+## pouring through the opening with a thin slice of the door swung aside.
+func _make_door_texture(open: bool) -> ImageTexture:
+	var img := Image.create(DOOR_W, DOOR_H, false, Image.FORMAT_RGBA8)
+	img.fill(Color(0, 0, 0, 0))
+	for y in range(DOOR_H):
+		for x in range(DOOR_W):
+			var on_frame := y < 2 or x < 2 or x >= DOOR_W - 2
+			var on_sill := y >= DOOR_H - 2
+			if on_frame or on_sill:
+				var edge := x < 1 or x >= DOOR_W - 1 or y < 1 or y >= DOOR_H - 1
+				img.set_pixel(x, y, DC_FRAME_D if edge else DC_FRAME)
+			elif open:
+				# warm light gradient filling the open doorway
+				var ty := float(y - 2) / float(DOOR_H - 4)
+				img.set_pixel(x, y, DC_LIGHT_A.lerp(DC_LIGHT_B, ty))
+			else:
+				# wooden slab with vertical plank seams
+				img.set_pixel(x, y, DC_WOOD_B if (x % 5 == 0) else DC_WOOD_A)
+	if open:
+		# a narrow slice of the door swung aside on the left, in shadow
+		for y in range(2, DOOR_H - 2):
+			for x in range(2, 8):
+				var shade := DC_WOOD_B if (y % 5 == 0) else DC_WOOD_A
+				img.set_pixel(x, y, shade.darkened(0.35))
+			img.set_pixel(8, y, DC_DARK)            # gap edge where light spills past
+			img.set_pixel(9, y, DC_LIGHT_A)         # bright rim of light
+	else:
+		# two recessed panels + brass knob
+		_door_panel(img, 5, 6, 27, 22)
+		_door_panel(img, 5, 26, 27, 46)
+		img.set_pixel(24, 33, DC_KNOB)
+		img.set_pixel(24, 34, DC_KNOB)
+		img.set_pixel(23, 33, DC_DARK)
+	return ImageTexture.create_from_image(img)
+
+## Draws a recessed rectangular panel (dark inset border, lighter fill).
+func _door_panel(img: Image, x0: int, y0: int, x1: int, y1: int) -> void:
+	for x in range(x0, x1):
+		img.set_pixel(x, y0, DC_DARK)
+		img.set_pixel(x, y1 - 1, DC_DARK)
+	for y in range(y0, y1):
+		img.set_pixel(x0, y, DC_DARK)
+		img.set_pixel(x1 - 1, y, DC_DARK)
+	for y in range(y0 + 1, y1 - 1):
+		for x in range(x0 + 1, x1 - 1):
+			img.set_pixel(x, y, DC_PANEL_HI if (x == x0 + 1 or y == y0 + 1) else DC_PANEL)
 
 func _spawn_player() -> void:
 	player = PlayerScene.instantiate()

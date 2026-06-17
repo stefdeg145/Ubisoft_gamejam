@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://qvgl83sme8ou" path="res://scenes/stages/stage_denial.gd" id="1_den"]
 [ext_resource type="Texture2D" uid="uid://cawwvob022wpx" path="res://assets/art/denial_stage/background.jpg" id="2_bg"]
 [ext_resource type="Texture2D" uid="uid://bbjno1ej8xqgu" path="res://assets/art/denial_stage/Mug Spilled for Denial.png" id="3_mug"]
-[ext_resource type="Texture2D" uid="uid://dau63d8glfxav" path="res://assets/art/denial_stage/painting.png" id="4_paint"]
+[ext_resource type="Texture2D" uid="uid://c7pwrpbu8ws86" path="res://assets/art/props/wedding_painting_fordenial.jpg" id="4_paint"]
 [ext_resource type="Texture2D" uid="uid://b653ybnog7f7n" path="res://assets/art/denial_stage/chair1.png" id="5_chair"]
 [ext_resource type="PackedScene" uid="uid://cpj3rn6gdeonh" path="res://scenes/actors/player.tscn" id="6_player"]
 
@@ -34,7 +34,7 @@ texture = ExtResource("5_chair")
 texture_filter = 1
 position = Vector2(807.99994, 406)
 rotation = 0.3
-scale = Vector2(0.26292077, 0.22706078)
+scale = Vector2(0.14022708, 0.12110441)
 texture = ExtResource("4_paint")
 
 [node name="Mug" type="Sprite2D" parent="." unique_id=622421462]

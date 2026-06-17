@@ -232,8 +232,10 @@ func _to_door() -> void:
 	Game.hide_prompt()
 	await Game.say("The front door. I haven't opened it in days.", 3.2)
 	await Game.say("...Okay. Let's just open it.", 2.6)
-	# the door opens: morning floods in, the dark lifts, the rain finally stops, and
-	# the held breath of the night exhales
+	# the door swings open as the morning floods in, the dark lifts, the rain finally
+	# stops, and the held breath of the night exhales
+	if house and is_instance_valid(house) and house.has_method("open_front_door"):
+		house.open_front_door(2.6)
 	var t := create_tween(); t.set_parallel(true)
 	t.tween_property(_rain_tex, "modulate:a", 0.0, 3.0)
 	t.tween_property(_dark, "color:a", 0.0, 3.0)
