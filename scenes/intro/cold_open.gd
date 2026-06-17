@@ -19,6 +19,8 @@ var _ecg_phase := 0.0
 func _ready() -> void:
 	Game.set_black(true)
 	Game.hide_prompt()
+	# Listen for device switches so prompt updates even before first input
+	InputManager.device_changed.connect(_update_prompt_text)
 	_monitor = AudioStreamPlayer.new()
 	_monitor.stream = MONITOR
 	_monitor.bus = "Master"
@@ -31,25 +33,18 @@ func _ready() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _started:
 		return
-		
-	if event is InputEventKey or event is InputEventMouseButton:
-		if InputManager.is_controller():
-			_update_prompt_text()
-	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		if not InputManager.is_controller():
-			_update_prompt_text()
 
-	var controller_pressed: bool = (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_B and event.pressed)
+	var controller_pressed: bool = (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_A and event.pressed)
 	var keyboard_pressed: bool = event.is_action_pressed("ui_accept") or (event is InputEventKey and event.keycode == KEY_E and event.pressed)
 
 	if keyboard_pressed or controller_pressed:
 		_started = true
 		_begin()
 
-func _update_prompt_text() -> void:
+func _update_prompt_text(_device: String = "") -> void:
 	if not _started:
 		if InputManager.is_controller():
-			Game.show_prompt("press B")
+			Game.show_prompt("press", "A")
 		else:
 			Game.show_prompt("press E")
 
