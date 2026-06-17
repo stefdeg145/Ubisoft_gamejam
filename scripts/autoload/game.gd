@@ -17,6 +17,11 @@ var _subtitle: Label
 var _prompt: Label
 var _prompt_tween: Tween
 var _caption_tween: Tween
+## True while a blocking say() line is on screen. Lets flash() know not to stomp
+## cinematic dialogue, and gives say()'s timer-based wait something to clear.
+var _saying := false
+## Bumped on every say(); only the most recent say() is allowed to clear _saying.
+var _say_token := 0
 var _title_hit: AudioStreamPlayer
 
 func _ready() -> void:
@@ -140,14 +145,28 @@ func say(text: String, hold := 2.6, fade := 0.6) -> void:
 	if _caption_tween and _caption_tween.is_valid():
 		_caption_tween.kill()
 	_caption.text = text
+	_caption.modulate.a = 0.0
+	_say_token += 1
+	var my_token := _say_token
+	_saying = true
 	_caption_tween = create_tween()
 	_caption_tween.tween_property(_caption, "modulate:a", 1.0, fade)
 	_caption_tween.tween_interval(hold)
 	_caption_tween.tween_property(_caption, "modulate:a", 0.0, fade)
-	await _caption_tween.finished
+	# IMPORTANT: wait on a real timer, NOT on _caption_tween.finished. If another
+	# say()/flash() kills this tween mid-line, Tween.kill() does NOT emit finished,
+	# so awaiting the signal would hang this coroutine forever — and with it, any
+	# can_move/_busy lock the caller is holding (this was the game-wide freeze).
+	await get_tree().create_timer(fade + hold + fade).timeout
+	# Only the most recent say() clears the flag, so overlapping lines stay correct.
+	if my_token == _say_token:
+		_saying = false
 
 ## Non-blocking caption that stays until cleared (for locked-line flashes).
 func flash(text: String, hold := 2.2) -> void:
+	# Never let an incidental proximity prompt overwrite a blocking spoken line.
+	if _saying:
+		return
 	# cancel any in-flight caption fade so this line shows for its full duration
 	if _caption_tween and _caption_tween.is_valid():
 		_caption_tween.kill()

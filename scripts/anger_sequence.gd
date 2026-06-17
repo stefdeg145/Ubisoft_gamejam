@@ -104,6 +104,10 @@ func start() -> void:
 
 func _spawn_zone() -> void:
 	if _zone and is_instance_valid(_zone):
+		# Drop the player's pointer to the old zone too — freeing an Area2D does not
+		# reliably emit body_exited, so a stale reference could fire the wrong quest.
+		if player and player.nearby_object == _zone:
+			player.nearby_object = null
 		_zone.queue_free()
 	if _qi >= _quests.size():
 		return
@@ -164,7 +168,7 @@ func _fumble_rug() -> void:
 		await Game.say("It won't lie flat. ...There. No—", 2.4)
 	else:
 		await Game.say("Why won't it just STAY down.", 2.2)
-		_botch_and_advance()
+		await _botch_and_advance()
 
 func _fumble_chair() -> void:
 	_anger_beat()
@@ -178,7 +182,7 @@ func _fumble_chair() -> void:
 		await Game.say("Push it in. It just— rolls back out.", 2.4)
 	else:
 		await Game.say("Stay where I PUT you—", 2.0)
-		_botch_and_advance()
+		await _botch_and_advance()
 
 func _fumble_mug() -> void:
 	_anger_beat()

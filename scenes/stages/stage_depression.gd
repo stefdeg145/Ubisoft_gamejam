@@ -1,150 +1,265 @@
 extends StageBase
-## STAGE 3 — DEPRESSION · "Insomnia" (dark top-down bedroom).
-## Different camera again: a small room from above, the air heavy. You try to
-## sleep and can't. You play their voice and it only sinks you lower. Thirsty,
-## you reach for the water on the nightstand — mash to reach — but you fall, and
-## pass out, down into acceptance.
+## STAGE 4 — DEPRESSION · "The Weight" (top-down living room, dusk into night).
+##
+## He surfaces from the Bargaining flashback STILL ON THE COUCH — it's gone dark
+## and he hasn't moved. The stage is the inability to GET UP, not to sleep, so the
+## "just woke / now sleeping" logic problem disappears. He's pinned to the couch;
+## trying to walk only aches. The one thing in reach is Eli's phone on the coffee
+## table, and replaying the voicemail sinks the room darker each time — until one
+## ordinary line, "...get some rest, okay? Love you," finally lands as permission.
+## He stands, a warm glow waits at the window (the same window from the cold open),
+## he crosses to it, the rain eases, and the growing light blooms into the
+## Acceptance morning. No bed, no clever fix: you don't solve depression, you
+## survive it and let one small kindness move you.
 
 const FX := "res://assets/art/fx/"
-const A := "res://assets/art/house/"
+const HOUSE := "res://assets/art/house/"
+const RAIN_BED := "res://assets/Sound/Oldies Playing In Another Room  with Gentle Rain and Thunder (V.1).mp3"
+const ACCEPTANCE_SCENE := "res://scenes/stages/stage_acceptance.tscn"
+
+# the little nook he can shuffle in once he can finally move
+const ROOM := Rect2(360, 140, 576, 448)
+
+var _win_pos := Vector2(640, 150)
 
 var _dark: ColorRect
+var _dawn: ColorRect
 var _vig: TextureRect
-var _step := 0
-var _mashing := false
-var _mash := 0
-var _reach: Sprite2D
-var _bed_sp: Sprite2D
-var _ns_sp: Sprite2D
-var _mug_sp: Sprite2D
-var _bar: ProgressBar
-var _done := false
+var _rain_tex: TextureRect
+var _rain_snd: AudioStreamPlayer
+var _glow: Sprite2D
+var _phone_sp: Sprite2D
+var _cam: Camera2D
+
+var _plays := 0
+var _busy := false        # a voicemail line is playing; ignore further input
+var _can_rise := false    # the "get some rest" beat has freed him to stand
+var _ending := false      # the window dissolve has begun
+var _ache_until := 0.0    # throttle the "I can't get up" lines
 
 func _ready() -> void:
-	setup_room()
-	spawn_player(Vector2(640, 470))
-	player.face("up")
-
-	# Each zone is glued to its prop, so the trigger + "E" follow the furniture.
-	var bed_a := add_interactable(640, 250, 90, "Try to sleep (E)", _bed_sp)
-	bed_a.used.connect(_on_bed)
-	var rec_a := add_interactable(900, 330, 80, "Play their voice (E)", _ns_sp)
-	rec_a.used.connect(_on_record)
-	var water_a := add_interactable(900, 250, 80, "Reach for the water (E)", _mug_sp)
-	water_a.used.connect(_on_water)
-
-	await Game.wake(1.8)
-	await Game.say("You're so tired. You just need to sleep. To stop, for a while.", 3.2)
-	player.can_move = true
-
-func setup_room() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	# dim carpet floor
+	_build_room()
+	_build_overlays()
+	_start_rain_bed()
+
+	# he wakes sitting on the couch, facing the table + window; can't move yet
+	spawn_player(Vector2(640, 452))
+	player.face("up")
+	player.speed = 46.0                       # heavy, slow shuffle once he can move
+	var pcam := player.get_node_or_null("Camera2D")
+	if pcam is Camera2D:
+		(pcam as Camera2D).enabled = false    # use the stationary stage camera
+	_build_camera()
+
+	await Game.wake(2.0)
+	await Game.say("...Oh. The park's gone. I'm still on the couch.", 3.0)
+	await Game.say("It got dark. I don't know how long I sat here.", 3.2)
+	await Game.say("I should get up. ...In a minute.", 3.0)
+
+	_add_phone()
+	Game.flash("Eli's phone is on the table. (E)", 3.2)
+
+# ------------------------------------------------------------------ build
+func _build_room() -> void:
 	var floors := Node2D.new(); add_child(floors)
-	var carpet: Texture2D = load(A + "floor_carpet.png")
-	for ix in range(8):
-		for iy in range(6):
+	var wood: Texture2D = load(HOUSE + "floor_wood.png")
+	for ix in range(9):
+		for iy in range(7):
 			var sp := Sprite2D.new()
-			sp.texture = carpet; sp.centered = false
-			sp.position = Vector2(320 + ix * 64, 200 + iy * 64); sp.scale = Vector2(2, 2)
-			sp.modulate = Color(0.5, 0.5, 0.6)
+			sp.texture = wood; sp.centered = false
+			sp.position = Vector2(360 + ix * 64, 140 + iy * 64)
+			sp.scale = Vector2(2, 2)
+			sp.modulate = Color(0.42, 0.43, 0.52)
 			sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 			floors.add_child(sp)
-	# bed + nightstand
-	_bed_sp = _dim_prop(A + "bed.png", 640, 250, 2.2)
-	_ns_sp = _dim_prop(A + "nightstand.png", 900, 330, 2.0)
-	_reach = _dim_prop("res://assets/art/props/record.png", 900, 360, 2.0)  # recording on stand
-	_mug_sp = _dim_prop("res://assets/art/props/mug.png", 900, 250, 2.0)    # the "water" cup
 
-	# bounds
-	_wall(300, 180, 24, 420); _wall(840, 180, 24, 420)
-	_wall(300, 180, 560, 24); _wall(300, 580, 560, 24)
+	# north wall + the window he'll cross to
+	var wall := ColorRect.new()
+	wall.color = Color(0.15, 0.15, 0.19)
+	wall.position = Vector2(360, 96); wall.size = Vector2(576, 48)
+	add_child(wall)
+	var win := Sprite2D.new()
+	win.texture = load(HOUSE + "wall_window.png")
+	win.centered = true
+	win.position = _win_pos
+	win.scale = Vector2(2.6, 2.2)
+	win.modulate = Color(0.5, 0.52, 0.62)
+	win.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(win)
 
-	# darkness overlays
-	var cl := CanvasLayer.new(); cl.layer = 8; add_child(cl)
-	_dark = ColorRect.new(); _dark.color = Color(0, 0, 0.02, 0.35)
-	_dark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_dark.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cl.add_child(_dark)
-	_vig = TextureRect.new(); _vig.texture = load(FX + "vignette.png")
-	_vig.stretch_mode = TextureRect.STRETCH_SCALE
-	_vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	_vig.modulate = Color(1, 1, 1, 0.4)
-	_vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	cl.add_child(_vig)
+	# couch (he's on it) + coffee table in front
+	_dim(HOUSE + "couch.png", 640, 540, 2.2)
+	_dim(HOUSE + "coffee_table.png", 640, 392, 2.0)
 
-func _dim_prop(path: String, x: float, y: float, s: float) -> Sprite2D:
+	# bounds — he can only move within the nook
+	_wall(ROOM.position.x - 24, ROOM.position.y, 24, ROOM.size.y)
+	_wall(ROOM.end.x, ROOM.position.y, 24, ROOM.size.y)
+	_wall(ROOM.position.x, ROOM.position.y - 24, ROOM.size.x, 24)
+	_wall(ROOM.position.x, ROOM.end.y, ROOM.size.x, 24)
+
+func _dim(path: String, x: float, y: float, s: float) -> Sprite2D:
 	var tex: Texture2D = load(path)
 	var sp := Sprite2D.new()
 	sp.texture = tex; sp.centered = false
 	sp.offset = Vector2(-tex.get_width() / 2.0, -tex.get_height())
 	sp.position = Vector2(x, y); sp.scale = Vector2(s, s)
-	sp.modulate = Color(0.55, 0.55, 0.66)
+	sp.modulate = Color(0.5, 0.5, 0.6)
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	add_child(sp)
 	return sp
 
-func _darken(to: float, dur := 1.5) -> void:
-	create_tween().tween_property(_dark, "color:a", to, dur)
-	create_tween().tween_property(_vig, "modulate:a", min(1.0, to + 0.3), dur)
+func _add_phone() -> void:
+	# small stand-in device on the coffee table (swap the art whenever)
+	_phone_sp = _dim("res://assets/art/props/record.png", 640, 372, 1.1)
+	_phone_sp.modulate = Color(0.72, 0.74, 0.88)
 
-func _on_bed(_a) -> void:
-	if _step != 0: return
-	_step = 1
-	player.can_move = false
-	await Game.say("You lie down. You close your eyes.", 2.6)
-	await Game.say("Nothing. Your mind keeps running. Sleep won't come.", 3.0)
-	_darken(0.5)
-	Game.flash("Their voice is still on the recorder. (the nightstand)", 3.0)
-	player.can_move = true
+func _build_overlays() -> void:
+	var cl := CanvasLayer.new(); cl.layer = 8; add_child(cl)
 
-func _on_record(_a) -> void:
-	if _step != 1: return
-	_step = 2
-	player.can_move = false
-	await Game.say("\"Hey — it's me. Call me back when you get this, okay?\"", 3.4)
-	await Game.say("\"...I'm not angry. I never really was. Talk soon.\"", 3.4)
-	await Game.say("You play it again. And again. It doesn't bring them back.", 3.2)
-	_darken(0.72)
-	Game.flash("Your throat is dry. There's water on the stand.", 2.8)
-	player.can_move = true
+	_rain_tex = TextureRect.new()
+	_rain_tex.texture = load(FX + "rain.png")
+	_rain_tex.stretch_mode = TextureRect.STRETCH_TILE
+	_rain_tex.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_rain_tex.modulate = Color(1, 1, 1, 0.12)
+	_rain_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl.add_child(_rain_tex)
 
-func _on_water(_a) -> void:
-	if _step != 2 or _mashing: return
-	_mashing = true
-	player.can_move = false
-	_make_bar()
-	Game.flash("Reach for it — keep pressing E.", 2.2)
+	_dark = ColorRect.new(); _dark.color = Color(0.02, 0.02, 0.06, 0.45)
+	_dark.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_dark.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl.add_child(_dark)
 
-func _make_bar() -> void:
-	var cl := CanvasLayer.new(); cl.layer = 9; add_child(cl)
-	_bar = ProgressBar.new()
-	_bar.min_value = 0; _bar.max_value = 100; _bar.value = 0
-	_bar.show_percentage = false
-	_bar.custom_minimum_size = Vector2(420, 30)
-	_bar.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_bar.position = Vector2(-210, 120)
-	cl.add_child(_bar)
+	_vig = TextureRect.new(); _vig.texture = load(FX + "vignette.png")
+	_vig.stretch_mode = TextureRect.STRETCH_SCALE
+	_vig.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_vig.modulate = Color(1, 1, 1, 0.5)
+	_vig.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl.add_child(_vig)
 
+	# the dawn light that blooms at the very end (above everything)
+	var cl2 := CanvasLayer.new(); cl2.layer = 9; add_child(cl2)
+	_dawn = ColorRect.new(); _dawn.color = Color(1.0, 0.97, 0.9, 0.0)
+	_dawn.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_dawn.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl2.add_child(_dawn)
+
+func _build_camera() -> void:
+	_cam = Camera2D.new()
+	_cam.position = Vector2(640, 360)
+	_cam.zoom = Vector2(1, 1)
+	add_child(_cam)
+	_cam.make_current()
+
+func _start_rain_bed() -> void:
+	_rain_snd = AudioStreamPlayer.new()
+	var s = load(RAIN_BED)
+	if s is AudioStreamMP3:
+		s.loop = true
+	_rain_snd.stream = s
+	_rain_snd.volume_db = -20.0
+	add_child(_rain_snd)
+	_rain_snd.play()
+
+# ------------------------------------------------------------------ input
 func _unhandled_input(event: InputEvent) -> void:
-	if not _mashing or _done:
+	if _busy or _ending:
 		return
-	if event.is_action_pressed("ui_accept"):
-		_mash += 1
-		_bar.value = min(100, _mash * 9)
-		# the arm strains a little closer each press, then drains back
-		create_tween().tween_property(_reach, "position:x", _reach.position.x - 2, 0.06)
-		if _bar.value >= 100:
-			_collapse()
+	if not _can_rise:
+		# pinned to the couch: E plays the voicemail, trying to walk only aches
+		if event.is_action_pressed("ui_accept"):
+			get_viewport().set_input_as_handled()
+			_play_voicemail()
+		elif event.is_action_pressed("ui_up") or event.is_action_pressed("ui_down") \
+				or event.is_action_pressed("ui_left") or event.is_action_pressed("ui_right"):
+			_ache()
 
-func _collapse() -> void:
-	_done = true
-	_mashing = false
-	await Game.say("Your fingers brush the glass —", 2.0)
-	await Game.say("— and the room tips sideways.", 2.0)
-	# pass out: fade to a soft white that becomes the acceptance dawn
-	var t := create_tween()
-	t.tween_property(_dark, "color", Color(1, 1, 1, 1), 2.2)
+func _ache() -> void:
+	var now := Time.get_ticks_msec() / 1000.0
+	if now < _ache_until:
+		return
+	_ache_until = now + 3.0
+	var lines := ["...I can't. Not yet.", "My legs won't.", "...In a minute."]
+	Game.flash(lines[randi() % lines.size()], 2.2)
+
+# ------------------------------------------------------------------ voicemail
+func _play_voicemail() -> void:
+	if _busy or _can_rise:
+		return
+	_busy = true
+	Game.hide_prompt()
+	_plays += 1
+	match _plays:
+		1:
+			await Game.say("\"Hey, it's me — forgot my charger again. Figures.\"", 3.2)
+			await Game.say("\"Don't wait up. Get some rest, okay? ...Love you.\"", 3.6)
+			await Game.say("...I'll play it again.", 2.4)
+			_darken(0.6)
+			Game.flash("Play it again. (E)", 2.6)
+			_busy = false
+		2:
+			await Game.say("\"...Get some rest, okay? ...Love you.\"", 3.2)
+			await Game.say("...Again.", 2.0)
+			_darken(0.76)
+			Game.flash("Play it again. (E)", 2.6)
+			_busy = false
+		_:
+			await Game.say("\"...Get some rest.\"", 2.6)
+			await Game.say("They're not asking me to do anything. Just... rest.", 3.6)
+			await Game.say("...Okay. Okay. I hear you.", 3.0)
+			await _allow_rise()
+			_busy = false
+
+func _darken(to: float, dur := 1.4) -> void:
+	create_tween().tween_property(_dark, "color:a", to, dur)
+	create_tween().tween_property(_vig, "modulate:a", min(1.0, to + 0.25), dur)
+
+func _allow_rise() -> void:
+	_can_rise = true
+	if _phone_sp and is_instance_valid(_phone_sp):
+		create_tween().tween_property(_phone_sp, "modulate:a", 0.25, 1.2)
+	# the window becomes the one warm thing in the room
+	_glow = Sprite2D.new()
+	_glow.texture = load(FX + "glow_warm.png")
+	_glow.position = _win_pos
+	_glow.scale = Vector2(2.4, 2.4)
+	_glow.modulate = Color(1, 1, 1, 0.0)
+	_glow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	add_child(_glow)
+	create_tween().tween_property(_glow, "modulate:a", 0.85, 1.6)
+	await Game.say("...Up. Just — up.", 2.6)
+	player.can_move = true
+	Game.flash("Go to the window.", 3.0)
+
+# ------------------------------------------------------------------ the window
+func _process(_dt: float) -> void:
+	if _ending or not _can_rise or player == null:
+		return
+	if player.global_position.distance_to(_win_pos) < 96.0:
+		_to_window()
+
+func _to_window() -> void:
+	_ending = true
+	player.can_move = false
+	player.face("up")
+	Game.hide_prompt()
+	await Game.say("The rain. ...It's letting up.", 3.0)
+	# rain eases, the dark lifts, the held breath of the night finally exhales
+	var t := create_tween(); t.set_parallel(true)
+	t.tween_property(_rain_tex, "modulate:a", 0.0, 3.0)
+	t.tween_property(_dark, "color:a", 0.0, 3.0)
+	t.tween_property(_vig, "modulate:a", 0.15, 3.0)
+	if _glow:
+		t.tween_property(_glow, "modulate:a", 0.0, 2.0)
+	if _rain_snd:
+		t.tween_property(_rain_snd, "volume_db", -50.0, 3.0)
 	await t.finished
-	GameState.complete_stage("Depression", "The recording — grief is the love with nowhere to go.")
-	Game.change_scene("res://scenes/stages/stage_acceptance.tscn")
+	await Game.say("...Morning.", 2.4)
+	# bloom to soft dawn light — this becomes the Acceptance morning
+	var w := create_tween()
+	w.tween_property(_dawn, "color:a", 1.0, 2.8)
+	await w.finished
+	if _rain_snd:
+		_rain_snd.stop()
+	GameState.complete_stage("Depression", "the depth — all the way down, and the morning still came.")
+	Game.change_scene(ACCEPTANCE_SCENE)
