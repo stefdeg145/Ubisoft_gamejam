@@ -451,6 +451,12 @@ func _on_letters_read() -> void:
 
 func _return_from_dream() -> void:
 	_update_grade()
+	# After Bargaining the Bleed reverses into the house and the Depression "long
+	# night" plays out in place — he surfaces still on the couch, not beside the bed.
+	# The depression controller runs its own wake, so hand off BEFORE waking/repositioning.
+	if GameState.completed.has("Bargaining") and not GameState.completed.has("Depression"):
+		_start_depression()
+		return
 	# wake up beside the bed (where you fell asleep into the dream), not the chair
 	if _my_bed and is_instance_valid(_my_bed):
 		player.position = _bed_spawn_point()
@@ -496,6 +502,27 @@ func _on_anger_finished() -> void:
 		_bargaining.begin_mission()
 	else:
 		await Game.say("(The next memory isn't ready yet.)", 2.4)
+
+# -------------------------------------------------------------- depression
+## After Bargaining: the player surfaces on the couch for the Depression "long
+## night", which plays out inside the house (no scene change). The controller owns
+## the wake, the voicemail beats and the final walk to the window that blooms into
+## Acceptance, so all we do here is place him on the couch, silence the house's own
+## interactions (so he can't accidentally sleep back into Denial) and start it.
+func _start_depression() -> void:
+	_set_house_interactions(false)
+	# surface on the couch (where the Bargaining flashback began), not the chair/bed
+	var couch := _world.get_node_or_null("Couch")
+	if couch and couch is Node2D:
+		player.position = (couch as Node2D).global_position + Vector2(0, -8)
+	else:
+		player.position = Vector2(640, 600)
+	player.can_move = false
+	player.face("up")
+	var dep := preload("res://scripts/depression_controller.gd").new()
+	add_child(dep)
+	dep.setup(player, _world, self)
+	dep.start()
 
 func _find_world_sprite(prefix: String) -> Sprite2D:
 	for c in _world.get_children():
