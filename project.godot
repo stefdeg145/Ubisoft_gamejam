@@ -21,9 +21,9 @@ config/icon="res://icon.svg"
 InputManager="*uid://cn7ee71lg0ccr"
 GameState="*res://scripts/autoload/game_state.gd"
 Game="*res://scripts/autoload/game.gd"
-StageHUD="*res://scripts/autoload/stage_hud.gd"
 DebugConsole="*uid://dcch7ua5chbuj"
 Dialogic="*uid://ds2q0uclmolvu"
+StageHUD="*res://scripts/autoload/stage_hud.gd"
 
 [dialogic]
 
