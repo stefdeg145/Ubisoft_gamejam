@@ -92,6 +92,10 @@ func _ready() -> void:
 func start() -> void:
 	_running = true
 	player.can_move = false
+	# The rug sits crooked from the outset, so the first "straighten it" actually
+	# has something to straighten (it reads as wrong before you ever touch it).
+	if rug and is_instance_valid(rug):
+		rug.rotation = deg_to_rad(-10.0)
 	await Game.say("Awake again. The house feels wrong, like a held breath.", 3.0)
 	await Game.say("...Tidy up. Make it normal. You can at least do that.", 3.2)
 	_show_ui()
@@ -352,7 +356,7 @@ func _screen_shake() -> void:
 	t.tween_property(world, "position", _world_home, 0.06)
 
 # ---------------------------------------------------------------- resolve
-func _resolve(at: Vector2) -> void:
+func _resolve(_at: Vector2) -> void:
 	# the anger is spent: floats fade, the cold lifts a little, the room exhales
 	var t := create_tween()
 	t.tween_property(_cold, "color:a", 0.0, 2.5)
@@ -360,32 +364,13 @@ func _resolve(at: Vector2) -> void:
 	await Game.say("...oh.", 1.6)
 	await Game.say("I'm sorry. I'm not angry at you.", 2.6)
 	await Game.say("I'm angry that you're gone.", 2.8)
-	# the photograph is there in the mess; the player keeps it
-	await _pocket_photo(at)
-	await Game.say("I'll keep this. I'm not done looking at it.", 3.0)
 	_hide_ui()
+	# He's spent. The photo he always carries is still in his pocket — the couch
+	# flow (in the house) is where he finally sits down and looks at it.
 	GameState.has_photo = true
 	GameState.complete_stage("Anger", "the unfair — anger is love with nowhere to go")
 	_running = false
 	emit_signal("finished")
-
-func _pocket_photo(at: Vector2) -> void:
-	var photo := Sprite2D.new()
-	photo.texture = load("res://assets/art/props/photo.png")
-	photo.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	photo.scale = Vector2(2, 2)
-	photo.global_position = at + Vector2(10, 8)
-	photo.modulate.a = 0.0
-	photo.z_index = 40
-	photo.top_level = true
-	world.add_child(photo)
-	var t := create_tween()
-	t.tween_property(photo, "modulate:a", 1.0, 0.8)
-	t.tween_interval(0.6)
-	t.tween_property(photo, "global_position", player.global_position, 0.7)
-	t.parallel().tween_property(photo, "modulate:a", 0.0, 0.7)
-	t.tween_callback(photo.queue_free)
-	await t.finished
 
 # ---------------------------------------------------------------- build bits
 func _build_mug() -> void:

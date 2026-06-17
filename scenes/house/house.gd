@@ -39,6 +39,7 @@ var _follow_zones: Array = []
 ## "Your bed" sprite (the top-left one) — used to spawn beside it after a dream.
 var _my_bed: Sprite2D
 var _denial_popup: ObjectivePopup
+var _bargaining: Node      # couch->Bargaining flow; started once Anger resolves
 
 @onready var _floor: Node2D = $Floor
 @onready var _northwall: Node2D = $NorthWall
@@ -70,8 +71,11 @@ func _ready() -> void:
 	_build_music()
 	_update_grade()
 
-	# Bargaining entry (self-contained; only acts once F1 is pressed).
-	add_child(preload("res://scripts/bargaining_controller.gd").new())
+	# Bargaining entry (self-contained). It waits until Anger resolves, then
+	# _on_anger_finished() calls begin_mission() to hand the player the couch
+	# objective. (INSERT still force-starts it for testing.)
+	_bargaining = preload("res://scripts/bargaining_controller.gd").new()
+	add_child(_bargaining)
 
 	# Only play the opening intro on a truly fresh start. Once any stage has been
 	# resolved, returning to the house always goes through the wake-from-dream path
@@ -149,6 +153,37 @@ func _spawn_player() -> void:
 	player.add_to_group("player")
 	_world.add_child(player)
 	player.face("left")
+	_setup_camera()
+
+## Pin the player's camera to the house so it never scrolls past the edges into the
+## grey void around the room. Limits are the visible house extents (floor + the
+## wall caps drawn in _build_north_wall). Because the room is a touch narrower than
+## the camera's view at the default zoom, we also zoom in just enough here that the
+## view fits *inside* the room horizontally — otherwise Godot would still reveal
+## grey on one side, since limits can't center a level smaller than the screen.
+## This only touches the house's camera; the dream stages keep the player's default.
+func _setup_camera() -> void:
+	var cam: Camera2D = player.get_node_or_null("Camera2D")
+	if cam == null:
+		return
+	# Visible house bounds (matches the wall caps: LEFT-16 .. RIGHT+16, TOP-96 .. BOTTOM+16).
+	var view_left := LEFT - 16
+	var view_top := TOP - 96
+	var view_right := RIGHT + 16
+	var view_bottom := BOTTOM + 16
+	cam.limit_left = view_left
+	cam.limit_top = view_top
+	cam.limit_right = view_right
+	cam.limit_bottom = view_bottom
+	cam.limit_smoothed = true            # ease to a stop at the edge instead of snapping
+	# Make sure the view fits within the room on both axes so no grey can peek in.
+	var vp: Vector2 = get_viewport_rect().size
+	var room_w := float(view_right - view_left)
+	var room_h := float(view_bottom - view_top)
+	var min_zoom: float = max(vp.x / room_w, vp.y / room_h)
+	var z: float = max(cam.zoom.x, ceilf(min_zoom * 100.0) / 100.0)
+	cam.zoom = Vector2(z, z)
+	cam.reset_smoothing()                # don't glide in from (0,0) on the first frame
 
 ## A standing spot just below/beside "your bed", clamped inside the play area.
 func _bed_spawn_point() -> Vector2:
@@ -402,16 +437,13 @@ func _start_anger() -> void:
 func _on_anger_finished() -> void:
 	_update_grade()                       # house warms a notch now Anger is resolved
 	await Game.say("The mug is in pieces. The rain keeps on, softer now.", 3.0)
-	await Game.say("...But the photograph is in my pocket. I can carry that.", 3.2)
-	# Anger resolved — lead into the next stage (Bargaining).
-	if ResourceLoader.exists(ANGER_NEXT_SCENE):
-		_fade_out_music(1.4)
-		await Game.fade_out(1.6)
-		Game.change_scene(ANGER_NEXT_SCENE)
+	# Hand control back, then start the couch flow: an objective to sit and look at
+	# their photograph, which is what actually bridges into the Bargaining memory.
+	_set_house_interactions(true)
+	player.can_move = true
+	if _bargaining and is_instance_valid(_bargaining) and _bargaining.has_method("begin_mission"):
+		_bargaining.begin_mission()
 	else:
-		# next stage not in the project yet — stay in the warmed house
-		_set_house_interactions(true)
-		player.can_move = true
 		await Game.say("(The next memory isn't ready yet.)", 2.4)
 
 func _find_world_sprite(prefix: String) -> Sprite2D:

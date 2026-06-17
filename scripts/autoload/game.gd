@@ -6,6 +6,7 @@ extends CanvasLayer
 
 const VIGNETTE := preload("res://assets/art/fx/vignette.png")
 const FONT_PATH := "res://assets/fonts/Lora.ttf"
+const TITLE_HIT := "res://assets/Sound/Titlecard_hit_sound.mp3"
 
 var _font: Font
 var _fade: ColorRect
@@ -16,6 +17,7 @@ var _subtitle: Label
 var _prompt: Label
 var _prompt_tween: Tween
 var _caption_tween: Tween
+var _title_hit: AudioStreamPlayer
 
 func _ready() -> void:
 	layer = 100
@@ -51,6 +53,12 @@ func _ready() -> void:
 	_prompt = _make_label(22, Color(0.7, 0.7, 0.74))
 	_prompt.modulate.a = 0.0
 	add_child(_prompt)
+
+	_title_hit = AudioStreamPlayer.new()
+	if ResourceLoader.exists(TITLE_HIT):
+		_title_hit.stream = load(TITLE_HIT)
+	_title_hit.bus = "Master"
+	add_child(_title_hit)
 
 	get_viewport().size_changed.connect(_resize)
 	_resize()
@@ -177,6 +185,9 @@ func show_title(text: String, hold := 3.0) -> void:
 func show_title_card(title: String, subtitle: String, hold := 3.0) -> void:
 	_title.text = title
 	_subtitle.text = subtitle
+	# Cinematic hit lands as the title slams in.
+	if _title_hit and _title_hit.stream:
+		_title_hit.play()
 	# Title rises first; the subtitle follows a beat later, then both hold and fade.
 	var t := create_tween()
 	t.tween_property(_title, "modulate:a", 1.0, 1.4)

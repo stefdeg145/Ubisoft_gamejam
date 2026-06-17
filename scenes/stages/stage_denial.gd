@@ -135,6 +135,11 @@ func _on_fix(area: Area2D) -> void:
 	if d == null:
 		return
 	_fixing = true
+	# Root the player while the prop straightens, settles back, and its line is
+	# read — so walking off to the next object can't cut the thought short.
+	player.can_move = false
+	player.velocity = Vector2.ZERO
+	Game.hide_prompt()
 	var sp: Sprite2D = d["sprite"]
 	_tries += 1
 	# straighten it (and, for the mug, wipe it clean)...
@@ -169,6 +174,8 @@ func _on_fix(area: Area2D) -> void:
 
 	# keep the line on screen long enough to read before another fix can interrupt
 	await get_tree().create_timer(hold).timeout
+	if not _resolved:
+		player.can_move = true        # hand movement back once the line has been read
 	_fixing = false
 
 # ------------------------------------------------------------------ resolve
