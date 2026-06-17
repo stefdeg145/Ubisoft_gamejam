@@ -24,24 +24,19 @@ func _ready() -> void:
 	_monitor.bus = "Master"
 	add_child(_monitor)
 	_build_ecg()
-	
+	InputManager.device_changed.connect(_on_device_changed_prompt)
 	await get_tree().create_timer(1.0).timeout
 	_update_prompt_text()
+
+func _on_device_changed_prompt(_device: String) -> void:
+	if not _started:
+		_update_prompt_text()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _started:
 		return
-		
-	if event is InputEventKey or event is InputEventMouseButton:
-		if InputManager.is_controller():
-			_update_prompt_text()
-	elif event is InputEventJoypadButton or event is InputEventJoypadMotion:
-		if not InputManager.is_controller():
-			_update_prompt_text()
-
 	var controller_pressed: bool = (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_B and event.pressed)
 	var keyboard_pressed: bool = event.is_action_pressed("ui_accept") or (event is InputEventKey and event.keycode == KEY_E and event.pressed)
-
 	if keyboard_pressed or controller_pressed:
 		_started = true
 		_begin()
@@ -66,7 +61,7 @@ func _begin() -> void:
 	await Game.say("...", 1.0)
 	await get_tree().create_timer(1.6).timeout
 	
-	_fade_monitor_out()
+	_fade_monitor_out(0.4)  # safety cleanup — flatline fade likely already running
 	_fade_ecg_out(1.4)
 	await Game.say("Only the rain, now.", 1.0)
 	await get_tree().create_timer(0.8).timeout
@@ -74,11 +69,11 @@ func _begin() -> void:
 	await get_tree().create_timer(0.6).timeout
 	Game.change_scene(HOUSE)
 
-func _fade_monitor_out() -> void:
-	if not _monitor.playing:
+func _fade_monitor_out(dur: float = 1.4) -> void:
+	if _monitor == null or not _monitor.playing:
 		return
 	var t := create_tween()
-	t.tween_property(_monitor, "volume_db", -80.0, 1.4)
+	t.tween_property(_monitor, "volume_db", -80.0, dur)
 	t.tween_callback(_monitor.stop)
 
 func _build_ecg() -> void:
@@ -102,6 +97,7 @@ func _start_ecg() -> void:
 
 func _flatline_ecg() -> void:
 	_ecg_flat = true
+	_fade_monitor_out(4.0)  # long gradual fade from the flatline moment
 
 func _fade_ecg_out(dur: float) -> void:
 	if _ecg == null:
