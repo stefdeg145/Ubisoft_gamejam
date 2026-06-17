@@ -18,7 +18,7 @@ var _glow: Sprite2D
 var _rustle: AudioStreamPlayer
 
 const CARD_TEX := "res://assets/art/props/sympathy_cards.png"
-const RUSTLE_SFX := "res://assets/Sound/paper_rustle.wav"
+const RUSTLE_SFX := "res://assets/Sound/paper_rustle.mp3"
 
 # from = who wrote it (blank for an unsigned card); body = the message;
 # thought = the protagonist's inner reaction shown beneath the card.
@@ -66,6 +66,11 @@ func _ready() -> void:
 
 # ---------------------------------------------------------------- the prop
 func _build_visual() -> void:
+	# Draw the cards in front of the table. z_as_relative = false makes this an
+	# absolute layer so the stack always sits ON the table top, never behind it,
+	# regardless of the y-sorted furniture around it.
+	z_as_relative = false
+	z_index = 20         # well above all furniture (z 0)
 	# warm pulse so the cards read as "the thing to face" in the grey room
 	if ResourceLoader.exists("res://assets/art/fx/glow_warm.png"):
 		_glow = Sprite2D.new()
@@ -89,7 +94,7 @@ func _build_visual() -> void:
 
 	var cs := CollisionShape2D.new()
 	var sh := CircleShape2D.new()
-	sh.radius = 56.0
+	sh.radius = 120.0    # generous reach so the prompt triggers from the table front, not only by walking around
 	cs.shape = sh
 	add_child(cs)
 
