@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://ck6wni0xeohvw"
+path="res://.godot/imported/Park ambience sound  (Royalty Free).mp3-ffbbe8721ae1d66ce92912c5faf076d8.mp3str"
+
+[deps]
+
+source_file="res://assets/Sound/Park ambience sound  (Royalty Free).mp3"
+dest_files=["res://.godot/imported/Park ambience sound  (Royalty Free).mp3-ffbbe8721ae1d66ce92912c5faf076d8.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

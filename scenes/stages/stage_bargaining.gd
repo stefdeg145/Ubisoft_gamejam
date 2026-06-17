@@ -16,6 +16,7 @@ extends Node2D
 
 const PARK_TIMELINE := "res://dialogic/timelines/bargaining_park.dtl"
 const FX := "res://assets/art/fx/"
+const PARK_AMBIENCE := "res://assets/Sound/Park ambience sound  (Royalty Free).mp3"
 
 # These names must match the speaker names used in bargaining_park.dtl.
 const PROT_NAME := "Me"
@@ -32,6 +33,7 @@ var _portrait_frame: Panel
 var _prot_tex: Texture2D
 var _dead_tex: Texture2D
 var _prot_portrait_tex: Texture2D    # front-facing face for the dialogue-box portrait
+var _ambience: AudioStreamPlayer     # looping park background sound
 var _finished := false
 
 func _ready() -> void:
@@ -39,6 +41,7 @@ func _ready() -> void:
 	_build_background()
 	_build_characters()
 	_build_speaker_portrait()
+	_start_park_ambience()
 
 	# Reveal the flashback, then let it play.
 	await Game.wake(1.8)
@@ -53,6 +56,22 @@ func _ready() -> void:
 func _exit_tree() -> void:
 	if Dialogic.Text.speaker_updated.is_connected(_on_speaker_updated):
 		Dialogic.Text.speaker_updated.disconnect(_on_speaker_updated)
+
+# ---------------------------------------------------------------- ambience
+## Quiet, looping park background (birds/wind). Kept low so it sits under the
+## dialogue; faded out when the flashback resolves.
+func _start_park_ambience() -> void:
+	if not ResourceLoader.exists(PARK_AMBIENCE):
+		return
+	_ambience = AudioStreamPlayer.new()
+	var stream = load(PARK_AMBIENCE)
+	if stream is AudioStreamMP3:
+		stream.loop = true
+	_ambience.stream = stream
+	_ambience.volume_db = -12.0
+	_ambience.bus = "Master"
+	add_child(_ambience)
+	_ambience.play()
 
 # ---------------------------------------------------------------- timeline io
 ## Reads the .dtl as plain text and builds the timeline in code. This avoids any
@@ -207,5 +226,10 @@ func _on_timeline_ended() -> void:
 		_portrait_frame.visible = false
 	await Game.say("Some doors only close once.", 3.0)
 	GameState.complete_stage("Bargaining", "The meeting — some doors only close once.")
+	# Let the park fade with the flashback rather than cutting out.
+	if _ambience and is_instance_valid(_ambience):
+		create_tween().tween_property(_ambience, "volume_db", -40.0, 1.6)
+	# Bleed reverses straight into Depression: he surfaces from the flashback still
+	# sitting on the couch (stage_depression opens there), drained, unable to move.
 	await Game.fade_out(1.6)
-	Game.change_scene("res://scenes/house/house.tscn")
+	Game.change_scene("res://scenes/stages/stage_depression.tscn")
