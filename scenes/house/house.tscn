@@ -17,7 +17,7 @@ region = Rect2(144, 256, 64, 32)
 size = Vector2(12, 192)
 
 [sub_resource type="RectangleShape2D" id="rs_16"]
-size = Vector2(12, 93.9375)
+size = Vector2(10, 93.9375)
 
 [sub_resource type="RectangleShape2D" id="rs_17"]
 size = Vector2(288, 12)
@@ -35,7 +35,7 @@ size = Vector2(49, 7)
 size = Vector2(240, 12)
 
 [sub_resource type="RectangleShape2D" id="rs_0"]
-size = Vector2(89, 126)
+size = Vector2(107, 126)
 
 [sub_resource type="RectangleShape2D" id="rs_1"]
 size = Vector2(32, 86)
@@ -207,8 +207,8 @@ color = Color(0.33, 0.3, 0.35, 1)
 
 [node name="WallBody2" type="ColorRect" parent="Walls" unique_id=687646272]
 offset_left = 340.0
-offset_top = 564.0
-offset_right = 353.0
+offset_top = 550.0
+offset_right = 352.0
 offset_bottom = 640.0
 color = Color(0.2, 0.18, 0.22, 1)
 
@@ -314,13 +314,13 @@ shape = SubResource("rs_15")
 [node name="WC1" type="StaticBody2D" parent="Solid" unique_id=1171195626]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC1" unique_id=8785979]
-position = Vector2(345, 434.96875)
+position = Vector2(346, 434.96875)
 shape = SubResource("rs_16")
 
 [node name="WC2" type="StaticBody2D" parent="Solid" unique_id=359016962]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC2" unique_id=59120498]
-position = Vector2(346, 610)
+position = Vector2(346, 596)
 shape = SubResource("rs_16")
 
 [node name="WC3" type="StaticBody2D" parent="Solid" unique_id=1742342210]
@@ -344,7 +344,7 @@ shape = SubResource("rs_19")
 [node name="WC6" type="StaticBody2D" parent="Solid" unique_id=1942911874]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC6" unique_id=1539775485]
-position = Vector2(524, 314)
+position = Vector2(519, 314)
 shape = SubResource("rs_19")
 
 [node name="WC7" type="StaticBody2D" parent="Solid" unique_id=1521086280]
@@ -362,7 +362,7 @@ shape = SubResource("rs_21")
 [node name="FC_Bed1" type="StaticBody2D" parent="Solid" unique_id=2071064589]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Bed1" unique_id=1364920301]
-position = Vector2(140.75, 201.5)
+position = Vector2(138.5, 201.5)
 shape = SubResource("rs_0")
 
 [node name="FC_Nightstand1" type="StaticBody2D" parent="Solid" unique_id=235210194]
@@ -380,7 +380,7 @@ shape = SubResource("rs_2")
 [node name="FC_Bed2" type="StaticBody2D" parent="Solid" unique_id=1953088011]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Bed2" unique_id=2133448113]
-position = Vector2(114.5, 467)
+position = Vector2(111.5, 467)
 shape = SubResource("rs_0")
 
 [node name="FC_Nightstand2" type="StaticBody2D" parent="Solid" unique_id=1000387369]
@@ -642,24 +642,8 @@ offset = Vector2(-16, -32)
 
 [node name="PlantLiving" type="Sprite2D" parent="World" unique_id=2049468305]
 texture_filter = 1
-position = Vector2(375, 647)
-scale = Vector2(2, 2)
-texture = SubResource("at_plant")
-centered = false
-offset = Vector2(-7.5, -30)
-
-[node name="PlantLiving" type="Sprite2D" parent="World/PlantLiving" unique_id=311669969]
-texture_filter = 1
 position = Vector2(374, 448)
 scale = Vector2(2, 2)
-texture = SubResource("at_plant")
-centered = false
-offset = Vector2(-7.5, -30)
-
-[node name="PlantLiving2" type="Sprite2D" parent="World/PlantLiving" unique_id=292605688]
-texture_filter = 1
-position = Vector2(-1.5000076, -102.5)
-scale = Vector2(0.905364, 0.98499453)
 texture = SubResource("at_plant")
 centered = false
 offset = Vector2(-7.5, -30)
