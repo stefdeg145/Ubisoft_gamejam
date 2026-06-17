@@ -466,11 +466,11 @@ y_sort_enabled = true
 
 [node name="Bed1" type="Sprite2D" parent="World" unique_id=1199367596]
 texture_filter = 1
-position = Vector2(194, 513)
+position = Vector2(194, 266)
 scale = Vector2(3.437501, 4.4953175)
 texture = ExtResource("3_12j21")
 centered = false
-offset = Vector2(-32, -86)
+offset = Vector2(-32, -31)
 
 [node name="Nightstand1" type="Sprite2D" parent="World" unique_id=654023103]
 texture_filter = 1
@@ -498,11 +498,11 @@ offset = Vector2(-8, -47)
 
 [node name="Bed2" type="Sprite2D" parent="World" unique_id=1061183487]
 texture_filter = 1
-position = Vector2(57, 419.99997)
+position = Vector2(57, 527)
 scale = Vector2(0.22820213, 0.21932246)
 texture = ExtResource("6_yj2u4")
 centered = false
-offset = Vector2(-32, -86)
+offset = Vector2(-32, -574)
 
 [node name="Nightstand2" type="Sprite2D" parent="World" unique_id=1297701579]
 texture_filter = 1
