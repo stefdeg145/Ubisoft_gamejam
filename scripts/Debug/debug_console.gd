@@ -14,6 +14,10 @@ const SCENES := {
 	"acceptance":  "res://scenes/stages/stage_acceptance.tscn",
 }
 
+## Trigger anger sequence directly from console
+## (anger runs inside house, so we goto house then fire it)
+const ANGER_CMD := "anger"
+
 var _visible   := false
 var _panel     : Window
 var _log       : RichTextLabel
@@ -160,6 +164,7 @@ func _on_command(raw: String) -> void:
 			_log_line("""[color=yellow]── SCENES ──[/color]
   [color=cyan]goto <scene>[/color]     — jump to a scene instantly
        scenes: [color=white]house, cold_open, denial, bargaining, depression, acceptance[/color]
+  [color=cyan]goto anger[/color]       — jump to house and immediately trigger the anger sequence
 
 [color=yellow]── GAME STATE ──[/color]
   [color=cyan]complete <stage>[/color] — mark a stage as done (denial/bargaining/depression/acceptance)
@@ -179,6 +184,20 @@ func _on_command(raw: String) -> void:
 		"goto":
 			if arg == "":
 				_log_error("Usage: goto <scene_name>")
+			elif arg == "anger":
+				_log_ok("Loading house and triggering anger sequence...")
+				Game.set_black(true)
+				await get_tree().create_timer(0.1).timeout
+				get_tree().change_scene_to_file(SCENES["house"])
+				await get_tree().create_timer(0.8).timeout
+				var house := get_tree().get_current_scene()
+				if house and house.has_method("debug_trigger_anger"):
+					house.debug_trigger_anger()
+					_log_ok("Anger sequence triggered!")
+				else:
+					_log_error("House scene not ready yet — try again in a moment")
+				_panel.show()
+				_regrab_focus()
 			elif SCENES.has(arg):
 				_log_ok("Jumping to: " + arg)
 				

@@ -58,6 +58,7 @@ func _ready() -> void:
 	body_entered.connect(_on_enter)
 	body_exited.connect(_on_exit)
 	_build_visual()
+	InputManager.device_changed.connect(_refresh_prompt)
 	if ResourceLoader.exists(RUSTLE_SFX):
 		_rustle = AudioStreamPlayer.new()
 		_rustle.stream = load(RUSTLE_SFX)
@@ -218,10 +219,28 @@ func _show_letter(i: int) -> void:
 	_body_label.text = "\"" + String(l["body"]) + "\""
 	_thought_label.text = String(l["thought"])
 	var last := i == LETTERS.size() - 1
-	_prompt_label.text = "E — set it down" if last else "E — next"
+	var btn := InputManager.hint("accept")
+	_prompt_label.text = (btn + " — set it down") if last else (btn + " — next")
+	# Style the prompt label like the controller badge when on controller
+	_style_prompt_label()
 	_thought_label.modulate.a = 0.0
 	var t := create_tween()
 	t.tween_property(_thought_label, "modulate:a", 1.0, 0.5)
+
+func _refresh_prompt(_device: String = "") -> void:
+	if _reading and _prompt_label:
+		var last := _idx == LETTERS.size() - 1
+		var btn := InputManager.hint("accept")
+		_prompt_label.text = (btn + " — set it down") if last else (btn + " — next")
+		_style_prompt_label()
+
+func _style_prompt_label() -> void:
+	if _prompt_label == null:
+		return
+	if InputManager.is_controller():
+		_prompt_label.add_theme_color_override("font_color", Color(0.11, 0.85, 0.23))
+	else:
+		_prompt_label.add_theme_color_override("font_color", Color(0.70, 0.70, 0.72))
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _reading or not _input_ready:
