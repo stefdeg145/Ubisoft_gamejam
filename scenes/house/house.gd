@@ -491,7 +491,7 @@ func _fade_out_music(dur := 2.0) -> void:
 	t.tween_callback(_music.stop)
 
 # -------------------------------------------------------------- rain ambience
-const RAIN_DB := -10.0               # target level once faded in
+const RAIN_DB := 0.0                 # target level once faded in
 
 func _build_rain_audio() -> void:
 	_rain = AudioStreamPlayer.new()

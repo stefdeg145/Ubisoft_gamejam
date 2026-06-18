@@ -23,6 +23,7 @@ shape = SubResource("shp")
 
 [node name="WalkSound" type="AudioStreamPlayer2D" parent="." unique_id=953404493]
 stream = ExtResource("3_walk")
+volume_db = -5.0
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1407034558]
 position = Vector2(0, -30)
