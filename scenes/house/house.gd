@@ -24,6 +24,9 @@ const ART := "res://assets/art/"
 const PROP := "res://assets/art/props/"
 const FX := "res://assets/art/fx/"
 const MUSIC := "res://assets/Sound/Oldies Playing In Another Room  with Gentle Rain and Thunder (V.1).mp3"
+## Rain ambience: begins as the flatline fades in the cold open ("Only the rain,
+## now.") and runs the whole time the player is in the house, just like MUSIC.
+const RAIN := "res://assets/Sound/Rain_Fl_studio.wav"
 
 # world bounds for the play area (interior)
 const LEFT := 64
@@ -35,6 +38,7 @@ const TILE := 64
 var player: CharacterBody2D
 var _grade: CanvasModulate
 var _music: AudioStreamPlayer
+var _rain: AudioStreamPlayer        # looping rain ambience under the house
 ## [{zone, sprite}] pairs kept in sync each frame so interactions track furniture.
 var _follow_zones: Array = []
 ## "Your bed" sprite (the top-left one) — used to spawn beside it after a dream.
@@ -80,7 +84,11 @@ func _ready() -> void:
 	_build_grade()
 	_build_rain()
 	_build_music()
+	_build_rain_audio()
 	_update_grade()
+	# The rain starts the moment we enter the house (right after the cold-open
+	# flatline stops) and runs the whole time we're here, fading in over 0.5s.
+	_play_rain()
 
 	# Bargaining entry (self-contained). It waits until Anger resolves, then
 	# _on_anger_finished() calls begin_mission() to hand the player the couch
@@ -482,7 +490,6 @@ func _fade_out_music(dur := 2.0) -> void:
 	t.tween_property(_music, "volume_db", -40.0, dur)
 	t.tween_callback(_music.stop)
 
-<<<<<<< HEAD
 # -------------------------------------------------------------- rain ambience
 const RAIN_DB := 0.0                 # target level once faded in
 
@@ -510,8 +517,6 @@ func _fade_out_rain(dur := 2.0) -> void:
 	t.tween_property(_rain, "volume_db", -40.0, dur)
 	t.tween_callback(_rain.stop)
 
-=======
->>>>>>> 3c56a777e01da0351ee313dc7d74284ba75a31c1
 # -------------------------------------------------------------- flow
 func _intro() -> void:
 	Game.set_black(true)
@@ -706,6 +711,7 @@ func _on_memory_chosen(node: Node) -> void:
 	player.can_move = false
 	Game.hide_prompt()
 	_fade_out_music(2.0)                            # let the oldies fade as we drift off
+	_fade_out_rain(2.0)                             # and the rain fades out with it
 	_hide_bed_glow()                                # objective reached — drop the beacon
 	if _denial_popup:
 		_denial_popup.dismiss()
