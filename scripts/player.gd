@@ -8,6 +8,10 @@ extends CharacterBody2D
 @export var can_move: bool = true
 ## Side-view stages set this so the character only walks left/right.
 @export var lock_vertical: bool = false
+## Cinematic auto-walk. When can_move is false and this is non-zero, the player
+## walks in this direction under full animation + footsteps (used by the
+## Acceptance walk-away). Set back to Vector2.ZERO to stop.
+@export var auto_walk: Vector2 = Vector2.ZERO
 
 const FRAME_TIME := 0.14
 const DIRS := ["down", "left", "up", "right"]
@@ -212,6 +216,8 @@ func _physics_process(delta: float) -> void:
 	var dir := Vector2.ZERO
 	if can_move:
 		dir = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	elif auto_walk != Vector2.ZERO:
+		dir = auto_walk
 	if lock_vertical:
 		dir.y = 0.0
 	velocity = dir * speed

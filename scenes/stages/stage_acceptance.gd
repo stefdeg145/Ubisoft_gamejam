@@ -1,111 +1,290 @@
-extends Node2D
-## FINAL — ACCEPTANCE · "The Last Morning" (cinematic ending).
-## The one true awakening. No mechanic, no fixing — only presence. The line from
-## the cold open ("Stay with me") finally lands, the loved one is let go, and the
-## protagonist wakes for real into a warm, rain-stopped morning.
+extends StageBase
+## FINAL — ACCEPTANCE · "The Last Morning" (reworked).
+##
+## No dream, no goodbye scene, no monitor flatline. For the first time in the
+## whole game the player is simply real and awake. They wake in the chair in a
+## still-grey house, stand on their own, and cross to the FRONT DOOR — sealed all
+## game. They open it themselves; warm morning light grows with the swing, floods
+## the house back into colour, and carries them OUT into the same park from
+## Bargaining — now a rain-washed morning instead of a grey argument, and the
+## spot where the lost one (Eli) stood is empty. They stand in the absence, find
+## it bearable, and walk on down the path into the morning. Theme: peace — not
+## forgetting, not moving on, but carrying it and still opening the door.
+##
+## The game name appears AFTER the walk, as the final card.
 
-const FX := "res://assets/art/fx/"
-const A := "res://assets/art/house/"
-const CH := "res://assets/art/characters/"
+const FX   := "res://assets/art/fx/"
+const A    := "res://assets/art/house/"
+const CH   := "res://assets/art/characters/"
+const PROP := "res://assets/art/props/"
+const PARK_BG  := "res://scenes/stages/Bargaining_bg.jpg"
+const PARK_AMB := "res://assets/Sound/Park ambience sound  (Royalty Free).mp3"
 
-var _white: ColorRect
-var _sun: TextureRect
-var _tableau: Node2D
-var _loved: Sprite2D
-var _accept_done := false
+# interior playable nook + the door on the north wall
+const ROOM := Rect2(356, 176, 568, 428)
+const DOOR_POS := Vector2(640, 150)
+const SPOT_X := 940.0          # where Eli stood, on the right of the park frame
 
+var _cam: Camera2D
+var _interior: Node2D
+var _park: Node2D
+var _white: ColorRect          # warm-white bloom overlay (open + close)
+var _door_glow: Sprite2D
+var _amb: AudioStreamPlayer
+var _greyed: Array[CanvasItem] = []    # interior props that flood to full colour
+
+var _opening := false
+var _park_active := false
+var _spot_done := false
+var _finale := false           # the very end; E restarts
+
+# ---------------------------------------------------------------- ready
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_build_dawn()
-	_build_table_scene()
-	var cam := Camera2D.new(); cam.position = Vector2(640, 360); cam.make_current(); add_child(cam)
-	# open from the white pass-out
-	_white = ColorRect.new(); _white.color = Color(1, 1, 1, 1)
+	Game.set_black(false)
+	Game.hide_prompt()
+
+	# one fixed camera for the whole level (interior + park line up to the screen)
+	_cam = Camera2D.new()
+	_cam.position = Vector2(640, 360)
+	add_child(_cam)
+
+	_build_white()
+	_white.color.a = 1.0          # open straight out of the depression bloom
+
+	_build_interior()
+
+	# wake sitting in the chair; can't move yet
+	spawn_player(Vector2(640, 520))
+	player.face("up")
+	player.speed = 64.0           # gentle, unhurried
+	# disable the player's follow-cam, THEN claim the fixed stage camera (a newly
+	# entered player camera would otherwise steal "current").
+	var pcam := player.get_node_or_null("Camera2D")
+	if pcam is Camera2D:
+		(pcam as Camera2D).enabled = false
+	_cam.make_current()
+
+	_run_interior()
+
+# ---------------------------------------------------------------- overlays
+func _build_white() -> void:
+	var cl := CanvasLayer.new(); cl.layer = 60; add_child(cl)
+	_white = ColorRect.new()
+	_white.color = Color(1.0, 0.97, 0.9, 0.0)
 	_white.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	_white.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var cl := CanvasLayer.new(); cl.layer = 50; add_child(cl); cl.add_child(_white)
-	Game.set_black(false)
-	_run()
+	cl.add_child(_white)
 
-# ---- backgrounds ----------------------------------------------------
-func _build_dawn() -> void:
-	var grad := Gradient.new()
-	grad.set_color(0, Color(0.96, 0.84, 0.62))     # warm sky
-	grad.set_color(1, Color(0.86, 0.66, 0.50))     # warm floor light
-	var gt := GradientTexture2D.new()
-	gt.gradient = grad; gt.fill_from = Vector2(0, 0); gt.fill_to = Vector2(0, 1)
-	gt.width = 64; gt.height = 64
-	var tr := TextureRect.new(); tr.texture = gt
-	tr.stretch_mode = TextureRect.STRETCH_SCALE
-	tr.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var cl := CanvasLayer.new(); cl.layer = -20; add_child(cl); cl.add_child(tr)
-	_sun = TextureRect.new(); _sun.texture = load(FX + "glow_warm.png")
-	_sun.position = Vector2(420, 60); _sun.size = Vector2(440, 440)
-	_sun.modulate = Color(1, 1, 1, 0.0)
-	cl.add_child(_sun)
+# ---------------------------------------------------------------- interior
+func _build_interior() -> void:
+	_interior = Node2D.new(); add_child(_interior)
 
-func _build_table_scene() -> void:
-	_tableau = Node2D.new(); add_child(_tableau)
-	_prop(_tableau, A + "dining_table.png", 640, 470, 4.5)
-	_prop(_tableau, CH + "walk_right_0.png", 470, 430, 4.0)               # you
-	_loved = _prop(_tableau, CH + "walk_left_0.png", 810, 420, 4.0)        # the loved one
-	_loved.modulate = Color(1.0, 0.96, 0.88)
+	# greyish wood floor across the nook
+	var wood: Texture2D = load(A + "floor_wood.png")
+	for ix in range(9):
+		for iy in range(8):
+			var sp := Sprite2D.new()
+			sp.texture = wood; sp.centered = false
+			sp.position = Vector2(356 + ix * 64, 140 + iy * 64)
+			sp.scale = Vector2(2, 2)
+			sp.modulate = Color(0.5, 0.51, 0.6)
+			sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			_interior.add_child(sp)
+			_greyed.append(sp)
 
-func _prop(parent: Node, tex: String, x: float, y: float, s: float) -> Sprite2D:
+	# north wall + the sealed front door
+	var wall := ColorRect.new()
+	wall.color = Color(0.15, 0.15, 0.19)
+	wall.position = Vector2(356, 96); wall.size = Vector2(568, 56)
+	_interior.add_child(wall); _greyed.append(wall)
+
+	# warm glow behind the door (blooms when it opens)
+	_door_glow = Sprite2D.new()
+	_door_glow.texture = load(FX + "glow_warm.png")
+	_door_glow.position = DOOR_POS
+	_door_glow.scale = Vector2(2.2, 2.2)
+	_door_glow.modulate = Color(1, 1, 1, 0.0)
+	_door_glow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_interior.add_child(_door_glow)
+
+	# door frame + panel (no door art in the pack — built from rects)
+	var frame := ColorRect.new()
+	frame.color = Color(0.12, 0.09, 0.07)
+	frame.size = Vector2(118, 150); frame.position = DOOR_POS - frame.size * 0.5
+	_interior.add_child(frame); _greyed.append(frame)
+	var panel := ColorRect.new()
+	panel.color = Color(0.34, 0.25, 0.18)
+	panel.size = Vector2(96, 134); panel.position = DOOR_POS - panel.size * 0.5
+	panel.modulate = Color(0.6, 0.6, 0.68)     # dimmed like the rest, floods later
+	_interior.add_child(panel); _greyed.append(panel)
+	var knob := ColorRect.new()
+	knob.color = Color(0.75, 0.66, 0.4)
+	knob.size = Vector2(8, 8); knob.position = DOOR_POS + Vector2(30, -2)
+	_interior.add_child(knob); _greyed.append(knob)
+
+	# a little life: armchair he wakes in + a plant
+	_prop(_interior, A + "armchair.png", 640, 556, 2.2, Color(0.5, 0.5, 0.6))
+	_prop(_interior, A + "plant.png", 420, 300, 2.0, Color(0.5, 0.52, 0.58))
+
+	# bounds — keep him in the nook, reachable up to the door trigger
+	_wall(ROOM.position.x - 24, ROOM.position.y, 24, ROOM.size.y)
+	_wall(ROOM.end.x, ROOM.position.y, 24, ROOM.size.y)
+	_wall(ROOM.position.x, ROOM.position.y - 24, ROOM.size.x, 24)
+	_wall(ROOM.position.x, ROOM.end.y, ROOM.size.x, 24)
+
+func _prop(parent: Node, tex: String, x: float, y: float, s: float, tint := Color(1, 1, 1)) -> Sprite2D:
+	var t: Texture2D = load(tex)
 	var sp := Sprite2D.new()
-	sp.texture = load(tex); sp.position = Vector2(x, y); sp.scale = Vector2(s, s)
+	sp.texture = t; sp.centered = false
+	sp.offset = Vector2(-t.get_width() / 2.0, -t.get_height())
+	sp.position = Vector2(x, y); sp.scale = Vector2(s, s)
+	sp.modulate = tint
 	sp.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	parent.add_child(sp)
+	if tint != Color(1, 1, 1):
+		_greyed.append(sp)
 	return sp
 
-# ---- the sequence ---------------------------------------------------
-func _run() -> void:
-	await get_tree().create_timer(0.5).timeout
-	create_tween().tween_property(_sun, "modulate:a", 0.7, 4.0)
-	await _tween_a(_white, 0.0, 3.5)                      # reveal from white
-
-	await Game.say("You wake. But this time you don't try to fix the morning.", 3.4)
-	await Game.say("You don't bargain. You don't look away.", 3.0)
-	await Game.say("You just sit with them, in the light, one more time.", 3.4)
-	await get_tree().create_timer(0.6).timeout
-	await Game.say("\"You stayed with me,\" they say. \"All the way to the end.\"", 3.8)
-	await Game.say("There is nothing left unsaid. Only this.", 3.0)
+func _run_interior() -> void:
 	await get_tree().create_timer(0.4).timeout
-	await Game.say("\"...Stay with me.\"", 3.2)
-	await Game.say("And then — gently — you let them go.", 3.2)
+	await _tween_a(_white, 0.0, 3.2)               # reveal the still-grey room
 
-	# light blooms; the loved one fades into it
-	create_tween().tween_property(_loved, "modulate:a", 0.0, 3.0)
-	await _tween_a(_white, 1.0, 3.0)
-	await get_tree().create_timer(0.8).timeout
+	await Game.say("Morning. The real one, this time.", 3.0)
+	await Game.say("The rain stopped in the night.", 2.8)
+	await Game.say("...I can get up now.", 2.8)
 
-	# the true awakening: the chair by the window, present day
-	_tableau.queue_free()
-	_build_window_scene()
-	await _tween_a(_white, 0.0, 3.0)
-	await Game.say("Morning. The real one. The rain has stopped.", 3.2)
-	await Game.say("The house is warm again.", 2.6)
-	await Game.say("You set the photograph down in your lap, and breathe.", 3.4)
-	await get_tree().create_timer(0.8).timeout
+	player.can_move = true
+	# door becomes the one warm thing; faint glow + a trigger glued to it
+	create_tween().tween_property(_door_glow, "modulate:a", 0.3, 1.6)
+	var area := add_interactable(DOOR_POS.x, DOOR_POS.y + 80, 90, "Open the door. (E)")
+	area.used.connect(_open_door)
+	Game.flash("Go to the door.", 3.0)
 
-	GameState.complete_stage("Acceptance", "The morning — you stayed until the end, and that was enough.")
+# ---------------------------------------------------------------- the door
+func _open_door(_who: Node = null) -> void:
+	if _opening:
+		return
+	_opening = true
+	player.can_move = false
+	player.face("up")
+	Game.hide_prompt()
+
+	# birdsong begins to rise even before the door is fully open
+	_start_ambience(-30.0)
+	if _amb:
+		create_tween().tween_property(_amb, "volume_db", -12.0, 3.0)
+
+	await Game.say("...Okay.", 2.0)
+
+	# light blooms with the swing; the house floods back into full colour
+	create_tween().tween_property(_door_glow, "modulate:a", 1.0, 1.6)
+	var flood := create_tween(); flood.set_parallel(true)
+	for ci in _greyed:
+		if is_instance_valid(ci):
+			flood.tween_property(ci, "modulate", Color(1, 1, 1, 1), 2.2)
+	await _tween_a(_white, 1.0, 2.6)               # warm wash carries us through
+	await get_tree().create_timer(0.6).timeout
+	_enter_park()
+
+# ---------------------------------------------------------------- the park
+func _enter_park() -> void:
+	_interior.queue_free()
+
+	_park = Node2D.new(); add_child(_park)
+	# regraded morning park: the Bargaining backdrop, warm and bright, no vignette
+	var cl := CanvasLayer.new(); cl.layer = -10; _park.add_child(cl)
+	var bg := TextureRect.new()
+	bg.texture = load(PARK_BG)
+	bg.stretch_mode = TextureRect.STRETCH_SCALE
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.modulate = Color(1.0, 0.98, 0.92)
+	bg.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl.add_child(bg)
+	# soft warm morning haze
+	var warm := ColorRect.new()
+	warm.color = Color(1.0, 0.92, 0.74, 0.14)
+	warm.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	warm.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	cl.add_child(warm)
+
+	# step into the morning at the left, facing right across the park
+	player.position = Vector2(300, 545)
+	player.scale = Vector2(1.3, 1.3)
+	player.lock_vertical = true
+	player.face("right")
+
+	await _tween_a(_white, 0.0, 2.8)
+	await Game.say("...Oh. It's the park.", 2.8)
+	await Game.say("Where it happened.", 2.6)
+
+	player.can_move = true
+	Game.flash("Walk. (→)", 3.0)
+	_park_active = true
+
+func _process(_dt: float) -> void:
+	if not _park_active or _spot_done or player == null:
+		return
+	if player.global_position.x > SPOT_X:
+		_spot_done = true
+		_spot_beat()
+
+func _spot_beat() -> void:
+	_park_active = false
+	player.can_move = false
+	player.face("right")
+	Game.hide_prompt()
+	await Game.say("Just grass now. A bench, and the light through the trees.", 3.6)
+	await Game.say("...I can be here. It's okay.", 3.0)
+	await _walk_away()
+
+func _walk_away() -> void:
+	# a single look back at the empty spot — staying, not fleeing
+	player.face("left")
+	await get_tree().create_timer(0.9).timeout
+	await Game.say("Thank you. For all of it.", 3.0)
+
+	# the morning is fully his now — the MC warms to full colour as he goes
+	GameState.complete_stage("Acceptance", "the morning — you opened the door, and walked on.")
+
+	player.face("right")
+	player.lock_vertical = false
+	player.auto_walk = Vector2(0.62, -0.26).normalized()    # away, into the distance
+
+	var t := create_tween(); t.set_parallel(true)
+	t.tween_property(player, "scale", Vector2(0.42, 0.42), 5.5)
+	if _amb:
+		t.tween_property(_amb, "volume_db", -6.0, 5.0)        # birdsong swells
+	await get_tree().create_timer(4.0).timeout
+
+	player.auto_walk = Vector2.ZERO
+	player.can_move = false
+	# a gentle golden haze — NOT a full white-out, so the title + park stay legible
+	await _tween_a(_white, 0.38, 2.8)
+
+	# the game name, AFTER the walk
+	await get_tree().create_timer(0.6).timeout
 	await Game.show_title("THE LAST MORNING", 3.5)
 	await Game.say("thank you for staying.", 3.0)
-	_accept_done = true
+	_finale = true
 	Game.show_prompt("press E")
 
-func _build_window_scene() -> void:
-	var s := Node2D.new(); add_child(s)
-	# soft interior light
-	var floor := ColorRect.new(); floor.color = Color(0.80, 0.70, 0.58)
-	floor.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var cl := CanvasLayer.new(); cl.layer = -15; add_child(cl); cl.add_child(floor)
-	_prop(s, A + "wall_window.png", 560, 150, 4.0)
-	_prop(s, A + "armchair.png", 600, 470, 4.0)
-	var you := _prop(s, CH + "walk_left_0.png", 660, 410, 4.0)
-	you.modulate = Color(1, 1, 1)
-	_prop(s, "res://assets/art/props/photo.png", 648, 470, 3.0)
+# ---------------------------------------------------------------- audio
+func _start_ambience(db: float) -> void:
+	if _amb or not ResourceLoader.exists(PARK_AMB):
+		return
+	_amb = AudioStreamPlayer.new()
+	var s = load(PARK_AMB)
+	if s is AudioStreamMP3:
+		s.loop = true
+	_amb.stream = s
+	_amb.volume_db = db
+	_amb.bus = "Master"
+	add_child(_amb)
+	_amb.play()
 
+# ---------------------------------------------------------------- helpers
 func _tween_a(node: CanvasItem, to: float, dur: float) -> void:
 	var t := create_tween()
 	if node is ColorRect:
@@ -115,11 +294,13 @@ func _tween_a(node: CanvasItem, to: float, dur: float) -> void:
 	await t.finished
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _accept_done:
+	if not _finale:
 		return
 	if event.is_action_pressed("ui_accept"):
-		_accept_done = false
+		_finale = false
 		Game.hide_prompt()
+		if _amb:
+			create_tween().tween_property(_amb, "volume_db", -50.0, 1.0)
 		GameState.reset()
 		await Game.fade_out(1.2)
 		Game.change_scene("res://scenes/intro/cold_open.tscn")

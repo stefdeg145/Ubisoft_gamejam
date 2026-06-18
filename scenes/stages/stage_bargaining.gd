@@ -20,7 +20,7 @@ const PARK_AMBIENCE := "res://assets/Sound/Park ambience sound  (Royalty Free).m
 
 # These names must match the speaker names used in bargaining_park.dtl.
 const PROT_NAME := "Me"
-const DEAD_NAME := "Sam"     # the lost relative — rename here AND in the .dtl to taste
+const DEAD_NAME := "Eli"     # the lost relative — rename here AND in the .dtl to taste
 
 const TARGET_H := 225.0      # on-screen height of the big character sprites
 const PROT_POS := Vector2(300, 540)

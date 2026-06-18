@@ -1,6 +1,6 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://bgamethemelora1"]
+[gd_resource type="Theme" format=3 uid="uid://d07dfkyydpkbm"]
 
-[ext_resource type="FontFile" uid="uid://blora0regular01" path="res://assets/fonts/Lora.ttf" id="1_font"]
+[ext_resource type="FontFile" uid="uid://b3a7853khja8y" path="res://assets/fonts/merchant-copy/Merchant Copy.ttf" id="1_font"]
 
 [resource]
 default_font = ExtResource("1_font")

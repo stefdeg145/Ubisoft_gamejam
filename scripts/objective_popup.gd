@@ -4,17 +4,23 @@ class_name ObjectivePopup
 ## Used for the grief-stage prompts (go to sleep, rest on the couch, ...). Create
 ## one, add it to the tree, call show_objective(); call dismiss() to fade it out.
 
-const CARD_W := 348.0
+const CARD_W := 430.0
 const MARGIN := 24.0
+
+## Objective/TODO UI uses the wider Merchant Copy variant for at-a-glance legibility.
+const WIDE_FONT := "res://assets/fonts/merchant-copy/Merchant Copy Wide.ttf"
 
 var _panel: Panel
 var _dismissing := false
+var _wide: Font
 
 func _init() -> void:
 	layer = 90
 	process_mode = Node.PROCESS_MODE_ALWAYS
 
 func show_objective(title_text: String, body_text: String) -> void:
+	if ResourceLoader.exists(WIDE_FONT):
+		_wide = load(WIDE_FONT)
 	_panel = Panel.new()
 	_panel.position = Vector2(1280 - CARD_W - MARGIN, MARGIN)
 	# Height is unconstrained — we resize to fit content after the first layout frame.
@@ -40,7 +46,9 @@ func show_objective(title_text: String, body_text: String) -> void:
 
 	var title := Label.new()
 	title.text = title_text
-	title.add_theme_font_size_override("font_size", 14)
+	if _wide:
+		title.add_theme_font_override("font", _wide)
+	title.add_theme_font_size_override("font_size", 20)
 	title.add_theme_color_override("font_color", Color(0.85, 0.78, 0.62))
 	vb.add_child(title)
 
@@ -48,7 +56,9 @@ func show_objective(title_text: String, body_text: String) -> void:
 	body.text = body_text
 	body.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	body.custom_minimum_size = Vector2(CARD_W - 28, 0)
-	body.add_theme_font_size_override("font_size", 18)
+	if _wide:
+		body.add_theme_font_override("font", _wide)
+	body.add_theme_font_size_override("font_size", 26)
 	body.add_theme_color_override("font_color", Color(0.93, 0.91, 0.86))
 	vb.add_child(body)
 
