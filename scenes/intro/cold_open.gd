@@ -37,12 +37,7 @@ func _on_device_changed_prompt(_device: String) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _started:
 		return
-<<<<<<< HEAD
-
-	var controller_pressed: bool = (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_B and event.pressed)
-=======
 	var controller_pressed: bool = (event is InputEventJoypadButton and event.button_index == JOY_BUTTON_A and event.pressed)
->>>>>>> 2219da81b67d80bb1b916845cc551ee051b6d02d
 	var keyboard_pressed: bool = event.is_action_pressed("ui_accept") or (event is InputEventKey and event.keycode == KEY_E and event.pressed)
 	if keyboard_pressed or controller_pressed:
 		_started = true

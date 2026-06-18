@@ -20,7 +20,7 @@ size = Vector2(12, 192)
 size = Vector2(10, 93.9375)
 
 [sub_resource type="RectangleShape2D" id="rs_17"]
-size = Vector2(288, 12)
+size = Vector2(287, 12)
 
 [sub_resource type="RectangleShape2D" id="rs_18"]
 size = Vector2(12, 259)
@@ -77,7 +77,7 @@ size = Vector2(60, 18)
 size = Vector2(92, 35)
 
 [sub_resource type="RectangleShape2D" id="rs_14"]
-size = Vector2(60, 32)
+size = Vector2(26, 8)
 
 [sub_resource type="AtlasTexture" id="at_nstand"]
 atlas = ExtResource("cab")
@@ -326,7 +326,7 @@ shape = SubResource("rs_16")
 [node name="WC3" type="StaticBody2D" parent="Solid" unique_id=1742342210]
 
 [node name="C" type="CollisionShape2D" parent="Solid/WC3" unique_id=2096381957]
-position = Vector2(208, 390)
+position = Vector2(207.5, 390)
 shape = SubResource("rs_17")
 
 [node name="WC4" type="StaticBody2D" parent="Solid" unique_id=1977708139]
@@ -459,6 +459,12 @@ shape = SubResource("rs_13")
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_Armchair" unique_id=1866900159]
 position = Vector2(860, 582)
+shape = SubResource("rs_14")
+
+[node name="PlantLiving" type="StaticBody2D" parent="Solid" unique_id=47133969]
+
+[node name="C" type="CollisionShape2D" parent="Solid/PlantLiving" unique_id=893087233]
+position = Vector2(375, 445)
 shape = SubResource("rs_14")
 
 [node name="World" type="Node2D" parent="." unique_id=1502813882]
