@@ -205,6 +205,16 @@ func _style_dialog_box() -> void:
 	var dialog_panel := _find_dialogic_node("DialogTextPanel") as PanelContainer
 	var name_panel   := _find_dialogic_node("NameLabelPanel")  as PanelContainer
 	var name_label   := _find_dialogic_node("DialogicNode_NameLabel") as Label
+	var dialog_text  := _find_dialogic_node("DialogicNode_DialogText") as RichTextLabel
+
+	# Bump the dialogue text up — Dialogic's default size barely fills the box.
+	if dialog_text:
+		dialog_text.add_theme_font_size_override("normal_font_size", 36)
+		dialog_text.add_theme_font_size_override("bold_font_size", 36)
+		dialog_text.add_theme_font_size_override("italics_font_size", 36)
+		dialog_text.add_theme_font_size_override("bold_italics_font_size", 36)
+	if name_label:
+		name_label.add_theme_font_size_override("font_size", 24)
 
 	# Main text box: dark blue-purple with warm golden border
 	var main_style := StyleBoxFlat.new()

@@ -43,6 +43,8 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	Game.set_black(false)
 	Game.hide_prompt()
+	# keep the end-of-game prompt in sync with keyboard/controller
+	InputManager.device_changed.connect(_on_device_changed)
 
 	# one fixed camera for the whole level (interior + park line up to the screen)
 	_cam = Camera2D.new()
@@ -268,7 +270,7 @@ func _walk_away() -> void:
 	await Game.show_title("THE LAST MORNING", 3.5)
 	await Game.say("thank you for staying.", 3.0)
 	_finale = true
-	Game.show_prompt("press E")
+	_update_accept_prompt()
 
 # ---------------------------------------------------------------- audio
 func _start_ambience(db: float) -> void:
@@ -300,7 +302,7 @@ func _update_accept_prompt() -> void:
 		Game.show_prompt("press E")
 
 func _on_device_changed(_device: String) -> void:
-	if _accept_done:
+	if _finale:
 		_update_accept_prompt()
 
 func _unhandled_input(event: InputEvent) -> void:

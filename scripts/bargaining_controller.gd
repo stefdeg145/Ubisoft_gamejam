@@ -211,9 +211,16 @@ func _style_dialog_box() -> void:
 	var name_label := get_tree().root.find_child("DialogicNode_NameLabel", true, false)
 	if name_label is Label:
 		(name_label as Label).add_theme_color_override("font_color", Color.WHITE)
+		(name_label as Label).add_theme_font_size_override("font_size", 24)
 		name_label.self_modulate = Color(1, 1, 1, 1)
 		if "use_character_color" in name_label:
 			name_label.use_character_color = false
+
+	# Bump the dialogue text up — Dialogic's default size barely fills the box.
+	var dialog_text := get_tree().root.find_child("DialogicNode_DialogText", true, false)
+	if dialog_text is RichTextLabel:
+		for s in ["normal_font_size", "bold_font_size", "italics_font_size", "bold_italics_font_size"]:
+			(dialog_text as RichTextLabel).add_theme_font_size_override(s, 36)
 
 ## Build the timeline from the .dtl text directly (robust at runtime, while the
 ## files stay editable in the Dialogic editor).
