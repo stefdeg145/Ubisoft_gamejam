@@ -275,6 +275,8 @@ func _to_door() -> void:
 	# stops, and the held breath of the night exhales
 	if house and is_instance_valid(house) and house.has_method("open_front_door"):
 		house.open_front_door(2.6)
+		# the heavy door giving way as the morning floods in — a low, swelling rumble
+		Haptics.rumble("door")
 	var t := create_tween(); t.set_parallel(true)
 	t.tween_property(_rain_tex, "modulate:a", 0.0, 3.0)
 	t.tween_property(_dark, "color:a", 0.0, 3.0)

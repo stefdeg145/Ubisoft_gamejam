@@ -24,6 +24,7 @@ Game="*res://scripts/autoload/game.gd"
 DebugConsole="*uid://dcch7ua5chbuj"
 Dialogic="*uid://ds2q0uclmolvu"
 StageHUD="*res://scripts/autoload/stage_hud.gd"
+Haptics="*res://scripts/autoload/haptics.gd"
 
 [dialogic]
 

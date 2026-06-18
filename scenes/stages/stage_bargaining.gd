@@ -216,6 +216,11 @@ func _style_dialog_box() -> void:
 	if name_label:
 		name_label.add_theme_font_size_override("font_size", 24)
 
+	# Enlarge the choice buttons too, so the options read as clearly as the text.
+	for btn in get_tree().get_nodes_in_group("dialogic_choice_button"):
+		if btn is Button:
+			(btn as Button).add_theme_font_size_override("font_size", 30)
+
 	# Main text box: dark blue-purple with warm golden border
 	var main_style := StyleBoxFlat.new()
 	main_style.bg_color = Color(0.06, 0.05, 0.10, 0.91)

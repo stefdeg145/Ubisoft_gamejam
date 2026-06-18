@@ -142,6 +142,12 @@ func _on_fix(area: Area2D) -> void:
 	Game.hide_prompt()
 	var sp: Sprite2D = d["sprite"]
 	_tries += 1
+	# Haptics: a physical nudge as you grab the object. Lighter than the Anger stage
+	# (which leans harder) — the chair has weight, the mug is a small skid, and the
+	# painting stays silent. No rug exists in this scene.
+	match String(sp.name):
+		"ChairKnocked": Haptics.rumble("medium")
+		"Mug": Haptics.rumble("light")
 	# straighten it (and, for the mug, wipe it clean)...
 	if d["fixed_tex"] != null:
 		sp.texture = d["fixed_tex"]
