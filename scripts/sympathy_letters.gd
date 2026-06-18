@@ -53,6 +53,7 @@ var _from_label: Label
 var _body_label: Label
 var _thought_label: Label
 var _prompt_label: Label
+var _prompt_badge: Label
 
 func _ready() -> void:
 	body_entered.connect(_on_enter)
@@ -195,13 +196,40 @@ func _build_reader() -> void:
 	_thought_label.size = Vector2(vp.x * 0.76, 70)
 	_layer.add_child(_thought_label)
 
+	# Badge + text in an HBoxContainer
+	var _prompt_row := HBoxContainer.new()
+	_prompt_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	_prompt_row.add_theme_constant_override("separation", 8)
+	_prompt_row.position = Vector2(vp.x * 0.5 - 100, vp.y - 54)
+	_prompt_row.size = Vector2(200, 30)
+	_layer.add_child(_prompt_row)
+
+	# Green circle badge for controller button
+	_prompt_badge = Label.new()
+	_prompt_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt_badge.add_theme_font_size_override("font_size", 16)
+	_prompt_badge.add_theme_color_override("font_color", Color(0.11, 0.85, 0.23))
+	_prompt_badge.custom_minimum_size = Vector2(26, 26)
+	_prompt_badge.visible = false
+	var _badge_box := StyleBoxFlat.new()
+	_badge_box.bg_color = Color(0.08, 0.08, 0.1, 0.85)
+	_badge_box.set_corner_radius_all(13)
+	_badge_box.content_margin_left   = 4
+	_badge_box.content_margin_right  = 4
+	_badge_box.content_margin_top    = 4
+	_badge_box.content_margin_bottom = 4
+	_prompt_badge.add_theme_stylebox_override("normal", _badge_box)
+	_prompt_row.add_child(_prompt_badge)
+
+	# Plain text label
 	_prompt_label = Label.new()
-	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_prompt_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_prompt_label.add_theme_font_size_override("font_size", 18)
 	_prompt_label.add_theme_color_override("font_color", Color(0.70, 0.70, 0.72))
-	_prompt_label.position = Vector2(vp.x * 0.5 - 160, vp.y - 54)
-	_prompt_label.size = Vector2(320, 30)
-	_layer.add_child(_prompt_label)
+	_prompt_label.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_prompt_row.add_child(_prompt_label)
 
 	# zoom the card in
 	_card.scale = Vector2(0.7, 0.7)
@@ -219,10 +247,7 @@ func _show_letter(i: int) -> void:
 	_body_label.text = "\"" + String(l["body"]) + "\""
 	_thought_label.text = String(l["thought"])
 	var last := i == LETTERS.size() - 1
-	var btn := InputManager.hint("accept")
-	_prompt_label.text = (btn + " — set it down") if last else (btn + " — next")
-	# Style the prompt label like the controller badge when on controller
-	_style_prompt_label()
+	_update_prompt_display(last)
 	_thought_label.modulate.a = 0.0
 	var t := create_tween()
 	t.tween_property(_thought_label, "modulate:a", 1.0, 0.5)
@@ -230,16 +255,21 @@ func _show_letter(i: int) -> void:
 func _refresh_prompt(_device: String = "") -> void:
 	if _reading and _prompt_label:
 		var last := _idx == LETTERS.size() - 1
-		var btn := InputManager.hint("accept")
-		_prompt_label.text = (btn + " — set it down") if last else (btn + " — next")
-		_style_prompt_label()
+		_update_prompt_display(last)
 
-func _style_prompt_label() -> void:
+func _update_prompt_display(last: bool) -> void:
 	if _prompt_label == null:
 		return
 	if InputManager.is_controller():
-		_prompt_label.add_theme_color_override("font_color", Color(0.11, 0.85, 0.23))
+		if _prompt_badge:
+			_prompt_badge.text = "A"
+			_prompt_badge.visible = true
+		_prompt_label.text = "— set it down" if last else "— next"
+		_prompt_label.add_theme_color_override("font_color", Color(0.70, 0.70, 0.72))
 	else:
+		if _prompt_badge:
+			_prompt_badge.visible = false
+		_prompt_label.text = "E — set it down" if last else "E — next"
 		_prompt_label.add_theme_color_override("font_color", Color(0.70, 0.70, 0.72))
 
 func _unhandled_input(event: InputEvent) -> void:

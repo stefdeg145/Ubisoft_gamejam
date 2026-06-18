@@ -138,7 +138,7 @@ func _quest_target(kind: String) -> Node2D:
 	return null
 
 func _quest_prompt(kind: String) -> String:
-	var btn := InputManager.hint("accept")
+	var btn: String = InputManager.hint("accept")
 	match kind:
 		"rug": return "Straighten it (%s)" % btn
 		"chair": return "Push it in (%s)" % btn
@@ -252,7 +252,7 @@ func _breaking_point() -> void:
 	_make_aim_arrow()
 	_aiming = true
 	if InputManager.is_controller():
-		Game.show_prompt("Aim with Left Stick   —   A to throw")
+		Game.show_prompt("Aim with Left Stick  —  throw", "A")
 	else:
 		Game.show_prompt("Aim with A / D   —   E to throw")
 
@@ -291,7 +291,7 @@ func _on_device_changed(_device: String) -> void:
 	# Refresh the throw prompt if currently aiming
 	if _aiming:
 		if InputManager.is_controller():
-			Game.show_prompt("Aim with Left Stick   —   A to throw")
+			Game.show_prompt("Aim with Left Stick  —  throw", "A")
 		else:
 			Game.show_prompt("Aim with A / D   —   E to throw")
 	# Refresh quest prompt if a zone is active
