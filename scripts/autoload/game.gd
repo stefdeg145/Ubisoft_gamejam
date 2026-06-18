@@ -322,9 +322,10 @@ func show_title(text: String, hold := 3.0) -> void:
 func show_title_card(title: String, subtitle: String, hold := 3.0) -> void:
 	_title.text = title
 	_subtitle.text = subtitle
-	# Cinematic hit lands as the title slams in.
+	# Cinematic hit lands as the title slams in — sound + a sharp controller jolt.
 	if _title_hit and _title_hit.stream:
 		_title_hit.play()
+	Haptics.rumble("slam")
 	# Title rises first; the subtitle follows a beat later, then both hold and fade.
 	var t := create_tween()
 	t.tween_property(_title, "modulate:a", 1.0, 1.4)

@@ -174,6 +174,8 @@ func _fumble_rug() -> void:
 
 func _fumble_chair() -> void:
 	_anger_beat()
+	# A heavy wooden chair shoved in frustration — the strongest of the chore rumbles.
+	Haptics.rumble("heavy")
 	var home := chair.position
 	var t := create_tween()
 	t.tween_property(chair, "position", home + Vector2(0, -10), 0.12)  # push in...
@@ -188,6 +190,8 @@ func _fumble_chair() -> void:
 
 func _fumble_mug() -> void:
 	_anger_beat()
+	# The mug skids across the table — a lighter, scraping buzz than the chair.
+	Haptics.rumble("medium")
 	# the mug slides toward the table edge with each grab
 	var slip := Vector2(34, 6) * _attempt
 	var t := create_tween()
@@ -245,6 +249,9 @@ func _breaking_point() -> void:
 		_zone.queue_free()
 	_set_row_breaking()
 	await Game.say("Why won't anything just— STAY—", 2.2)
+	# He picks up the mug — the house holds its breath. Cut ALL music + rain so the
+	# throw and the words after it land in silence. Brought back in _resolve().
+	_hush_surrounding_audio()
 	# the mug lifts to the hand: snap it to the player and start aiming
 	_mug.rotation = 0.0
 	_mug.global_position = player.global_position + Vector2(0, -28)
@@ -285,6 +292,8 @@ func _launch() -> void:
 	_vz = THROW_VZ
 	_vel = dir * THROW_SPEED
 	_flying = true
+	# The release — a hard kick as the mug leaves the hand (the shatter hits harder).
+	Haptics.rumble("throw")
 
 # ---------------------------------------------------------------- device switch
 func _on_device_changed(_device: String) -> void:
@@ -343,6 +352,8 @@ func _shatter() -> void:
 		_sfx.play()
 	_spawn_shards(at)
 	_screen_shake()
+	# The biggest hit in the game — the mug shattering against the wall.
+	Haptics.rumble("impact")
 	_resolve(at)
 
 func _spawn_shards(at: Vector2) -> void:
@@ -386,6 +397,8 @@ func _resolve(_at: Vector2) -> void:
 	await Game.say("...oh.", 1.6)
 	await Game.say("I'm sorry. I'm not angry at you.", 2.6)
 	await Game.say("I'm angry that you're gone.", 2.8)
+	# The words are out — the room can breathe again. BGM + rain ease back in.
+	_resume_surrounding_audio()
 	_hide_ui()
 	# He's spent. The photo he always carries is still in his pocket — the couch
 	# flow (in the house) is where he finally sits down and looks at it.
@@ -393,6 +406,20 @@ func _resolve(_at: Vector2) -> void:
 	GameState.complete_stage("Anger", "the unfair — anger is love with nowhere to go")
 	_running = false
 	emit_signal("finished")
+
+# ---------------------------------------------------------------- surrounding audio
+## The bleed runs inside the house, which owns the BGM + rain. We're parented to
+## it, so ask it to hush/resume. Guarded so this is harmless if the parent ever
+## changes or lacks the methods (e.g. when run standalone for testing).
+func _hush_surrounding_audio() -> void:
+	var host := get_parent()
+	if host and host.has_method("hush_house_audio"):
+		host.hush_house_audio()
+
+func _resume_surrounding_audio() -> void:
+	var host := get_parent()
+	if host and host.has_method("resume_house_audio"):
+		host.resume_house_audio()
 
 # ---------------------------------------------------------------- build bits
 func _build_mug() -> void:

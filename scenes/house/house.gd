@@ -517,6 +517,26 @@ func _fade_out_rain(dur := 2.0) -> void:
 	t.tween_property(_rain, "volume_db", -40.0, dur)
 	t.tween_callback(_rain.stop)
 
+# -------------------------------------------------------------- grief hush
+## Called by the Anger bleed the instant the mug is lifted: the house holds its
+## breath — BGM and rain both cut out — so the throw + the words that follow land
+## in stark silence. `resume_house_audio()` brings them back afterwards.
+func hush_house_audio(dur := 0.25) -> void:
+	if _music and _music.playing:
+		var tm := create_tween()
+		tm.tween_property(_music, "volume_db", -60.0, dur)
+		tm.tween_callback(_music.stop)
+	_fade_out_rain(dur)
+
+## Ease the BGM (and rain) back in after the silence — used once he says he isn't
+## angry at her, so the room can breathe again.
+func resume_house_audio(fade := 1.4) -> void:
+	if _music and not _music.playing:
+		_music.volume_db = -40.0
+		_music.play()
+		create_tween().tween_property(_music, "volume_db", -8.0, fade)
+	_play_rain(fade)
+
 # -------------------------------------------------------------- flow
 func _intro() -> void:
 	Game.set_black(true)
