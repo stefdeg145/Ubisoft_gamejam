@@ -244,13 +244,13 @@ func _walk_away() -> void:
 	await Game.say("...It's a good morning.", 3.0)
 	await Game.say("A good morning to be walking.", 3.4)
 
-	# the light blooms up around him — the dramatic swell, then the title
-	await _tween_a(_white, 0.5, 3.4)
+	# the morning settles — the world dims to black for the closing title card
 	await get_tree().create_timer(1.0).timeout
-	await Game.show_title("THE LAST MORNING", 4.0)
-	await Game.say("thank you for staying.", 3.4)
-	_finale = true
-	_update_accept_prompt()
+	if _amb:
+		create_tween().tween_property(_amb, "volume_db", -50.0, 3.0)
+	await Game.fade_out(3.0)
+	# The closing card holds forever — the game ends here, with no loop back.
+	await Game.show_end_card("AFTER", "a game about grief and inner peace")
 
 # ---------------------------------------------------------------- audio
 func _start_ambience(db: float) -> void:
@@ -291,14 +291,6 @@ func _on_device_changed(_device: String) -> void:
 	if _finale:
 		_update_accept_prompt()
 
-func _unhandled_input(event: InputEvent) -> void:
-	if not _finale:
-		return
-	if event.is_action_pressed("ui_accept"):
-		_finale = false
-		Game.hide_prompt()
-		if _amb:
-			create_tween().tween_property(_amb, "volume_db", -50.0, 1.0)
-		GameState.reset()
-		await Game.fade_out(1.2)
-		Game.change_scene("res://scenes/intro/cold_open.tscn")
+## The game ends on the closing card and holds there — no input restarts it.
+func _unhandled_input(_event: InputEvent) -> void:
+	return

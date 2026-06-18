@@ -354,6 +354,32 @@ func hide_prompt() -> void:
 	if _prompt_badge:
 		_prompt_badge.visible = false
 
+## The closing card: a big centred title with a small line beneath it, on black.
+## Unlike show_title_card it NEVER fades out — it holds for the end of the game.
+func show_end_card(title: String, subtitle: String) -> void:
+	hide_prompt()
+	set_black(true)                       # solid black behind the text
+	var vs := get_viewport().get_visible_rect().size
+	# Big, centred title with the subtext just below it (positions for this card only).
+	_title.add_theme_font_size_override("font_size", 96)
+	_title.text = title
+	_title.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.38)
+	_title.size = Vector2(vs.x * 0.9, 140)
+	_title.modulate.a = 0.0
+	_subtitle.text = subtitle
+	_subtitle.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.55)
+	_subtitle.size = Vector2(vs.x * 0.9, 60)
+	_subtitle.modulate.a = 0.0
+	# Make sure no other overlay text lingers over the ending.
+	_title_img.modulate.a = 0.0
+	_logo_img.modulate.a = 0.0
+	_caption.modulate.a = 0.0
+	_caption_bg.modulate.a = 0.0
+	var t := create_tween()
+	t.tween_property(_title, "modulate:a", 1.0, 2.0)
+	t.parallel().tween_property(_subtitle, "modulate:a", 1.0, 2.0).set_delay(0.8)
+	await t.finished
+
 func show_title(text: String, hold := 3.0) -> void:
 	_title.text = text
 	var t := create_tween()

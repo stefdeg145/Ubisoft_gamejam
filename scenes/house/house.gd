@@ -394,9 +394,9 @@ func _process(_dt: float) -> void:
 			continue
 		var r := _visual_aabb_global(sp)
 		z.global_position = r.position + r.size * 0.5
-	# Keep the bubble of light centred on the player.
+	# Keep the pool of light at the player's feet, like a soft warm shadow.
 	if _light_pool and is_instance_valid(_light_pool) and is_instance_valid(player):
-		_light_pool.global_position = player.global_position
+		_light_pool.global_position = player.global_position + Vector2(0, LIGHT_FEET_OFFSET)
 
 func _visual_aabb_global(sp: Sprite2D) -> Rect2:
 	var ts: Vector2 = sp.texture.get_size()
@@ -512,23 +512,25 @@ func _apply_desat(node: Node) -> void:
 ## radial-gradient sprite blended additively over the room (renderer-safe on the
 ## GL Compatibility backend, unlike a world-position shader). Sits just above the
 ## room (z_index 1) so the warmth pools over the floor and furniture around him.
-const LIGHT_RADIUS := 150.0          # world-px radius of the pool (small/tight)
-const LIGHT_WARMTH := Color(1.0, 0.92, 0.78, 0.32)   # warm tint + strength (alpha)
+const LIGHT_RADIUS := 88.0           # world-px radius of the pool (small/tight)
+const LIGHT_WARMTH := Color(1.0, 0.9, 0.74, 0.6)   # warm tint + strength (alpha = brighter)
+const LIGHT_SQUASH := 0.55           # vertical squash so it reads as a ground pool
+const LIGHT_FEET_OFFSET := 10.0      # push it down to the feet, almost like a shadow
 
 func _build_light_pool() -> void:
 	_light_pool = Sprite2D.new()
 	_light_pool.texture = _make_radial_texture(128)
 	_light_pool.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	# Scale the 128px (radius 64) gradient up to the wanted world radius.
+	# Scale the 128px (radius 64) gradient to the wanted radius, squashed vertically.
 	var s := LIGHT_RADIUS / 64.0
-	_light_pool.scale = Vector2(s, s)
+	_light_pool.scale = Vector2(s, s * LIGHT_SQUASH)
 	_light_pool.modulate = LIGHT_WARMTH
 	_light_pool.z_index = 1            # gentle glow just above the room
 	var m := CanvasItemMaterial.new()
 	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD   # adds warmth/brightness, never darkens
 	_light_pool.material = m
 	if player and is_instance_valid(player):
-		_light_pool.global_position = player.global_position
+		_light_pool.global_position = player.global_position + Vector2(0, LIGHT_FEET_OFFSET)
 	add_child(_light_pool)
 
 ## Builds a soft round white gradient (opaque centre -> transparent edge) used as
