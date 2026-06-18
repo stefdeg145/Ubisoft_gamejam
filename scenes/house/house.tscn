@@ -416,7 +416,8 @@ shape = SubResource("rs_6")
 [node name="FC_BathSink" type="StaticBody2D" parent="Solid" unique_id=143077835]
 
 [node name="C" type="CollisionShape2D" parent="Solid/FC_BathSink" unique_id=1042537618]
-position = Vector2(511, 275)
+position = Vector2(544, 274)
+rotation = 1.5821799
 shape = SubResource("rs_7")
 
 [node name="FC_Kitchen" type="StaticBody2D" parent="Solid" unique_id=1362295619]
@@ -552,7 +553,8 @@ offset = Vector2(-11, -44)
 
 [node name="BathSink" type="Sprite2D" parent="World" unique_id=1799189273]
 texture_filter = 1
-position = Vector2(512, 290)
+position = Vector2(525, 274)
+rotation = 1.5821799
 scale = Vector2(2, 2)
 texture = SubResource("at_sink")
 centered = false

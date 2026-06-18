@@ -109,6 +109,7 @@ func _ready() -> void:
 	_title_hit.bus = "Master"
 	add_child(_title_hit)
 
+
 	get_viewport().size_changed.connect(_resize)
 	_resize()
 
