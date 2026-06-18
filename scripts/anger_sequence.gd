@@ -253,9 +253,7 @@ func _breaking_point() -> void:
 		_zone.queue_free()
 	_set_row_breaking()
 	await Game.say("Why won't anything just— STAY—", 2.2)
-	# He picks up the mug — the house holds its breath. Cut ALL music + rain so the
-	# throw and the words after it land in silence. Brought back in _resolve().
-	_hush_surrounding_audio()
+	# The house keeps its music + rain going through the throw (no dramatic silence).
 	# the mug lifts to the hand: snap it to the player and start aiming
 	_mug.rotation = 0.0
 	_mug.global_position = player.global_position + Vector2(0, -28)

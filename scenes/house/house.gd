@@ -37,6 +37,7 @@ const TILE := 64
 
 var player: CharacterBody2D
 var _grade: CanvasModulate
+var _light_pool: Sprite2D            # soft warm pool of light that follows the player
 var _music: AudioStreamPlayer
 var _rain: AudioStreamPlayer        # looping rain ambience under the house
 ## [{zone, sprite}] pairs kept in sync each frame so interactions track furniture.
@@ -83,6 +84,7 @@ func _ready() -> void:
 	_build_interactions()
 	_build_grade()
 	_build_desaturation()
+	_build_light_pool()
 	_build_rain()
 	_build_music()
 	_build_rain_audio()
@@ -392,6 +394,9 @@ func _process(_dt: float) -> void:
 			continue
 		var r := _visual_aabb_global(sp)
 		z.global_position = r.position + r.size * 0.5
+	# Keep the bubble of light centred on the player.
+	if _light_pool and is_instance_valid(_light_pool) and is_instance_valid(player):
+		_light_pool.global_position = player.global_position
 
 func _visual_aabb_global(sp: Sprite2D) -> Rect2:
 	var ts: Vector2 = sp.texture.get_size()
@@ -463,6 +468,8 @@ func _build_grade() -> void:
 const DESAT_SHADER := """
 shader_type canvas_item;
 uniform float amount : hint_range(0.0, 1.0) = 1.0;   // 1 = full grey, 0 = full colour
+// A soft 'bubble of light' around the player: within it the grey is partly lifted
+// so colour pools around the griever wherever he stands.
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
 	float g = dot(c.rgb, vec3(0.299, 0.587, 0.114));   // perceptual luminance
@@ -498,6 +505,46 @@ func _apply_desat(node: Node) -> void:
 			(child as Sprite2D).material = _desat_mat
 		if child.get_child_count() > 0:
 			_apply_desat(child)
+
+# -------------------------------------------------------------- bubble of light
+## A soft, warm pool of light that follows the player so the grey film reads as
+## "lifted" right around him — a little bubble of warmth in the cold house. It's a
+## radial-gradient sprite blended additively over the room (renderer-safe on the
+## GL Compatibility backend, unlike a world-position shader). Sits just above the
+## room (z_index 1) so the warmth pools over the floor and furniture around him.
+const LIGHT_RADIUS := 150.0          # world-px radius of the pool (small/tight)
+const LIGHT_WARMTH := Color(1.0, 0.92, 0.78, 0.32)   # warm tint + strength (alpha)
+
+func _build_light_pool() -> void:
+	_light_pool = Sprite2D.new()
+	_light_pool.texture = _make_radial_texture(128)
+	_light_pool.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	# Scale the 128px (radius 64) gradient up to the wanted world radius.
+	var s := LIGHT_RADIUS / 64.0
+	_light_pool.scale = Vector2(s, s)
+	_light_pool.modulate = LIGHT_WARMTH
+	_light_pool.z_index = 1            # gentle glow just above the room
+	var m := CanvasItemMaterial.new()
+	m.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD   # adds warmth/brightness, never darkens
+	_light_pool.material = m
+	if player and is_instance_valid(player):
+		_light_pool.global_position = player.global_position
+	add_child(_light_pool)
+
+## Builds a soft round white gradient (opaque centre -> transparent edge) used as
+## the light pool. Squared falloff so it fades gently rather than hard-edged.
+func _make_radial_texture(size: int) -> ImageTexture:
+	var img := Image.create(size, size, false, Image.FORMAT_RGBA8)
+	var c := size * 0.5
+	for y in range(size):
+		for x in range(size):
+			var dx := (float(x) - c) / c
+			var dy := (float(y) - c) / c
+			var d := sqrt(dx * dx + dy * dy)        # 0 centre .. 1 edge
+			var a := clampf(1.0 - d, 0.0, 1.0)
+			a = a * a                                # soft, rounded falloff
+			img.set_pixel(x, y, Color(1, 1, 1, a))
+	return ImageTexture.create_from_image(img)
 
 func _build_rain() -> void:
 	var layer := CanvasLayer.new()
