@@ -26,6 +26,8 @@ var table_top: Vector2 = Vector2(700, 300)     # where the mug sits / is thrown 
 
 # ---- tuning ---------------------------------------------------------------
 const SHATTER_SFX := "res://assets/Sound/Mug_Breaking.mp3"
+const RUG_SFX := "res://assets/Sound/New_Rustling_Rug.wav"
+const CHAIR_SFX := "res://assets/Sound/New_Moving_wood_or_chair.wav"
 const THROW_SPEED := 360.0     # horizontal launch speed (px/s)
 const THROW_VZ := 300.0        # initial upward "height" speed (fake Z)
 const GRAVITY := 650.0         # fake-Z gravity
@@ -161,6 +163,7 @@ func _on_quest_used(_area) -> void:
 # ---------------------------------------------------------------- fumbles
 func _fumble_rug() -> void:
 	_anger_beat()
+	Sfx.play(RUG_SFX)                    # the rug rustling as it's tugged (no haptic — it's light)
 	var base := rug.rotation
 	var t := create_tween()
 	t.tween_property(rug, "rotation", base + 0.18, 0.12)   # tug it straight...
@@ -176,6 +179,7 @@ func _fumble_chair() -> void:
 	_anger_beat()
 	# A heavy wooden chair shoved in frustration — the strongest of the chore rumbles.
 	Haptics.rumble("heavy")
+	Sfx.play(CHAIR_SFX)                  # wood scraping the floor as the chair drags
 	var home := chair.position
 	var t := create_tween()
 	t.tween_property(chair, "position", home + Vector2(0, -10), 0.12)  # push in...

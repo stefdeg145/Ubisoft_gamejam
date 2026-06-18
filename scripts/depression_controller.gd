@@ -245,12 +245,17 @@ func _allow_rise() -> void:
 	_glow = Sprite2D.new()
 	_glow.texture = load(FX + "glow_warm.png")
 	_glow.position = _glow_point
-	_glow.scale = Vector2(2.6, 2.6)
+	_glow.scale = Vector2(4.6, 4.6)                  # larger pool of light so the door reads
 	_glow.modulate = Color(1, 1, 1, 0.0)
-	_glow.z_index = 2
+	_glow.z_index = 40                               # sit above the furniture
 	_glow.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	# Additive blend so the warm light punches THROUGH the dark/vignette overlays
+	# instead of being buried under them (that's why it read so dim before).
+	var glow_mat := CanvasItemMaterial.new()
+	glow_mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	_glow.material = glow_mat
 	world.add_child(_glow)
-	create_tween().tween_property(_glow, "modulate:a", 0.85, 1.6)
+	create_tween().tween_property(_glow, "modulate:a", 1.0, 1.6)
 	await Game.say("...Up. Just — up.", 2.6)
 	if player:
 		player.can_move = true
@@ -282,7 +287,7 @@ func _to_door() -> void:
 	t.tween_property(_dark, "color:a", 0.0, 3.0)
 	t.tween_property(_vig, "modulate:a", 0.12, 3.0)
 	if _glow:
-		t.tween_property(_glow, "scale", Vector2(5.5, 5.5), 2.6)
+		t.tween_property(_glow, "scale", Vector2(9.0, 9.0), 2.6)
 		t.tween_property(_glow, "modulate:a", 1.0, 1.6)
 	await t.finished
 	await Game.say("...Morning. The rain's stopped.", 2.6)

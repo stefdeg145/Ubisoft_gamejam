@@ -82,6 +82,7 @@ func _ready() -> void:
 	# entrances are off for now — we'll rework stage entries when designing levels.)
 	_build_interactions()
 	_build_grade()
+	_build_desaturation()
 	_build_rain()
 	_build_music()
 	_build_rain_audio()
@@ -453,6 +454,51 @@ func _build_grade() -> void:
 	_grade = CanvasModulate.new()
 	add_child(_grade)
 
+# -------------------------------------------------------------- grayscale grade
+## A desaturation pass applied ONLY to the house's structure + furniture (floor,
+## walls, props) — never the player and never the warm memory glows. It starts
+## fully grey and lifts toward full colour as stages resolve, so the house quite
+## literally regains its colour as the griever does. House-only: it lives on these
+## nodes, so the dream-stage scenes are untouched.
+const DESAT_SHADER := """
+shader_type canvas_item;
+uniform float amount : hint_range(0.0, 1.0) = 1.0;   // 1 = full grey, 0 = full colour
+void fragment() {
+	vec4 c = texture(TEXTURE, UV);
+	float g = dot(c.rgb, vec3(0.299, 0.587, 0.114));   // perceptual luminance
+	c.rgb = mix(c.rgb, vec3(g), amount);
+	COLOR = c * COLOR;
+}
+"""
+var _desat_mat: ShaderMaterial
+
+func _build_desaturation() -> void:
+	var sh := Shader.new()
+	sh.code = DESAT_SHADER
+	_desat_mat = ShaderMaterial.new()
+	_desat_mat.shader = sh
+	_desat_mat.set_shader_parameter("amount", 1.0 - GameState.warmth())
+	# Paint the shared material onto every house sprite EXCEPT the player and the
+	# memory objects (whose glows should stay warm). Runs after the player + the
+	# memories already exist, so the skip checks work.
+	_apply_desat(_floor)        # wooden / tiled floor
+	_apply_desat(_northwall)    # north wall faces + the wooden door leaf
+	_apply_desat(_world)        # furniture (skips the player + memories)
+	var decals := get_node_or_null("Decals")   # the living-room rug, etc.
+	if decals:
+		_apply_desat(decals)
+
+## Recursively assign the desaturation material to Sprite2D nodes, skipping the
+## player subtree and any memory objects (Area2D) so they keep their colour.
+func _apply_desat(node: Node) -> void:
+	for child in node.get_children():
+		if child == player or child is Area2D:
+			continue
+		if child is Sprite2D:
+			(child as Sprite2D).material = _desat_mat
+		if child.get_child_count() > 0:
+			_apply_desat(child)
+
 func _build_rain() -> void:
 	var layer := CanvasLayer.new()
 	layer.layer = 5
@@ -470,6 +516,13 @@ func _update_grade() -> void:
 	# cold grey -> warm/full colour as memories resolve
 	var cold := Color(0.55, 0.57, 0.66)
 	_grade.color = cold.lerp(Color(1, 1, 1), w)
+	# Ease the house's greyness toward its new, lower level (full colour at the end).
+	if _desat_mat:
+		var target := 1.0 - w
+		var tw := create_tween()
+		tw.tween_method(
+			func(v: float) -> void: _desat_mat.set_shader_parameter("amount", v),
+			_desat_mat.get_shader_parameter("amount"), target, 1.2)
 
 # -------------------------------------------------------------- music
 func _build_music() -> void:

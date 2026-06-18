@@ -15,6 +15,7 @@ extends StageBase
 const MUG_CLEAN := "res://assets/art/Mug Unspilled for Denial.png"
 const BACKGROUND := "res://assets/art/denial_stage/background.jpg"
 const COOKING_BGM := "res://assets/Sound/Cooking_sound_denial_BGM.mp3"
+const CHAIR_SFX := "res://assets/Sound/New_Moving_wood_or_chair.wav"
 
 ## name in the scene -> {prompt, clean(optional swap texture), reach}
 ## `reach` is the radius of the interaction box — bump it for props the player
@@ -146,8 +147,11 @@ func _on_fix(area: Area2D) -> void:
 	# (which leans harder) — the chair has weight, the mug is a small skid, and the
 	# painting stays silent. No rug exists in this scene.
 	match String(sp.name):
-		"ChairKnocked": Haptics.rumble("medium")
-		"Mug": Haptics.rumble("light")
+		"ChairKnocked":
+			Haptics.rumble("medium")
+			Sfx.play(CHAIR_SFX)          # wood scraping as the chair is set upright
+		"Mug":
+			Haptics.rumble("light")
 	# straighten it (and, for the mug, wipe it clean)...
 	if d["fixed_tex"] != null:
 		sp.texture = d["fixed_tex"]
