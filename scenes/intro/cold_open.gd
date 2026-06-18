@@ -67,8 +67,10 @@ func _begin() -> void:
 	_fade_ecg_out(1.4)
 	await Game.say("Only the rain, now.", 1.0)
 	await get_tree().create_timer(0.8).timeout
-	await Game.show_title_card("After", "Ubisoft Gamejam 2026", 3.2)
-	await get_tree().create_timer(0.6).timeout
+	# Title screen: AFTER_title (left) + AFTER_logo (right) + "Ubisoft Gamejam 2026"
+	# centred below. The title twitches first; the logo's glitch joins 0.5s later.
+	await Game.show_after_card("res://assets/art/AFTER_title.png", "res://assets/art/AFTER_logo.png", "Ubisoft Gamejam 2026", 3.2)
+	await get_tree().create_timer(0.4).timeout
 	Game.change_scene(HOUSE)
 
 func _fade_monitor_out(dur: float = 1.4) -> void:

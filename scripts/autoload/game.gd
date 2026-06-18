@@ -7,6 +7,7 @@ extends CanvasLayer
 const VIGNETTE := preload("res://assets/art/fx/vignette.png")
 const FONT_PATH := "res://assets/fonts/merchant-copy/Merchant Copy.ttf"
 const TITLE_HIT := "res://assets/Sound/Titlecard_hit_sound.mp3"
+const GLITCH_SHADER := "res://shaders/glitch.gdshader"
 
 const _CAPTION_FONT_SIZE  := 34
 const _CAPTION_LINE_H     := _CAPTION_FONT_SIZE * 1.35   # px per wrapped line
@@ -20,6 +21,8 @@ var _caption_bg: Panel   # dark panel behind every say()/flash() line
 var _caption: Label
 var _title: Label
 var _subtitle: Label
+var _title_img: TextureRect   ## image title card (e.g. AFTER_title) with glitch
+var _logo_img: TextureRect    ## full-screen logo card (e.g. AFTER_logo) with glitch
 var _prompt: Label
 var _prompt_tween: Tween
 var _prompt_row: HBoxContainer   ## holds badge + text side by side
@@ -67,6 +70,22 @@ func _ready() -> void:
 	_subtitle = _make_label(26, Color(0.78, 0.76, 0.70))
 	_subtitle.modulate.a = 0.0
 	add_child(_subtitle)
+
+	# Image title card (e.g. AFTER_title) — sits where the text title is, glitching.
+	_title_img = TextureRect.new()
+	_title_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_title_img.modulate.a = 0.0
+	_title_img.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_title_img.material = _make_glitch_material()
+	add_child(_title_img)
+
+	# Full-screen logo card (e.g. AFTER_logo) shown on its own black screen.
+	_logo_img = TextureRect.new()
+	_logo_img.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_logo_img.modulate.a = 0.0
+	_logo_img.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_logo_img.material = _make_glitch_material()
+	add_child(_logo_img)
 
 	# Prompt row: [badge] [text] — side by side
 	_prompt_row = HBoxContainer.new()
@@ -128,6 +147,21 @@ func _make_label(size: int, col: Color) -> Label:
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
 
+## Builds a ShaderMaterial running the RGB-split glitch shader (if present).
+func _make_glitch_material() -> ShaderMaterial:
+	var m := ShaderMaterial.new()
+	if ResourceLoader.exists(GLITCH_SHADER):
+		m.shader = load(GLITCH_SHADER)
+	return m
+
+## Set the glitch strength on one of the image cards.
+func _set_glitch(node: CanvasItem, strength: float) -> void:
+	if node == null:
+		return
+	var m := node.material as ShaderMaterial
+	if m and m.shader:
+		m.set_shader_parameter("intensity", strength)
+
 ## Same dark style as the bargaining dialogue box.
 func _make_caption_bg() -> Panel:
 	var p := Panel.new()
@@ -184,9 +218,20 @@ func _resize() -> void:
 	_title.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_title.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.42)
 	_title.size = Vector2(vs.x * 0.9, 120)
+	# Subtitle: centred low on the screen, under both images.
 	_subtitle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_subtitle.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.56)
+	_subtitle.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.74)
 	_subtitle.size = Vector2(vs.x * 0.9, 60)
+	# Logo (left) and title (right) share the same vertical band so they line up.
+	# Boxes don't overlap: logo 0.06-0.22, title 0.54-0.70.
+	var _img_top := vs.y * 0.1
+	var _img_h := vs.y * 0.14
+	if _logo_img:
+		_logo_img.position = Vector2(vs.x * 0.02, _img_top)
+		_logo_img.size = Vector2(vs.x * 0.16, _img_h)
+	if _title_img:
+		_title_img.position = Vector2(vs.x * 0.45, _img_top)
+		_title_img.size = Vector2(vs.x * 0.16, _img_h)
 	# Position the whole row centred at the bottom
 	if _prompt_row:
 		_prompt_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
@@ -332,4 +377,31 @@ func show_title_card(title: String, subtitle: String, hold := 3.0) -> void:
 	t.tween_interval(hold)
 	t.tween_property(_subtitle, "modulate:a", 0.0, 1.3)
 	t.parallel().tween_property(_title, "modulate:a", 0.0, 1.5)
+	await t.finished
+
+## The "After" title screen: AFTER_title on the left and AFTER_logo on the right,
+## at the same level, with the subtitle ("Ubisoft Gamejam 2026") centred near the
+## bottom. Both carry the digital-glitch twitch, but the title starts twitching
+## first and the logo's twitch kicks in ~0.5s later.
+func show_after_card(title_tex_path: String, logo_tex_path: String, subtitle: String, hold := 3.2, glitch := 0.9) -> void:
+	if ResourceLoader.exists(title_tex_path):
+		_title_img.texture = load(title_tex_path)
+	if ResourceLoader.exists(logo_tex_path):
+		_logo_img.texture = load(logo_tex_path)
+	_subtitle.text = subtitle
+	_set_glitch(_title_img, glitch)      # title twitches from the start
+	_set_glitch(_logo_img, 0.0)          # logo holds still for the first half second
+	# Cinematic hit lands as the card slams in.
+	if _title_hit and _title_hit.stream:
+		_title_hit.play()
+	# The logo's twitch joins in 0.5s after the title's.
+	get_tree().create_timer(0.5).timeout.connect(func() -> void: _set_glitch(_logo_img, glitch))
+	var t := create_tween()
+	t.tween_property(_title_img, "modulate:a", 1.0, 1.4)
+	t.parallel().tween_property(_logo_img, "modulate:a", 1.0, 1.4)
+	t.parallel().tween_property(_subtitle, "modulate:a", 1.0, 1.4).set_delay(0.6)
+	t.tween_interval(hold)
+	t.tween_property(_subtitle, "modulate:a", 0.0, 1.3)
+	t.parallel().tween_property(_title_img, "modulate:a", 0.0, 1.5)
+	t.parallel().tween_property(_logo_img, "modulate:a", 0.0, 1.5)
 	await t.finished
