@@ -5,7 +5,7 @@ extends CanvasLayer
 ## game flows through here so the "fall asleep -> dream -> wake" grammar is shared.
 
 const VIGNETTE := preload("res://assets/art/fx/vignette.png")
-const FONT_PATH := "res://assets/fonts/Lora.ttf"
+const FONT_PATH := "res://assets/fonts/merchant-copy/Merchant Copy.ttf"
 const TITLE_HIT := "res://assets/Sound/Titlecard_hit_sound.mp3"
 
 const _CAPTION_FONT_SIZE  := 34

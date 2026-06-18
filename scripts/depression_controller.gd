@@ -118,20 +118,13 @@ func _add_phone() -> void:
 
 func _make_pill() -> void:
 	_pill = Label.new()
-	_pill.text = InputManager.hint("accept")
 	_pill.z_index = 60
 	_pill.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_pill.add_theme_font_size_override("font_size", 18)
-	_pill.add_theme_color_override("font_color", Color(0.97, 0.95, 0.86))
-	_pill.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	_pill.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_pill.add_theme_constant_override("shadow_offset_x", 1)
 	_pill.add_theme_constant_override("shadow_offset_y", 1)
-	var box := StyleBoxFlat.new()
-	box.bg_color = Color(0.1, 0.1, 0.12, 0.85)
-	box.set_corner_radius_all(5)
-	box.content_margin_left = 7; box.content_margin_right = 7
-	box.content_margin_top = 3; box.content_margin_bottom = 3
-	_pill.add_theme_stylebox_override("normal", box)
+	_pill.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.9))
+	_refresh_pill_style()
 	world.add_child(_pill)
 	_pill.position = _phone_point + Vector2(-9, -56)
 	var by := _pill.position.y
@@ -139,17 +132,48 @@ func _make_pill() -> void:
 	t.tween_property(_pill, "position:y", by - 5.0, 0.6).set_trans(Tween.TRANS_SINE)
 	t.tween_property(_pill, "position:y", by, 0.6).set_trans(Tween.TRANS_SINE)
 
+func _refresh_pill_style() -> void:
+	if _pill == null:
+		return
+	var box := StyleBoxFlat.new()
+	box.bg_color = Color(0.08, 0.08, 0.1, 0.85)
+	if InputManager.is_controller():
+		# Green circle badge — same as player hint aesthetic
+		_pill.text = "A"
+		_pill.add_theme_font_size_override("font_size", 18)
+		_pill.add_theme_color_override("font_color", Color(0.11, 0.85, 0.23))
+		_pill.custom_minimum_size = Vector2(28, 28)
+		box.set_corner_radius_all(14)
+		box.content_margin_left = 4; box.content_margin_right = 4
+		box.content_margin_top = 4; box.content_margin_bottom = 4
+	else:
+		# Keyboard — warm white rounded rectangle
+		_pill.text = "E"
+		_pill.add_theme_font_size_override("font_size", 18)
+		_pill.add_theme_color_override("font_color", Color(0.97, 0.95, 0.86))
+		_pill.custom_minimum_size = Vector2(24, 24)
+		box.set_corner_radius_all(5)
+		box.content_margin_left = 7; box.content_margin_right = 7
+		box.content_margin_top = 3; box.content_margin_bottom = 3
+	_pill.add_theme_stylebox_override("normal", box)
+
 # ------------------------------------------------------------------ device
 func _update_voicemail_prompt() -> void:
-	var btn := InputManager.hint("accept")
+	var btn: String = InputManager.hint("accept")
 	if _plays == 0:
-		Game.show_prompt("Eli's old voicemail — press " + btn)
+		if InputManager.is_controller():
+			Game.show_prompt("Eli's old voicemail — press", "A")
+		else:
+			Game.show_prompt("Eli's old voicemail — press " + btn)
 	else:
-		Game.show_prompt("Play it again — press " + btn)
+		if InputManager.is_controller():
+			Game.show_prompt("Play it again — press", "A")
+		else:
+			Game.show_prompt("Play it again — press " + btn)
 
 func _on_device_changed(_device: String) -> void:
 	if _pill and is_instance_valid(_pill):
-		_pill.text = InputManager.hint("accept")
+		_refresh_pill_style()
 	if not _busy and not _can_rise and not _ending:
 		_update_voicemail_prompt()
 
