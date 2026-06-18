@@ -87,6 +87,7 @@ func _ready() -> void:
 	_sfx = AudioStreamPlayer.new()
 	_sfx.stream = load(SHATTER_SFX)
 	add_child(_sfx)
+	InputManager.device_changed.connect(_on_device_changed)
 
 # ---------------------------------------------------------------- the flow
 func start() -> void:
@@ -137,11 +138,12 @@ func _quest_target(kind: String) -> Node2D:
 	return null
 
 func _quest_prompt(kind: String) -> String:
+	var btn := InputManager.hint("accept")
 	match kind:
-		"rug": return "Straighten it (E)"
-		"chair": return "Push it in (E)"
-		"mug": return "Wash the mug (E)"
-	return "(E)"
+		"rug": return "Straighten it (%s)" % btn
+		"chair": return "Push it in (%s)" % btn
+		"mug": return "Wash the mug (%s)" % btn
+	return "(%s)" % btn
 
 func _on_quest_used(_area) -> void:
 	if _busy or not _running or _qi >= _quests.size():
@@ -249,7 +251,10 @@ func _breaking_point() -> void:
 	_aim_angle = -PI / 2.0      # start aiming "up"/away
 	_make_aim_arrow()
 	_aiming = true
-	Game.show_prompt("Aim with A / D   —   E to throw")
+	if InputManager.is_controller():
+		Game.show_prompt("Aim with Left Stick   —   A to throw")
+	else:
+		Game.show_prompt("Aim with A / D   —   E to throw")
 
 func _make_aim_arrow() -> void:
 	_aim_arrow = Line2D.new()
@@ -280,6 +285,19 @@ func _launch() -> void:
 	_vz = THROW_VZ
 	_vel = dir * THROW_SPEED
 	_flying = true
+
+# ---------------------------------------------------------------- device switch
+func _on_device_changed(_device: String) -> void:
+	# Refresh the throw prompt if currently aiming
+	if _aiming:
+		if InputManager.is_controller():
+			Game.show_prompt("Aim with Left Stick   —   A to throw")
+		else:
+			Game.show_prompt("Aim with A / D   —   E to throw")
+	# Refresh quest prompt if a zone is active
+	if _zone and is_instance_valid(_zone) and _running and not _busy:
+		if _qi < _quests.size():
+			_zone.prompt = _quest_prompt(_quests[_qi]["kind"])
 
 # ---------------------------------------------------------------- per-frame
 func _process(dt: float) -> void:

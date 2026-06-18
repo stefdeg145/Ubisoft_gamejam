@@ -22,6 +22,8 @@ var _title: Label
 var _subtitle: Label
 var _prompt: Label
 var _prompt_tween: Tween
+var _prompt_row: HBoxContainer   ## holds badge + text side by side
+var _prompt_badge: Label         ## green circle letter for controller
 var _caption_tween: Tween
 ## True while a blocking say() line is on screen. Lets flash() know not to stomp
 ## cinematic dialogue, and gives say()'s timer-based wait something to clear.
@@ -66,15 +68,47 @@ func _ready() -> void:
 	_subtitle.modulate.a = 0.0
 	add_child(_subtitle)
 
+	# Prompt row: [badge] [text] — side by side
+	_prompt_row = HBoxContainer.new()
+	_prompt_row.modulate.a = 0.0
+	_prompt_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_prompt_row.add_theme_constant_override("separation", 8)
+	add_child(_prompt_row)
+
+	# Styled badge (circle, green letter) — only visible when controller is active
+	_prompt_badge = Label.new()
+	_prompt_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_prompt_badge.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_prompt_badge.add_theme_font_size_override("font_size", 18)
+	_prompt_badge.add_theme_color_override("font_color", Color(0.11, 0.85, 0.23))
+	_prompt_badge.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 0.85))
+	_prompt_badge.add_theme_constant_override("shadow_offset_x", 1)
+	_prompt_badge.add_theme_constant_override("shadow_offset_y", 1)
+	_prompt_badge.custom_minimum_size = Vector2(28, 28)
+	_prompt_badge.visible = false
+	var _badge_box := StyleBoxFlat.new()
+	_badge_box.bg_color = Color(0.08, 0.08, 0.1, 0.85)
+	_badge_box.set_corner_radius_all(14)
+	_badge_box.content_margin_left   = 4
+	_badge_box.content_margin_right  = 4
+	_badge_box.content_margin_top    = 4
+	_badge_box.content_margin_bottom = 4
+	_prompt_badge.add_theme_stylebox_override("normal", _badge_box)
+	# Prompt text label — added FIRST so it appears on the left
 	_prompt = _make_label(22, Color(0.7, 0.7, 0.74))
-	_prompt.modulate.a = 0.0
-	add_child(_prompt)
+	_prompt.autowrap_mode = TextServer.AUTOWRAP_OFF
+	_prompt.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_prompt_row.add_child(_prompt)
+
+	# Badge added AFTER so it appears on the right of the text
+	_prompt_row.add_child(_prompt_badge)
 
 	_title_hit = AudioStreamPlayer.new()
 	if ResourceLoader.exists(TITLE_HIT):
 		_title_hit.stream = load(TITLE_HIT)
 	_title_hit.bus = "Master"
 	add_child(_title_hit)
+
 
 	get_viewport().size_changed.connect(_resize)
 	_resize()
@@ -153,9 +187,12 @@ func _resize() -> void:
 	_subtitle.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
 	_subtitle.position = Vector2(vs.x * 0.5 - vs.x * 0.45, vs.y * 0.56)
 	_subtitle.size = Vector2(vs.x * 0.9, 60)
-	_prompt.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	_prompt.position = Vector2(vs.x * 0.5 - vs.x * 0.4, vs.y * 0.85)
-	_prompt.size = Vector2(vs.x * 0.8, 60)
+	# Position the whole row centred at the bottom
+	if _prompt_row:
+		_prompt_row.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+		_prompt_row.position = Vector2(vs.x * 0.5 - 100, vs.y * 0.85)
+		_prompt_row.size = Vector2(200, 40)
+		_prompt_row.alignment = BoxContainer.ALIGNMENT_CENTER
 
 # ---------------------------------------------------------------- fades
 func fade_in(dur := 1.0) -> void:            # black -> clear
@@ -249,19 +286,28 @@ func flash(text: String, hold := 2.2) -> void:
 	_caption_tween.tween_property(_caption, "modulate:a", 0.0, 0.6)
 	_caption_tween.parallel().tween_property(_caption_bg, "modulate:a", 0.0, 0.6)
 
-func show_prompt(text: String) -> void:
+func show_prompt(text: String, badge: String = "") -> void:
 	_prompt.text = text
+	# Show/hide the badge circle
+	if _prompt_badge:
+		if badge != "":
+			_prompt_badge.text = badge
+			_prompt_badge.visible = true
+		else:
+			_prompt_badge.visible = false
 	if _prompt_tween and _prompt_tween.is_valid():
 		_prompt_tween.kill()
-	_prompt.modulate.a = 1.0
+	_prompt_row.modulate.a = 1.0
 	_prompt_tween = create_tween().set_loops()
-	_prompt_tween.tween_property(_prompt, "modulate:a", 0.35, 0.9)
-	_prompt_tween.tween_property(_prompt, "modulate:a", 1.0, 0.9)
+	_prompt_tween.tween_property(_prompt_row, "modulate:a", 0.35, 0.9)
+	_prompt_tween.tween_property(_prompt_row, "modulate:a", 1.0, 0.9)
 
 func hide_prompt() -> void:
 	if _prompt_tween and _prompt_tween.is_valid():
 		_prompt_tween.kill()
-	_prompt.modulate.a = 0.0
+	_prompt_row.modulate.a = 0.0
+	if _prompt_badge:
+		_prompt_badge.visible = false
 
 func show_title(text: String, hold := 3.0) -> void:
 	_title.text = text

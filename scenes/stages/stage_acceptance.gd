@@ -293,6 +293,16 @@ func _tween_a(node: CanvasItem, to: float, dur: float) -> void:
 		t.tween_property(node, "modulate:a", to, dur)
 	await t.finished
 
+func _update_accept_prompt() -> void:
+	if InputManager.is_controller():
+		Game.show_prompt("press", "A")
+	else:
+		Game.show_prompt("press E")
+
+func _on_device_changed(_device: String) -> void:
+	if _accept_done:
+		_update_accept_prompt()
+
 func _unhandled_input(event: InputEvent) -> void:
 	if not _finale:
 		return
