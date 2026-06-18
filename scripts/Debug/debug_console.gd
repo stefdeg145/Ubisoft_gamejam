@@ -186,6 +186,7 @@ func _on_command(raw: String) -> void:
 			if arg == "":
 				_log_error("Usage: goto <scene_name>")
 			elif arg == "anger":
+				_complete_prerequisites_for("anger")
 				_log_ok("Loading house and triggering anger sequence...")
 				Game.set_black(true)
 				await get_tree().create_timer(0.1).timeout
@@ -200,6 +201,7 @@ func _on_command(raw: String) -> void:
 				_panel.show()
 				_regrab_focus()
 			elif arg == "depression":
+				_complete_prerequisites_for("depression")
 				_log_ok("Loading house and triggering depression sequence...")
 				Game.set_black(true)
 				await get_tree().create_timer(0.1).timeout
@@ -214,6 +216,7 @@ func _on_command(raw: String) -> void:
 				_panel.show()
 				_regrab_focus()
 			elif SCENES.has(arg):
+				_complete_prerequisites_for(arg)
 				_log_ok("Jumping to: " + arg)
 				
 				# --- FIX: Clear any hanging UI prompts before jumping ---
@@ -236,11 +239,15 @@ func _on_command(raw: String) -> void:
 				for stage in GameState.STAGES:
 					GameState.complete_stage(stage, "[debug] force-completed")
 				_log_ok("All stages completed. Warmth: " + str(GameState.warmth()))
+				_refresh_house_grade()
+				_refresh_house_grade()
 			else:
 				var proper := arg.capitalize()
 				if GameState.STAGES.has(proper):
 					GameState.complete_stage(proper, "[debug] force-completed")
 					_log_ok("Completed: " + proper + " | Progress: " + str(GameState.completed.size()) + "/" + str(GameState.STAGES.size()))
+					_refresh_house_grade()
+					_refresh_house_grade()
 				else:
 					_log_error("Unknown stage: '" + arg + "'. Valid: denial, bargaining, depression, acceptance")
 
@@ -294,6 +301,31 @@ func _on_command(raw: String) -> void:
 
 
 # ── Log helpers ───────────────────────────────
+
+## Auto-completes all prerequisite stages before jumping to a scene
+func _complete_prerequisites_for(scene_name: String) -> void:
+	var prerequisites := {
+		"denial":      [],
+		"anger":       ["Denial"],
+		"bargaining":  ["Denial", "Anger"],
+		"depression":  ["Denial", "Anger", "Bargaining"],
+		"acceptance":  ["Denial", "Anger", "Bargaining", "Depression"],
+	}
+	if not prerequisites.has(scene_name):
+		return
+	for stage in prerequisites[scene_name]:
+		if not GameState.completed.has(stage):
+			GameState.complete_stage(stage, "[debug] skipped to " + scene_name)
+	_refresh_house_grade()
+
+## Refreshes the house warmth bar after completing stages via console
+func _refresh_house_grade() -> void:
+	var scene := get_tree().get_current_scene()
+	if scene and scene.has_method("_update_grade"):
+		scene._update_grade()
+		_log_ok("Progression bar updated.")
+	else:
+		_log_line("[color=gray]Note: not in house scene, bar will update when you return.[/color]")
 
 func _log_line(text: String) -> void:
 	_log.append_text(text + "\n")

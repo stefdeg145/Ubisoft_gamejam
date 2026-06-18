@@ -640,11 +640,19 @@ func _start_anger() -> void:
 
 ## Called by the debug console via "goto anger"
 func debug_trigger_anger() -> void:
+	for stage in ["Denial"]:
+		if not GameState.completed.has(stage):
+			GameState.complete_stage(stage, "[debug] skipped to anger")
+	_update_grade()
 	if player:
 		player.can_move = true
 	_start_anger()
 
 func debug_trigger_depression() -> void:
+	for stage in ["Denial", "Anger", "Bargaining"]:
+		if not GameState.completed.has(stage):
+			GameState.complete_stage(stage, "[debug] skipped to depression")
+	_update_grade()
 	if player:
 		player.can_move = true
 	_start_depression()
