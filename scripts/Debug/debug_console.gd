@@ -10,7 +10,7 @@ const SCENES := {
 	"cold_open":   "res://scenes/intro/cold_open.tscn",
 	"denial":      "res://scenes/stages/stage_denial.tscn",
 	"bargaining":  "res://scenes/stages/stage_bargaining.tscn",
-	"depression":  "res://scenes/stages/stage_depression.tscn",
+	# depression runs inside house — use "goto depression" which triggers debug_trigger_depression()
 	"acceptance":  "res://scenes/stages/stage_acceptance.tscn",
 }
 
@@ -165,6 +165,7 @@ func _on_command(raw: String) -> void:
   [color=cyan]goto <scene>[/color]     — jump to a scene instantly
        scenes: [color=white]house, cold_open, denial, bargaining, depression, acceptance[/color]
   [color=cyan]goto anger[/color]       — jump to house and immediately trigger the anger sequence
+  [color=cyan]goto depression[/color]  — jump to house and immediately trigger the depression/voicemail sequence
 
 [color=yellow]── GAME STATE ──[/color]
   [color=cyan]complete <stage>[/color] — mark a stage as done (denial/bargaining/depression/acceptance)
@@ -194,6 +195,20 @@ func _on_command(raw: String) -> void:
 				if house and house.has_method("debug_trigger_anger"):
 					house.debug_trigger_anger()
 					_log_ok("Anger sequence triggered!")
+				else:
+					_log_error("House scene not ready yet — try again in a moment")
+				_panel.show()
+				_regrab_focus()
+			elif arg == "depression":
+				_log_ok("Loading house and triggering depression sequence...")
+				Game.set_black(true)
+				await get_tree().create_timer(0.1).timeout
+				get_tree().change_scene_to_file(SCENES["house"])
+				await get_tree().create_timer(0.8).timeout
+				var house := get_tree().get_current_scene()
+				if house and house.has_method("debug_trigger_depression"):
+					house.debug_trigger_depression()
+					_log_ok("Depression sequence triggered!")
 				else:
 					_log_error("House scene not ready yet — try again in a moment")
 				_panel.show()
